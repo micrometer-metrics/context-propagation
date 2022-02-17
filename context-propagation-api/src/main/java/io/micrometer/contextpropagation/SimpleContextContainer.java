@@ -15,8 +15,6 @@
  */
 package io.micrometer.contextpropagation;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,10 +32,26 @@ class SimpleContextContainer implements ContextContainer {
 
     private final List<ThreadLocalAccessor> threadLocalAccessors;
 
-    private final Map<String, List<?>> accessors = new ConcurrentHashMap<>(1);
+    SimpleContextContainer() {
+        this.threadLocalAccessors = ThreadLocalAccessorLoader.getThreadLocalAccessors();
+    }
 
-    SimpleContextContainer(List<ThreadLocalAccessor> accessors) {
-        this.threadLocalAccessors = new ArrayList<>(accessors);
+    @Override
+    public void captureContext(Object context) {
+        List<ContextAccessor> contextAccessorsForSet = ContextAccessorLoader.getContextAccessorsForSet(context);
+        for (ContextAccessor contextAccessor : contextAccessorsForSet) {
+            contextAccessor.captureValues(context, this);
+        }
+    }
+
+    @Override
+    public <T> T restoreContext(T context) {
+        T mergedContext = context;
+        List<ContextAccessor> contextAccessorsForGet = ContextAccessorLoader.getContextAccessorsForGet(context);
+        for (ContextAccessor contextAccessor : contextAccessorsForGet) {
+            mergedContext = (T) contextAccessor.restoreValues(mergedContext, this);
+        }
+        return mergedContext;
     }
 
     @Override
@@ -60,17 +74,6 @@ class SimpleContextContainer implements ContextContainer {
     @Override
     public Object remove(String key) {
         return this.values.remove(key);
-    }
-
-    @Override
-    public <A> void setAccessors(String key, List<A> accessors) {
-        this.accessors.put(key, accessors);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <A> List<A> getAccessors(String key) {
-        return (List<A>) this.accessors.getOrDefault(key, Collections.emptyList());
     }
 
     @Override

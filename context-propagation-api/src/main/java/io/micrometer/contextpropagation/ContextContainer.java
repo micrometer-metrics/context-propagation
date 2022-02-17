@@ -15,8 +15,6 @@
  */
 package io.micrometer.contextpropagation;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -32,6 +30,16 @@ public interface ContextContainer {
      * A No-Op instance that does nothing. To be used instead of {@code null}.
      */
     ContextContainer NOOP = new ContextContainer() {
+        @Override
+        public void captureContext(Object context) {
+
+        }
+
+        @Override
+        public <T> T restoreContext(T context) {
+            return context;
+        }
+
         @Override
         public <T> T get(String key) {
             return null;
@@ -82,17 +90,11 @@ public interface ContextContainer {
         public <T> T tryScoped(Supplier<T> action) {
             return action.get();
         }
-
-        @Override
-        public <A> void setAccessors(String key, List<A> accessors) {
-
-        }
-
-        @Override
-        public <A> List<A> getAccessors(String key) {
-            return Collections.emptyList();
-        }
     };
+
+    void captureContext(Object context);
+
+    <T> T restoreContext(T context);
 
     @SuppressWarnings("unchecked")
     static <T> ContextContainer restoreContainer(T bag) {
@@ -110,7 +112,7 @@ public interface ContextContainer {
      * Create an instance with the registered {@link ThreadLocalAccessor} to use.
      */
     static ContextContainer create() {
-        return new SimpleContextContainer(ThreadLocalAccessorLoader.getThreadLocalAccessors());
+        return new SimpleContextContainer();
     }
 
     @SuppressWarnings("unchecked")
@@ -135,11 +137,6 @@ public interface ContextContainer {
     void tryScoped(Runnable action);
 
     <T> T tryScoped(Supplier<T> action);
-
-    <A> void setAccessors(String key, List<A> accessors);
-
-    @SuppressWarnings("unchecked")
-    <A> List<A> getAccessors(String key);
 
     /**
      * Demarcates the scope of restored ThreadLocal values.

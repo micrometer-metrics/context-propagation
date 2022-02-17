@@ -89,6 +89,7 @@ public interface ContextContainerPropagator<READ, WRITE> {
      * @param context to write the {@link ContextContainer} to
      * @return {@code true} when this context is applicable for writing
      */
+    // TODO: Actually it's always a class so maybe we should just return the acceptable classes - that will be easy to cache
     boolean supportsContextForSet(Object context);
 
     /**
@@ -97,6 +98,7 @@ public interface ContextContainerPropagator<READ, WRITE> {
      * @param context to retrieve the {@link ContextContainer} from
      * @return {@code true} when this context is applicable for reading
      */
+    // TODO: Actually it's always a class so maybe we should just return the acceptable classes - that will be easy to cache
     boolean supportsContextForGet(Object context);
 }
 

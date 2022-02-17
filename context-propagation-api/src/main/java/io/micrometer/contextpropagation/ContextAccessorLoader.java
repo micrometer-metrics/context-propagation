@@ -15,31 +15,35 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ServiceLoader;
 
 /**
  * Loads {@link ThreadLocalAccessor} and {@link ContextAccessor}.
  */
 @SuppressWarnings("rawtypes")
-final class PropagatorLoader {
+final class ContextAccessorLoader {
 
-    private static final ServiceLoader<ContextContainerPropagator> propagators = ServiceLoader.load(ContextContainerPropagator.class);
+    private static final ServiceLoader<ContextAccessor> propagators = ServiceLoader.load(ContextAccessor.class);
 
-    static ContextContainerPropagator getPropagatorForSet(Object ctx) {
-        for (ContextContainerPropagator contextContainerPropagator : propagators) {
-            if (contextContainerPropagator.supportsContextForSet(ctx)) {
-                return contextContainerPropagator;
+    static List<ContextAccessor> getContextAccessorsForSet(Object ctx) {
+        List<ContextAccessor> accessors = new ArrayList<>();
+        for (ContextAccessor accessor : propagators) {
+            if (accessor.supportsContextForSet(ctx)) {
+                accessors.add(accessor);
             }
         }
-        return ContextContainerPropagator.NOOP;
+        return accessors;
     }
 
-    static ContextContainerPropagator getPropagatorForGet(Object ctx) {
-        for (ContextContainerPropagator contextContainerPropagator : propagators) {
-            if (contextContainerPropagator.supportsContextForGet(ctx)) {
-                return contextContainerPropagator;
+    static List<ContextAccessor> getContextAccessorsForGet(Object ctx) {
+        List<ContextAccessor> accessors = new ArrayList<>();
+        for (ContextAccessor accessor : propagators) {
+            if (accessor.supportsContextForGet(ctx)) {
+                accessors.add(accessor);
             }
         }
-        return ContextContainerPropagator.NOOP;
+        return accessors;
     }
 }
