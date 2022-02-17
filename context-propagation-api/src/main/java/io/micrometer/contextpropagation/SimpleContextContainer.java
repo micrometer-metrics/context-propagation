@@ -26,6 +26,7 @@ import java.util.function.Supplier;
  *
  * @since 1.0.0
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 class SimpleContextContainer implements ContextContainer {
 
     private final Map<String, Object> values = new ConcurrentHashMap<>();

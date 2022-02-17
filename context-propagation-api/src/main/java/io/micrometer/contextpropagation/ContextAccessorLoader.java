@@ -17,33 +17,41 @@ package io.micrometer.contextpropagation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Loads {@link ThreadLocalAccessor} and {@link ContextAccessor}.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 final class ContextAccessorLoader {
 
     private static final ServiceLoader<ContextAccessor> propagators = ServiceLoader.load(ContextAccessor.class);
 
+    private static final Map<Class, List<ContextAccessor>> cache = new ConcurrentHashMap<>();
+
     static List<ContextAccessor> getContextAccessorsForSet(Object ctx) {
-        List<ContextAccessor> accessors = new ArrayList<>();
-        for (ContextAccessor accessor : propagators) {
-            if (accessor.supportsContextForSet(ctx)) {
-                accessors.add(accessor);
+        return cache.computeIfAbsent(ctx.getClass(), aClass -> {
+            List<ContextAccessor> accessors = new ArrayList<>();
+            for (ContextAccessor accessor : propagators) {
+                if (accessor.getSupportedContextClassForSet().isAssignableFrom(aClass)) {
+                    accessors.add(accessor);
+                }
             }
-        }
-        return accessors;
+            return accessors;
+        });
     }
 
     static List<ContextAccessor> getContextAccessorsForGet(Object ctx) {
-        List<ContextAccessor> accessors = new ArrayList<>();
-        for (ContextAccessor accessor : propagators) {
-            if (accessor.supportsContextForGet(ctx)) {
-                accessors.add(accessor);
+        return cache.computeIfAbsent(ctx.getClass(), aClass -> {
+            List<ContextAccessor> accessors = new ArrayList<>();
+            for (ContextAccessor accessor : propagators) {
+                if (accessor.getSupportedContextClassForGet().isAssignableFrom(aClass)) {
+                    accessors.add(accessor);
+                }
             }
-        }
-        return accessors;
+            return accessors;
+        });
     }
 }

@@ -15,31 +15,39 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Loads {@link ThreadLocalAccessor} and {@link ContextAccessor}.
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 final class PropagatorLoader {
 
     private static final ServiceLoader<ContextContainerPropagator> propagators = ServiceLoader.load(ContextContainerPropagator.class);
 
+    private static final Map<Class, ContextContainerPropagator> cache = new ConcurrentHashMap<>();
+
     static ContextContainerPropagator getPropagatorForSet(Object ctx) {
-        for (ContextContainerPropagator contextContainerPropagator : propagators) {
-            if (contextContainerPropagator.supportsContextForSet(ctx)) {
-                return contextContainerPropagator;
+        return cache.computeIfAbsent(ctx.getClass(), aClass -> {
+            for (ContextContainerPropagator contextContainerPropagator : propagators) {
+                if (contextContainerPropagator.getSupportedContextClassForSet().isAssignableFrom(aClass)) {
+                    return contextContainerPropagator;
+                }
             }
-        }
-        return ContextContainerPropagator.NOOP;
+            return ContextContainerPropagator.NOOP;
+        });
     }
 
     static ContextContainerPropagator getPropagatorForGet(Object ctx) {
-        for (ContextContainerPropagator contextContainerPropagator : propagators) {
-            if (contextContainerPropagator.supportsContextForGet(ctx)) {
-                return contextContainerPropagator;
+        return cache.computeIfAbsent(ctx.getClass(), aClass -> {
+            for (ContextContainerPropagator contextContainerPropagator : propagators) {
+                if (contextContainerPropagator.getSupportedContextClassForGet().isAssignableFrom(aClass)) {
+                    return contextContainerPropagator;
+                }
             }
-        }
-        return ContextContainerPropagator.NOOP;
+            return ContextContainerPropagator.NOOP;
+        });
     }
 }
