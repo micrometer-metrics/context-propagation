@@ -1,0 +1,10 @@
+plugins {
+	id 'idea'
+}
+
+dependencies {
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.assertj:assertj-core'
+	testImplementation 'org.mockito:mockito-core'
+}
+
