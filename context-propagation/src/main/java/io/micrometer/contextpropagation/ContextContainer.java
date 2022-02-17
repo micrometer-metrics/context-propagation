@@ -1,3 +1,18 @@
+/*
+ * Copyright 2002-2022 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.micrometer.contextpropagation;
 
 import java.util.Collections;
@@ -13,125 +28,126 @@ import java.util.function.Supplier;
  */
 public interface ContextContainer {
 
-	/**
-	 * A No-Op instance that does nothing. To be used instead of {@code null}.
-	 */
-	ContextContainer NOOP = new ContextContainer() {
-		@Override
-		public <T> T get(String key) {
-			return null;
-		}
+    /**
+     * A No-Op instance that does nothing. To be used instead of {@code null}.
+     */
+    ContextContainer NOOP = new ContextContainer() {
+        @Override
+        public <T> T get(String key) {
+            return null;
+        }
 
-		@Override
-		public boolean containsKey(String key) {
-			return false;
-		}
+        @Override
+        public boolean containsKey(String key) {
+            return false;
+        }
 
-		@Override
-		public <T> T put(String key, T value) {
-			return value;
-		}
+        @Override
+        public <T> T put(String key, T value) {
+            return value;
+        }
 
-		@Override
-		public Object remove(String key) {
-			return null;
-		}
+        @Override
+        public Object remove(String key) {
+            return null;
+        }
 
-		@Override
-		public ContextContainer captureThreadLocalValues() {
-			return this;
-		}
+        @Override
+        public ContextContainer captureThreadLocalValues() {
+            return this;
+        }
 
-		@Override
-		public Scope restoreThreadLocalValues() {
-			return () -> { };
-		}
+        @Override
+        public Scope restoreThreadLocalValues() {
+            return () -> {
+            };
+        }
 
-		@Override
-		public <T> T saveContainer(T context) {
-			return context;
-		}
+        @Override
+        public <T> T saveContainer(T context) {
+            return context;
+        }
 
-		@Override
-		public boolean isNoOp() {
-			return true;
-		}
+        @Override
+        public boolean isNoOp() {
+            return true;
+        }
 
-		@Override
-		public void tryScoped(Runnable action) {
-			action.run();
-		}
+        @Override
+        public void tryScoped(Runnable action) {
+            action.run();
+        }
 
-		@Override
-		public <T> T tryScoped(Supplier<T> action) {
-			return action.get();
-		}
+        @Override
+        public <T> T tryScoped(Supplier<T> action) {
+            return action.get();
+        }
 
-		@Override
-		public <A> void setAccessors(String key, List<A> accessors) {
+        @Override
+        public <A> void setAccessors(String key, List<A> accessors) {
 
-		}
+        }
 
-		@Override
-		public <A> List<A> getAccessors(String key) {
-			return Collections.emptyList();
-		}
-	};
+        @Override
+        public <A> List<A> getAccessors(String key) {
+            return Collections.emptyList();
+        }
+    };
 
-	@SuppressWarnings("unchecked")
-	static <T> ContextContainer restoreContainer(T bag) {
-		ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
-		return contextContainerPropagator.get(bag);
-	}
+    @SuppressWarnings("unchecked")
+    static <T> ContextContainer restoreContainer(T bag) {
+        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
+        return contextContainerPropagator.get(bag);
+    }
 
-	@SuppressWarnings("unchecked")
-	static <T> T resetContainer(T bag) {
-		ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
-		return (T) contextContainerPropagator.remove(bag);
-	}
+    @SuppressWarnings("unchecked")
+    static <T> T resetContainer(T bag) {
+        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
+        return (T) contextContainerPropagator.remove(bag);
+    }
 
-	/**
-	 * Create an instance with the registered {@link ThreadLocalAccessor} to use.
-	 */
-	static ContextContainer create() {
-		return new SimpleContextContainer(ThreadLocalAccessorLoader.getThreadLocalAccessors());
-	}
+    /**
+     * Create an instance with the registered {@link ThreadLocalAccessor} to use.
+     */
+    static ContextContainer create() {
+        return new SimpleContextContainer(ThreadLocalAccessorLoader.getThreadLocalAccessors());
+    }
 
-	@SuppressWarnings("unchecked")
-	<T> T get(String key);
+    @SuppressWarnings("unchecked")
+    <T> T get(String key);
 
-	boolean containsKey(String key);
+    boolean containsKey(String key);
 
-	@SuppressWarnings("unchecked")
-	<T> T put(String key, T value);
+    @SuppressWarnings("unchecked")
+    <T> T put(String key, T value);
 
-	Object remove(String key);
+    Object remove(String key);
 
-	ContextContainer captureThreadLocalValues();
+    ContextContainer captureThreadLocalValues();
 
-	Scope restoreThreadLocalValues();
+    Scope restoreThreadLocalValues();
 
-	@SuppressWarnings("unchecked")
-	<T> T saveContainer(T context);
+    @SuppressWarnings("unchecked")
+    <T> T saveContainer(T context);
 
-	boolean isNoOp();
+    boolean isNoOp();
 
-	void tryScoped(Runnable action);
+    void tryScoped(Runnable action);
 
-	<T> T tryScoped(Supplier<T> action);
+    <T> T tryScoped(Supplier<T> action);
 
-	<A> void setAccessors(String key, List<A> accessors);
+    <A> void setAccessors(String key, List<A> accessors);
 
-	@SuppressWarnings("unchecked")
-	<A> List<A> getAccessors(String key);
+    @SuppressWarnings("unchecked")
+    <A> List<A> getAccessors(String key);
 
-	/**
-	 * Demarcates the scope of restored ThreadLocal values.
-	 */
-	interface Scope extends AutoCloseable {
+    /**
+     * Demarcates the scope of restored ThreadLocal values.
+     */
+    interface Scope extends AutoCloseable {
 
-		@Override
-		void close();
+        @Override
+        void close();
 
-	}
+    }
 }

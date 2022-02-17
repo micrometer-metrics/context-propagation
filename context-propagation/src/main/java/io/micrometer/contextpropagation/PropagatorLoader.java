@@ -23,23 +23,23 @@ import java.util.ServiceLoader;
 @SuppressWarnings("rawtypes")
 final class PropagatorLoader {
 
-	private static final ServiceLoader<ContextContainerPropagator> propagators = ServiceLoader.load(ContextContainerPropagator.class);
+    private static final ServiceLoader<ContextContainerPropagator> propagators = ServiceLoader.load(ContextContainerPropagator.class);
 
-	static ContextContainerPropagator getPropagatorForSet(Object ctx) {
-		for (ContextContainerPropagator contextContainerPropagator : propagators) {
-			if (contextContainerPropagator.supportsContextForSet(ctx)) {
-				return contextContainerPropagator;
-			}
-		}
-		return ContextContainerPropagator.NOOP;
-	}
+    static ContextContainerPropagator getPropagatorForSet(Object ctx) {
+        for (ContextContainerPropagator contextContainerPropagator : propagators) {
+            if (contextContainerPropagator.supportsContextForSet(ctx)) {
+                return contextContainerPropagator;
+            }
+        }
+        return ContextContainerPropagator.NOOP;
+    }
 
-	static ContextContainerPropagator getPropagatorForGet(Object ctx) {
-		for (ContextContainerPropagator contextContainerPropagator : propagators) {
-			if (contextContainerPropagator.supportsContextForGet(ctx)) {
-				return contextContainerPropagator;
-			}
-		}
-		return ContextContainerPropagator.NOOP;
-	}
+    static ContextContainerPropagator getPropagatorForGet(Object ctx) {
+        for (ContextContainerPropagator contextContainerPropagator : propagators) {
+            if (contextContainerPropagator.supportsContextForGet(ctx)) {
+                return contextContainerPropagator;
+            }
+        }
+        return ContextContainerPropagator.NOOP;
+    }
 }

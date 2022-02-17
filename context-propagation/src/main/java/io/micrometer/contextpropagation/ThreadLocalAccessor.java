@@ -26,21 +26,21 @@ import java.util.ServiceLoader;
  */
 public interface ThreadLocalAccessor {
 
-	/**
-	 * Capture ThreadLocal values and add them to the given container, so they
-	 * can be saved and subsequently {@link #restoreValues(ContextContainer)
-	 * restored} on a different thread.
-	 */
-	void captureValues(ContextContainer container);
+    /**
+     * Capture ThreadLocal values and add them to the given container, so they
+     * can be saved and subsequently {@link #restoreValues(ContextContainer)
+     * restored} on a different thread.
+     */
+    void captureValues(ContextContainer container);
 
-	/**
-	 * Restore ThreadLocal values from the given container.
-	 */
-	void restoreValues(ContextContainer container);
+    /**
+     * Restore ThreadLocal values from the given container.
+     */
+    void restoreValues(ContextContainer container);
 
-	/**
-	 * Reset ThreadLocal values holders.
-	 */
-	void resetValues(ContextContainer container);
+    /**
+     * Reset ThreadLocal values holders.
+     */
+    void resetValues(ContextContainer container);
 
 }
