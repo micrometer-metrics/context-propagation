@@ -94,7 +94,7 @@ public interface ContextContainer {
 	 * Create an instance with the registered {@link ThreadLocalAccessor} to use.
 	 */
 	static ContextContainer create() {
-		return new SimpleContextContainer(AccessorLoader.getThreadLocalAccessors());
+		return new SimpleContextContainer(ThreadLocalAccessorLoader.getThreadLocalAccessors());
 	}
 
 	@SuppressWarnings("unchecked")

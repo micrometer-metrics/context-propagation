@@ -21,20 +21,14 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * Loads {@link ThreadLocalAccessor} and {@link ReactorContextAccessor}.
+ * Loads {@link ThreadLocalAccessor}.
  */
-final class AccessorLoader {
+final class ThreadLocalAccessorLoader {
 
 	private static final ServiceLoader<ThreadLocalAccessor> threadLocalAccessors = ServiceLoader.load(ThreadLocalAccessor.class);
 
-	private static final ServiceLoader<ReactorContextAccessor> reactorAccessors = ServiceLoader.load(ReactorContextAccessor.class);
-
 	static List<ThreadLocalAccessor> getThreadLocalAccessors() {
 		return StreamSupport.stream(threadLocalAccessors.spliterator(), false).collect(Collectors.toList());
-	}
-
-	static List<ReactorContextAccessor> getReactorContextAccessor() {
-		return StreamSupport.stream(reactorAccessors.spliterator(), false).collect(Collectors.toList());
 	}
 
 }
