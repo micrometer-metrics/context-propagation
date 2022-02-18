@@ -19,8 +19,8 @@ import java.util.ServiceLoader;
 
 /**
  * Abstraction to tell context propagation how to read from and write to
- * a given context.  To register your own {@link ContextContainerPropagator}
- *  * you have to register it using the {@link ServiceLoader} mechanism.
+ * a given context. To register your own {@link ContextContainerPropagator}
+ * you have to register it using the {@link ServiceLoader} mechanism.
  *
  * @param <READ> context from which we read
  * @param <WRITE> context to which we write

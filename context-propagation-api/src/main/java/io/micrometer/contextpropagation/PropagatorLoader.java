@@ -18,7 +18,7 @@ package io.micrometer.contextpropagation;
 import java.util.ServiceLoader;
 
 /**
- * Loads {@link ThreadLocalAccessor} and {@link ReactorContextAccessor}.
+ * Loads {@code ThreadLocalAccessor} and {@code ReactorContextAccessor}.
  */
 @SuppressWarnings("rawtypes")
 final class PropagatorLoader {

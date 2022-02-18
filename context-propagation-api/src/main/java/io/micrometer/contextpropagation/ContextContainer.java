@@ -85,7 +85,6 @@ public interface ContextContainer {
 
         @Override
         public <A> void setAccessors(String key, List<A> accessors) {
-
         }
 
         @Override
@@ -94,13 +93,13 @@ public interface ContextContainer {
         }
     };
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> ContextContainer restoreContainer(T bag) {
         ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
         return contextContainerPropagator.get(bag);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T resetContainer(T bag) {
         ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
         return (T) contextContainerPropagator.remove(bag);
@@ -113,12 +112,10 @@ public interface ContextContainer {
         return new SimpleContextContainer(ThreadLocalAccessorLoader.getThreadLocalAccessors());
     }
 
-    @SuppressWarnings("unchecked")
     <T> T get(String key);
 
     boolean containsKey(String key);
 
-    @SuppressWarnings("unchecked")
     <T> T put(String key, T value);
 
     Object remove(String key);
@@ -127,7 +124,6 @@ public interface ContextContainer {
 
     Scope restoreThreadLocalValues();
 
-    @SuppressWarnings("unchecked")
     <T> T saveContainer(T context);
 
     boolean isNoOp();
@@ -138,16 +134,13 @@ public interface ContextContainer {
 
     <A> void setAccessors(String key, List<A> accessors);
 
-    @SuppressWarnings("unchecked")
     <A> List<A> getAccessors(String key);
 
     /**
      * Demarcates the scope of restored ThreadLocal values.
      */
     interface Scope extends AutoCloseable {
-
         @Override
         void close();
-
     }
 }

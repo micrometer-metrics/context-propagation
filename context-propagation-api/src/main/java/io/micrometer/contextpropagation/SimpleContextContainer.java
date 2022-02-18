@@ -54,7 +54,7 @@ class SimpleContextContainer implements ContextContainer {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T put(String key, T value) {
-        return (T) this.values.put(key, (T) value);
+        return (T) this.values.put(key, value);
     }
 
     @Override
@@ -86,7 +86,7 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T saveContainer(T context) {
         ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForSet(context);
         return (T) contextContainerPropagator.set(context, this);
@@ -105,6 +105,7 @@ class SimpleContextContainer implements ContextContainer {
      * @param action action to run
      */
     @Override
+    @SuppressWarnings("unused")
     public void tryScoped(Runnable action) {
         try (Scope scope = restoreThreadLocalValues()) {
             action.run();
@@ -120,6 +121,7 @@ class SimpleContextContainer implements ContextContainer {
      * @return result of the action
      */
     @Override
+    @SuppressWarnings("unused")
     public <T> T tryScoped(Supplier<T> action) {
         try (Scope scope = restoreThreadLocalValues()) {
             return action.get();

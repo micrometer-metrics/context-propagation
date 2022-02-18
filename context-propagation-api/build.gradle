@@ -7,4 +7,3 @@ dependencies {
 	testImplementation 'org.assertj:assertj-core'
 	testImplementation 'org.mockito:mockito-core'
 }
-
