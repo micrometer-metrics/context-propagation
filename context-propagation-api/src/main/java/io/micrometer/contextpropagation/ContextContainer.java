@@ -15,7 +15,6 @@
  */
 package io.micrometer.contextpropagation;
 
-import java.util.Collections;
 import java.util.function.Supplier;
 
 /**
