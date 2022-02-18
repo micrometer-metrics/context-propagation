@@ -47,14 +47,15 @@ public interface ContextContainerPropagator<READ, WRITE> {
         }
 
         @Override
-        public boolean supportsContextForSet(Object context) {
-            return false;
+        public Class<?> getSupportedContextClassForSet() {
+            return ContextContainerPropagator.class;
         }
 
         @Override
-        public boolean supportsContextForGet(Object context) {
-            return false;
+        public Class<?> getSupportedContextClassForGet() {
+            return ContextContainerPropagator.class;
         }
+
     };
 
     /**
@@ -86,18 +87,16 @@ public interface ContextContainerPropagator<READ, WRITE> {
     /**
      * Checks if this implementation can work with the provided context for writing.
      *
-     * @param context to write the {@link ContextContainer} to
-     * @return {@code true} when this context is applicable for writing
+     * @return class type for which this propagator is applicable
      */
-    boolean supportsContextForSet(Object context);
+    Class<?> getSupportedContextClassForSet();
 
     /**
      * Checks if this implementation can work with the provided context for reading.
      *
-     * @param context to retrieve the {@link ContextContainer} from
-     * @return {@code true} when this context is applicable for reading
+     * @return class type for which this propagator is applicable
      */
-    boolean supportsContextForGet(Object context);
+    Class<?> getSupportedContextClassForGet();
 }
 
 

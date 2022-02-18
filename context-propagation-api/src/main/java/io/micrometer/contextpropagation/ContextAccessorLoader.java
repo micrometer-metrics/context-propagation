@@ -15,6 +15,8 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,31 +25,33 @@ import java.util.concurrent.ConcurrentHashMap;
  * Loads {@link ThreadLocalAccessor} and {@link ContextAccessor}.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-final class PropagatorLoader {
+final class ContextAccessorLoader {
 
-    private static final ServiceLoader<ContextContainerPropagator> propagators = ServiceLoader.load(ContextContainerPropagator.class);
+    private static final ServiceLoader<ContextAccessor> propagators = ServiceLoader.load(ContextAccessor.class);
 
-    private static final Map<Class, ContextContainerPropagator> cache = new ConcurrentHashMap<>();
+    private static final Map<Class, List<ContextAccessor>> cache = new ConcurrentHashMap<>();
 
-    static ContextContainerPropagator getPropagatorForSet(Object ctx) {
+    static List<ContextAccessor> getContextAccessorsForSet(Object ctx) {
         return cache.computeIfAbsent(ctx.getClass(), aClass -> {
-            for (ContextContainerPropagator contextContainerPropagator : propagators) {
-                if (contextContainerPropagator.getSupportedContextClassForSet().isAssignableFrom(aClass)) {
-                    return contextContainerPropagator;
+            List<ContextAccessor> accessors = new ArrayList<>();
+            for (ContextAccessor accessor : propagators) {
+                if (accessor.getSupportedContextClassForSet().isAssignableFrom(aClass)) {
+                    accessors.add(accessor);
                 }
             }
-            return ContextContainerPropagator.NOOP;
+            return accessors;
         });
     }
 
-    static ContextContainerPropagator getPropagatorForGet(Object ctx) {
+    static List<ContextAccessor> getContextAccessorsForGet(Object ctx) {
         return cache.computeIfAbsent(ctx.getClass(), aClass -> {
-            for (ContextContainerPropagator contextContainerPropagator : propagators) {
-                if (contextContainerPropagator.getSupportedContextClassForGet().isAssignableFrom(aClass)) {
-                    return contextContainerPropagator;
+            List<ContextAccessor> accessors = new ArrayList<>();
+            for (ContextAccessor accessor : propagators) {
+                if (accessor.getSupportedContextClassForGet().isAssignableFrom(aClass)) {
+                    accessors.add(accessor);
                 }
             }
-            return ContextContainerPropagator.NOOP;
+            return accessors;
         });
     }
 }
