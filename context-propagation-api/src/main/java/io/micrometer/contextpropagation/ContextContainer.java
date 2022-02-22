@@ -72,7 +72,7 @@ public interface ContextContainer {
         }
 
         @Override
-        public <T> T saveContainer(T context) {
+        public <T> T save(T context) {
             return context;
         }
 
@@ -97,15 +97,15 @@ public interface ContextContainer {
     <T> T restoreContext(T context);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> ContextContainer restoreContainer(T bag) {
-        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
-        return contextContainerPropagator.get(bag);
+    static <T> ContextContainer restore(T context) {
+        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(context);
+        return contextContainerPropagator.get(context);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T resetContainer(T bag) {
-        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(bag);
-        return (T) contextContainerPropagator.remove(bag);
+    static <T> T reset(T context) {
+        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(context);
+        return (T) contextContainerPropagator.remove(context);
     }
 
     /**
@@ -127,7 +127,7 @@ public interface ContextContainer {
 
     Scope restoreThreadLocalValues();
 
-    <T> T saveContainer(T context);
+    <T> T save(T context);
 
     boolean isNoOp();
 

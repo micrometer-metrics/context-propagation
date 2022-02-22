@@ -91,7 +91,7 @@ class SimpleContextContainer implements ContextContainer {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T saveContainer(T context) {
+    public <T> T save(T context) {
         ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForSet(context);
         return (T) contextContainerPropagator.set(context, this);
     }
