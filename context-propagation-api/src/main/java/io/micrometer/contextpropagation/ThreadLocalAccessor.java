@@ -22,6 +22,7 @@ import java.util.ServiceLoader;
  * from a {@link ContextContainer}. To register your own {@link ThreadLocalAccessor}
  * you have to register it using the {@link ServiceLoader} mechanism.
  *
+ * @author Marcin Grzejszczak
  * @since 1.0.0
  */
 public interface ThreadLocalAccessor {
@@ -30,16 +31,22 @@ public interface ThreadLocalAccessor {
      * Capture ThreadLocal values and add them to the given container, so they
      * can be saved and subsequently {@link #restoreValues(ContextContainer)
      * restored} on a different thread.
+     *
+     * @param container {@link ContextContainer} to which we put the thread locals
      */
     void captureValues(ContextContainer container);
 
     /**
      * Restore ThreadLocal values from the given container.
+     *
+     * @param container {@link ContextContainer} for which we restore thread locals
      */
     void restoreValues(ContextContainer container);
 
     /**
      * Reset ThreadLocal values holders.
+     *
+     * @param container {@link ContextContainer} for which we reset thread locals
      */
     void resetValues(ContextContainer container);
 

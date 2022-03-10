@@ -18,16 +18,29 @@ package io.micrometer.contextpropagation;
 /**
  * Contract to assist with extracting and restoring context values to
  * and from a {@link ContextContainer}.
+ *
+ * @param <READ> type for context reading
+ * @param <WRITE> type for context writing
+ *
+ * @author Marcin Grzejszczak
+ * @since 1.0.0
  */
 public interface ContextAccessor<READ, WRITE> {
 
     /**
      * Capture values from a context and save them in the given container.
+     *
+     * @param view context from which we read
+     * @param container container to which we put
      */
     void captureValues(READ view, ContextContainer container);
 
     /**
      * Restore context values from the given container.
+     *
+     * @param context context to which we write
+     * @param container container from which we read
+     * @return updated context
      */
     WRITE restoreValues(WRITE context, ContextContainer container);
 

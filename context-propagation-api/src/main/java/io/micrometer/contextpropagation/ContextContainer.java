@@ -22,6 +22,7 @@ import java.util.function.Supplier;
  * various contexts. A context can be e.g. a Reactor Context, Reactor Netty Channel etc.
  * The values can be e.g. MDC entries, Micrometer Observation etc.
  *
+ * @author Marcin Grzejszczak
  * @since 1.0.0
  */
 public interface ContextContainer {
@@ -56,7 +57,7 @@ public interface ContextContainer {
         }
 
         @Override
-        public Object remove(String key) {
+        public <T> T remove(String key) {
             return null;
         }
 
@@ -92,16 +93,43 @@ public interface ContextContainer {
         }
     };
 
+    /**
+     * Capture values from a context and save them in the given container.
+     *
+     * @param context context to process
+     */
     void captureContext(Object context);
 
+    /**
+     * Restore context values from the given container.
+     *
+     * @param context context to process
+     * @param <T> type of the context
+     * @return context with elements previously stored in the container
+     * @see ContextContainer#captureContext(Object)
+     */
     <T> T restoreContext(T context);
 
+    /**
+     * Restores the {@link ContextContainer} from the provided context.
+     *
+     * @param context context from which we want to retrieve from {@link ContextContainer}
+     * @param <T> type of the context
+     * @return the container retrieved from the given context
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> ContextContainer restore(T context) {
         ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(context);
         return contextContainerPropagator.get(context);
     }
 
+    /**
+     * Removes the {@link ContextContainer} from the given context.
+     *
+     * @param context context from which we want to remove the {@link ContextContainer}
+     * @param <T> type of the context
+     * @return context with {@link ContextContainer} removed
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T reset(T context) {
         ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(context);
@@ -109,30 +137,95 @@ public interface ContextContainer {
     }
 
     /**
-     * Create an instance with the registered {@link ThreadLocalAccessor} to use.
+     * Builds a new {@link ContextContainer}.
+     *
+     * @return a new {@link ContextContainer}
      */
     static ContextContainer create() {
         return new SimpleContextContainer();
     }
 
+    /**
+     * Gets an element from the container.
+     *
+     * @param key key under which the element is stored
+     * @param <T> type of the element
+     * @return the element or {@code null} when it's not present
+     */
     <T> T get(String key);
 
+    /**
+     * Checks if an element is available under the given key.
+     *
+     * @param key key under which the element is stored
+     * @return {@code true} when element is stored
+     */
     boolean containsKey(String key);
 
+    /**
+     * Puts the element under the given key.
+     *
+     * @param key key under which the element will be available
+     * @param value element to store
+     * @param <T> type of the value
+     * @return previously stored element under this key or {@code null} if there was none
+     */
     <T> T put(String key, T value);
 
-    Object remove(String key);
+    /**
+     * Removes the element registered under the given key,
+     *
+     * @param key key under which the element is stored
+     * @param <T> type of the removed element
+     * @return the removed element or {@code null} if it wasn't there
+     */
+    <T> T remove(String key);
 
+    /**
+     * Captures the current thread local values and stores them in the container.
+     * @return this for chaining
+     */
     ContextContainer captureThreadLocalValues();
 
+    /**
+     * Restores the previously captured thread local values and puts them in thread local
+     * @return scope within which the thread local values are available
+     * @see Scope
+     */
     Scope restoreThreadLocalValues();
 
+    /**
+     * Saves this container in the provided context.
+     *
+     * @param context context in which we want to store this container
+     * @param <T> type of the context
+     * @return the context with the stored container
+     */
     <T> T save(T context);
 
+    /**
+     * Is this a noop implementation?
+     *
+     * @return {@code true} if this instance is a no-op
+     */
     boolean isNoOp();
 
+    /**
+     * Takes the runnable and runs it with thread local values available.
+     * Clears the thread local values when the runnable has been finished.
+     *
+     * @param action runnable to run
+     */
     void tryScoped(Runnable action);
 
+    /**
+     * Takes the supplier and runs it with thread local values available.
+     * Clears the thread local values when the supplier has been finished.
+     *
+     * @param action supplier to run
+     * @param <T> type that the supplier returns
+     * @return value returned by the supplier
+     */
     <T> T tryScoped(Supplier<T> action);
 
     /**

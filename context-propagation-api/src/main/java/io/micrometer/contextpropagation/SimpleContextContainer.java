@@ -24,6 +24,7 @@ import java.util.function.Supplier;
  * Holds context values to be propagated different context environments along
  * with the accessors required to propagate to and from those environments.
  *
+ * @author Marcin Grzejszczak
  * @since 1.0.0
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -73,8 +74,8 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     @Override
-    public Object remove(String key) {
-        return this.values.remove(key);
+    public <T> T remove(String key) {
+        return (T) this.values.remove(key);
     }
 
     @Override

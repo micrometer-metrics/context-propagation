@@ -24,11 +24,15 @@ import java.util.ServiceLoader;
  *
  * @param <READ> context from which we read
  * @param <WRITE> context to which we write
+ *
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
 public interface ContextContainerPropagator<READ, WRITE> {
 
+    /**
+     * No-Op instance of the {@link ContextContainerPropagator}. Does nothing.
+     */
     @SuppressWarnings("rawtypes")
     ContextContainerPropagator NOOP = new ContextContainerPropagator() {
         @Override
