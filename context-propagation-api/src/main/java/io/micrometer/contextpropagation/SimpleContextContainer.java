@@ -18,7 +18,10 @@ package io.micrometer.contextpropagation;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Holds context values to be propagated different context environments along
@@ -33,6 +36,8 @@ class SimpleContextContainer implements ContextContainer {
     private final Map<String, Object> values = new ConcurrentHashMap<>();
 
     private final List<ThreadLocalAccessor> threadLocalAccessors;
+
+    private final List<Predicate<Namespace>> predicates = new CopyOnWriteArrayList<>();
 
     SimpleContextContainer() {
         this.threadLocalAccessors = ThreadLocalAccessorLoader.getThreadLocalAccessors();
@@ -85,9 +90,21 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     @Override
+    public ContextContainer captureThreadLocalValues(Predicate<Namespace> predicate) {
+        this.predicates.add(predicate);
+        this.threadLocalAccessors.stream().filter(t -> t.isApplicable(predicate)).forEach(accessor -> accessor.captureValues(this));
+        return this;
+    }
+
+    @Override
     public Scope restoreThreadLocalValues() {
-        this.threadLocalAccessors.forEach(accessor -> accessor.restoreValues(this));
-        return () -> this.threadLocalAccessors.forEach(accessor -> accessor.resetValues(this));
+        List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
+                .collect(Collectors.toList());
+        accessors.forEach(accessor -> accessor.restoreValues(this));
+        return () -> {
+            accessors.forEach(accessor -> accessor.resetValues(this));
+            this.predicates.clear();
+        };
     }
 
     @Override
@@ -133,4 +150,11 @@ class SimpleContextContainer implements ContextContainer {
         }
     }
 
+    @Override
+    public String toString() {
+        return "ContextContainer{" +
+                "values=" + values +
+                ", threadLocalAccessors=" + threadLocalAccessors +
+                '}';
+    }
 }

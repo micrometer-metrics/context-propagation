@@ -16,6 +16,7 @@
 package io.micrometer.contextpropagation;
 
 import java.util.ServiceLoader;
+import java.util.function.Predicate;
 
 /**
  * Contract to assist with extracting and restoring ThreadLocal values to and
@@ -49,5 +50,27 @@ public interface ThreadLocalAccessor {
      * @param container {@link ContextContainer} for which we reset thread locals
      */
     void resetValues(ContextContainer container);
+
+    /**
+     * Corresponding {@link Namespace}.
+     *
+     * @return corresponding {@link Namespace} or {@code null} if entries should go to the global namespace
+     */
+    default Namespace getNamespace() {
+        return null;
+    }
+
+    /**
+     * Used to filter out {@link ThreadLocalAccessor} by {@link Namespace}.
+     *
+     * @param predicate conditional logic for this accessor
+     * @return {@code true} if this {@link ThreadLocalAccessor} should be applied
+     */
+    default boolean isApplicable(Predicate<Namespace> predicate) {
+        if (getNamespace() == null) {
+            return true;
+        }
+        return predicate.test(getNamespace());
+    }
 
 }

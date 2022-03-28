@@ -15,6 +15,7 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -63,6 +64,11 @@ public interface ContextContainer {
 
         @Override
         public ContextContainer captureThreadLocalValues() {
+            return this;
+        }
+
+        @Override
+        public ContextContainer captureThreadLocalValues(Predicate<Namespace> predicate) {
             return this;
         }
 
@@ -186,6 +192,13 @@ public interface ContextContainer {
      * @return this for chaining
      */
     ContextContainer captureThreadLocalValues();
+
+    /**
+     * Captures the current thread local values and stores them in the container.
+     * @param predicate condition to check namespaces against
+     * @return this for chaining
+     */
+    ContextContainer captureThreadLocalValues(Predicate<Namespace> predicate);
 
     /**
      * Restores the previously captured thread local values and puts them in thread local

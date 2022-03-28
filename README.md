@@ -44,6 +44,7 @@ Glossary
 * `ContextAccessor` - what to take from the Context and put it to the container and vice versa (e.g. if there's a Reactor Context I want to take out and put back a value for key `foo`)
 * `ThreadLocalAccessor` - how to take from thread local and put it to the context container and vice versa. (e.g. `ObservationThreadLocalAccessor` will take the value of the current `Observation`)
 * `ContextContainerPropagator` - how to write the `ContextContainer` to a Context and from it (e.g. `ReactorContextContainerPropagator` - how to read and write the container to Reactor Context)
+* `Namespace` logical grouping for `ThreadLocalAccessor`s. Can be used for filtering out thread local accessors.
 
 ## Contributing
 
