@@ -19,7 +19,7 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor {
 
     public static final String KEY = "micrometer.observation";
 
-    public static final Namespace OBSERVATION = Namespace.create(KEY);
+    public static final Namespace OBSERVATION = Namespace.of(KEY);
 
     private final NamespaceAccessor<ObservationStore> namespaceAccessor = new NamespaceAccessor<>(OBSERVATION);
 
@@ -27,23 +27,24 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor {
     public void captureValues(ContextContainer container) {
         String value = ObservationThreadLocalHolder.holder.get();
         if (value != null) {
-            namespaceAccessor.putStore(container, new ObservationStore(value));
+            this.namespaceAccessor.putStore(container, new ObservationStore(value));
         }
     }
 
     @Override
     public void restoreValues(ContextContainer container) {
-        if (namespaceAccessor.isPresent(container)) {
-            ObservationStore store = namespaceAccessor.getStore(container);
+        if (this.namespaceAccessor.isPresent(container)) {
+            ObservationStore store = this.namespaceAccessor.getStore(container);
             String observation = store.getObservation();
             ObservationThreadLocalHolder.holder.set(observation);
-            System.out.println("Observation [" + observation + "]");
         }
     }
 
     @Override
     public void resetValues(ContextContainer container) {
-        namespaceAccessor.getRequiredStore(container).close();
+        if (this.namespaceAccessor.isPresent(container)) {
+            this.namespaceAccessor.getRequiredStore(container).close();
+        }
     }
 
     @Override

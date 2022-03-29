@@ -49,7 +49,7 @@ public interface Namespace {
      * @param key key under which this namespace is to be registered
      * @return new namespace
      */
-    static Namespace create(String key) {
+    static Namespace of(String key) {
         return new SimpleNamespace(key);
     }
 }

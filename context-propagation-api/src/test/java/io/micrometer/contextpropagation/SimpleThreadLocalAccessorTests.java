@@ -41,6 +41,22 @@ class SimpleThreadLocalAccessorTests {
     }
 
     @Test
+    void should_not_fail_when_capturing_empty_thread_local_values() {
+        then(ObservationThreadLocalHolder.holder.get()).isNull();
+
+        ContextContainer container = this.container.captureThreadLocalValues();
+
+        ObservationThreadLocalHolder.holder.remove();
+        then(ObservationThreadLocalHolder.holder.get()).isNull();
+
+        try (ContextContainer.Scope scope = container.restoreThreadLocalValues()) {
+            then(ObservationThreadLocalHolder.holder.get()).isNull();
+        }
+
+        then(ObservationThreadLocalHolder.holder.get()).isNull();
+    }
+
+    @Test
     void should_filter_out_thread_local_values() {
         then(ObservationThreadLocalHolder.holder.get()).isNull();
         ObservationThreadLocalHolder.holder.set("hello");
