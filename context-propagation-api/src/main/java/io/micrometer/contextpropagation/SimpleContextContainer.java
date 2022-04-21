@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 class SimpleContextContainer implements ContextContainer {
 
     private final Map<String, Object> values = new ConcurrentHashMap<>();
@@ -107,43 +107,37 @@ class SimpleContextContainer implements ContextContainer {
         };
     }
 
-	// TODO: need better names
-    public Scope withThreadLocalAccessors(ThreadLocalAccessorsOperation callback) {
-        List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
-                .collect(Collectors.toList());
-		callback.before(accessors, this);  // before
-        return () -> {
-			callback.after(accessors, this);  // after
-			this.predicates.clear();
-		};
+    @Override
+    public Scope withScope(Predicate<Namespace> predicate, ThreadLocalAccessorScopeCallback callback) {
+        this.predicates.add(predicate);
+        return withScope(callback);
     }
 
-	interface ThreadLocalAccessorsOperation {
-		default void before(List<ThreadLocalAccessor> accessors, ContextContainer container) {
-			accessors.forEach(accessor -> beforeEach(accessor, container));
-		}
+    @Override
+    public Scope withScope(ThreadLocalAccessorScopeCallback callback) {
+        List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
+                .collect(Collectors.toList());
+        callback.beforeAllAccessors(accessors, this);
+        return () -> {
+            callback.afterAllAccessors(accessors, this);
+            this.predicates.clear();
+        };
+    }
 
-		void beforeEach(ThreadLocalAccessor accessors, ContextContainer container);
+    @Override
+    public void tryScoped(ThreadLocalAccessorScopeRunnable callback, Runnable action) {
+        List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
+                .collect(Collectors.toList());
 
-		default void after(List<ThreadLocalAccessor> accessors, ContextContainer container) {
-			accessors.forEach(accessor -> afterEach(accessor, container));
-		}
+        callback.run(accessors, this, action);
+        this.predicates.clear();
+    }
 
-		void afterEach(ThreadLocalAccessor accessors, ContextContainer container);
-	}
-
-
-	public void withThreadLocalAccessorsAndAction(AccessorOperations callback, Runnable action) {
-		List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
-				.collect(Collectors.toList());
-
-		callback.perform(accessors, this, action);
-		this.predicates.clear();
-	}
-
-	interface AccessorOperations {
-		void perform(List<ThreadLocalAccessor> accessors, ContextContainer container, Runnable action);
-	}
+    @Override
+    public void tryScoped(Predicate<Namespace> predicate, ThreadLocalAccessorScopeRunnable callback, Runnable action) {
+        this.predicates.add(predicate);
+        tryScoped(callback, action);
+    }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -157,13 +151,6 @@ class SimpleContextContainer implements ContextContainer {
         return false;
     }
 
-    /**
-     * Tries to run the action against an Observation. If the
-     * Observation is null, we just run the action, otherwise
-     * we run the action in scope.
-     *
-     * @param action action to run
-     */
     @Override
     @SuppressWarnings("unused")
     public void tryScoped(Runnable action) {
@@ -172,14 +159,6 @@ class SimpleContextContainer implements ContextContainer {
         }
     }
 
-    /**
-     * Tries to run the action against an Observation. If the
-     * Observation is null, we just run the action, otherwise
-     * we run the action in scope.
-     *
-     * @param action action to run
-     * @return result of the action
-     */
     @Override
     @SuppressWarnings("unused")
     public <T> T tryScoped(Supplier<T> action) {

@@ -15,6 +15,7 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -32,6 +33,7 @@ public interface ContextContainer {
      * A No-Op instance that does nothing. To be used instead of {@code null}.
      */
     ContextContainer NOOP = new ContextContainer() {
+
         @Override
         public void captureContext(Object context) {
 
@@ -74,8 +76,17 @@ public interface ContextContainer {
 
         @Override
         public Scope restoreThreadLocalValues() {
-            return () -> {
-            };
+            return Scope.NOOP;
+        }
+
+        @Override
+        public Scope withScope(Predicate<Namespace> predicate, ThreadLocalAccessorScopeCallback callback) {
+            return Scope.NOOP;
+        }
+
+        @Override
+        public Scope withScope(ThreadLocalAccessorScopeCallback callback) {
+            return Scope.NOOP;
         }
 
         @Override
@@ -96,6 +107,16 @@ public interface ContextContainer {
         @Override
         public <T> T tryScoped(Supplier<T> action) {
             return action.get();
+        }
+
+        @Override
+        public void tryScoped(ThreadLocalAccessorScopeRunnable callback, Runnable action) {
+
+        }
+
+        @Override
+        public void tryScoped(Predicate<Namespace> predicate, ThreadLocalAccessorScopeRunnable callback, Runnable action) {
+
         }
     };
 
@@ -189,12 +210,14 @@ public interface ContextContainer {
 
     /**
      * Captures the current thread local values and stores them in the container.
+     *
      * @return this for chaining
      */
     ContextContainer captureThreadLocalValues();
 
     /**
      * Captures the current thread local values and stores them in the container.
+     *
      * @param predicate condition to check namespaces against
      * @return this for chaining
      */
@@ -202,10 +225,30 @@ public interface ContextContainer {
 
     /**
      * Restores the previously captured thread local values and puts them in thread local
+     *
      * @return scope within which the thread local values are available
      * @see Scope
      */
     Scope restoreThreadLocalValues();
+
+    /**
+     * Opens the scope with the given {@link ThreadLocalAccessorScopeCallback}.
+     *
+     * @param predicate condition to check namespaces against
+     * @param callback callback to be applied for the scope
+     * @return scope within which the thread local values are available
+     * @see Scope
+     */
+    Scope withScope(Predicate<Namespace> predicate, ThreadLocalAccessorScopeCallback callback);
+
+    /**
+     * Opens the scope with the given {@link ThreadLocalAccessorScopeCallback}.
+     *
+     * @param callback callback to be applied for the scope
+     * @return scope within which the thread local values are available
+     * @see Scope
+     */
+    Scope withScope(ThreadLocalAccessorScopeCallback callback);
 
     /**
      * Saves this container in the provided context.
@@ -242,9 +285,85 @@ public interface ContextContainer {
     <T> T tryScoped(Supplier<T> action);
 
     /**
+     * Takes the runnable and runs it with thread local values available.
+     * Clears the thread local values when the runnable has been finished.
+     *
+     * @param callback callback to control the lifecycle of accessors
+     * @param action runnable to run
+     */
+    void tryScoped(ThreadLocalAccessorScopeRunnable callback, Runnable action);
+
+    /**
+     * Takes the runnable and runs it with thread local values available.
+     * Clears the thread local values when the runnable has been finished.
+     *
+     * @param predicate condition to check namespaces against
+     * @param callback callback to control the lifecycle of accessors
+     * @param action runnable to run
+     */
+    void tryScoped(Predicate<Namespace> predicate, ThreadLocalAccessorScopeRunnable callback, Runnable action);
+
+    /**
+     * Callback to control what should when the {@link Scope} is being closed and opened.
+     */
+    interface ThreadLocalAccessorScopeCallback {
+
+        /**
+         * Runs logic for all accessors before the scope is opened.
+         * @param accessors all accessors
+         * @param container context container
+         */
+        default void beforeAllAccessors(List<ThreadLocalAccessor> accessors, ContextContainer container) {
+            accessors.forEach(accessor -> beforeEachAccessor(accessor, container));
+        }
+
+        /**
+         * Code to run for each accessor before the scope is opened.
+         * @param accessor single accessor
+         * @param container context container
+         */
+        void beforeEachAccessor(ThreadLocalAccessor accessor, ContextContainer container);
+
+        /**
+         * Runs logic for all accessors before the scope is closed.
+         * @param accessors all accessors
+         * @param container context container
+         */
+        default void afterAllAccessors(List<ThreadLocalAccessor> accessors, ContextContainer container) {
+            accessors.forEach(accessor -> afterEachAccessor(accessor, container));
+        }
+
+        /**
+         * Code to run for each accessor before the scope is closed.
+         * @param accessor single accessor
+         * @param container context container
+         */
+        void afterEachAccessor(ThreadLocalAccessor accessor, ContextContainer container);
+    }
+
+    /**
+     * Callback to fully control the lifecycle of accessors.
+     */
+    interface ThreadLocalAccessorScopeRunnable {
+        /**
+         * Allows to control the action to run together with configuration of accessors.
+         *
+         * @param accessors filtered accessors
+         * @param container context container
+         * @param action action to run
+         */
+        void run(List<ThreadLocalAccessor> accessors, ContextContainer container, Runnable action);
+    }
+
+    /**
      * Demarcates the scope of restored ThreadLocal values.
      */
     interface Scope extends AutoCloseable {
+
+        Scope NOOP = () -> {
+
+        };
+
         @Override
         void close();
     }
