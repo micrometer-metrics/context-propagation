@@ -107,6 +107,44 @@ class SimpleContextContainer implements ContextContainer {
         };
     }
 
+	// TODO: need better names
+    public Scope withThreadLocalAccessors(ThreadLocalAccessorsOperation callback) {
+        List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
+                .collect(Collectors.toList());
+		callback.before(accessors, this);  // before
+        return () -> {
+			callback.after(accessors, this);  // after
+			this.predicates.clear();
+		};
+    }
+
+	interface ThreadLocalAccessorsOperation {
+		default void before(List<ThreadLocalAccessor> accessors, ContextContainer container) {
+			accessors.forEach(accessor -> beforeEach(accessor, container));
+		}
+
+		void beforeEach(ThreadLocalAccessor accessors, ContextContainer container);
+
+		default void after(List<ThreadLocalAccessor> accessors, ContextContainer container) {
+			accessors.forEach(accessor -> afterEach(accessor, container));
+		}
+
+		void afterEach(ThreadLocalAccessor accessors, ContextContainer container);
+	}
+
+
+	public void withThreadLocalAccessorsAndAction(AccessorOperations callback, Runnable action) {
+		List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
+				.collect(Collectors.toList());
+
+		callback.perform(accessors, this, action);
+		this.predicates.clear();
+	}
+
+	interface AccessorOperations {
+		void perform(List<ThreadLocalAccessor> accessors, ContextContainer container, Runnable action);
+	}
+
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T save(T context) {
