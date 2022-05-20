@@ -263,14 +263,11 @@ public interface ContextContainer {
      */
     default <T> Callable<T> wrap(Callable<T> action) {
         ContextContainer container = captureThreadLocalValues();
-        return () -> container.tryScoped(() -> {
-            try {
+        return () -> {
+            try (Scope scope = container.restoreThreadLocalValues()) {
                 return action.call();
             }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+        };
     }
 
     /**
