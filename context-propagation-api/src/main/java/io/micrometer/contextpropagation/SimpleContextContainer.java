@@ -120,9 +120,8 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     /**
-     * Tries to run the action against an Observation. If the
-     * Observation is null, we just run the action, otherwise
-     * we run the action in scope.
+     * Restores the thread local values and runs the given action. No exception
+     * catching takes place.
      *
      * @param action action to run
      */
@@ -135,9 +134,8 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     /**
-     * Tries to run the action against an Observation. If the
-     * Observation is null, we just run the action, otherwise
-     * we run the action in scope.
+     * Restores the thread local values and runs the given action. No exception
+     * catching takes place.
      *
      * @param action action to run
      * @return result of the action

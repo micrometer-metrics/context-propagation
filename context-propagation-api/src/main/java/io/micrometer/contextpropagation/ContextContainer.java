@@ -15,6 +15,9 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -242,10 +245,60 @@ public interface ContextContainer {
     <T> T tryScoped(Supplier<T> action);
 
     /**
+     * Propagates the context over the {@link Runnable}.
+     *
+     * @param action action through which context should be propagated
+     * @return wrapped action
+     */
+    default Runnable wrap(Runnable action) {
+        ContextContainer container = captureThreadLocalValues();
+        return () -> container.tryScoped(action);
+    }
+
+    /**
+     * Propagates the context over the {@link Callable}.
+     *
+     * @param action action through which context should be propagated
+     * @return wrapped action
+     */
+    default <T> Callable<T> wrap(Callable<T> action) {
+        ContextContainer container = captureThreadLocalValues();
+        return () -> container.tryScoped(() -> {
+            try {
+                return action.call();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    /**
+     * Propagates the context over the {@link Executor}.
+     *
+     * @param executor executor through which context should be propagated
+     * @return wrapped executor
+     */
+    default Executor wrap(Executor executor) {
+        return command -> executor.execute(wrap(command));
+    }
+
+    /**
+     * Propagates the context over the {@link ExecutorService}.
+     *
+     * @param executorService executor service through which context should be propagated
+     * @return wrapped executor
+     */
+    default ExecutorService wrap(ExecutorService executorService) {
+        return new WrappedExecutorService(this, executorService);
+    }
+
+    /**
      * Demarcates the scope of restored ThreadLocal values.
      */
     interface Scope extends AutoCloseable {
         @Override
         void close();
     }
+
 }
