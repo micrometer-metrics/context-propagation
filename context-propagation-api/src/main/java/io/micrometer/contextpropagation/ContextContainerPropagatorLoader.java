@@ -23,16 +23,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * Loads {@link ThreadLocalAccessor} and {@link ContextAccessor}.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-final class PropagatorLoader {
+final class ContextContainerPropagatorLoader {
 
     private static final ServiceLoader<ContextContainerPropagator> propagators = ServiceLoader.load(ContextContainerPropagator.class);
 
     private static final Map<Class, ContextContainerPropagator> cache = new ConcurrentHashMap<>();
 
-    static ContextContainerPropagator getPropagatorForSet(Object ctx) {
+    static ContextContainerPropagator getPropagatorToSave(Object ctx) {
         return cache.computeIfAbsent(ctx.getClass(), aClass -> {
             for (ContextContainerPropagator contextContainerPropagator : propagators) {
-                if (contextContainerPropagator.getSupportedContextClassForSet().isAssignableFrom(aClass)) {
+                if (contextContainerPropagator.supportsSaveTo(aClass)) {
                     return contextContainerPropagator;
                 }
             }
@@ -40,10 +40,10 @@ final class PropagatorLoader {
         });
     }
 
-    static ContextContainerPropagator getPropagatorForGet(Object ctx) {
+    static ContextContainerPropagator getPropagatorToRestore(Object ctx) {
         return cache.computeIfAbsent(ctx.getClass(), aClass -> {
             for (ContextContainerPropagator contextContainerPropagator : propagators) {
-                if (contextContainerPropagator.getSupportedContextClassForGet().isAssignableFrom(aClass)) {
+                if (contextContainerPropagator.supportsRestoreFrom(aClass)) {
                     return contextContainerPropagator;
                 }
             }

@@ -33,12 +33,12 @@ public interface ContextContainer {
      */
     ContextContainer NOOP = new ContextContainer() {
         @Override
-        public void captureContext(Object context) {
+        public void captureValues(Object context) {
 
         }
 
         @Override
-        public <T> T restoreContext(T context) {
+        public <T> T restoreValues(T context) {
             return context;
         }
 
@@ -79,7 +79,7 @@ public interface ContextContainer {
         }
 
         @Override
-        public <T> T save(T context) {
+        public <T> T saveTo(T context) {
             return context;
         }
 
@@ -99,57 +99,6 @@ public interface ContextContainer {
         }
     };
 
-    /**
-     * Capture values from a context and save them in the given container.
-     *
-     * @param context context to process
-     */
-    void captureContext(Object context);
-
-    /**
-     * Restore context values from the given container.
-     *
-     * @param context context to process
-     * @param <T> type of the context
-     * @return context with elements previously stored in the container
-     * @see ContextContainer#captureContext(Object)
-     */
-    <T> T restoreContext(T context);
-
-    /**
-     * Restores the {@link ContextContainer} from the provided context.
-     *
-     * @param context context from which we want to retrieve from {@link ContextContainer}
-     * @param <T> type of the context
-     * @return the container retrieved from the given context
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> ContextContainer restore(T context) {
-        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(context);
-        return contextContainerPropagator.get(context);
-    }
-
-    /**
-     * Removes the {@link ContextContainer} from the given context.
-     *
-     * @param context context from which we want to remove the {@link ContextContainer}
-     * @param <T> type of the context
-     * @return context with {@link ContextContainer} removed
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    static <T> T reset(T context) {
-        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForGet(context);
-        return (T) contextContainerPropagator.remove(context);
-    }
-
-    /**
-     * Builds a new {@link ContextContainer}.
-     *
-     * @return a new {@link ContextContainer}
-     */
-    static ContextContainer create() {
-        return new SimpleContextContainer();
-    }
 
     /**
      * Gets an element from the container.
@@ -188,6 +137,23 @@ public interface ContextContainer {
     <T> T remove(String key);
 
     /**
+     * Capture values from a context and save them in the given container.
+     *
+     * @param context context to process
+     */
+    void captureValues(Object context);
+
+    /**
+     * Restore context values from the given container.
+     *
+     * @param context context to process
+     * @param <T> type of the context
+     * @return context with elements previously stored in the container
+     * @see ContextContainer#captureValues(Object)
+     */
+    <T> T restoreValues(T context);
+
+    /**
      * Captures the current thread local values and stores them in the container.
      * @return this for chaining
      */
@@ -214,7 +180,33 @@ public interface ContextContainer {
      * @param <T> type of the context
      * @return the context with the stored container
      */
-    <T> T save(T context);
+    <T> T saveTo(T context);
+
+    /**
+     * Restores the {@link ContextContainer} from the provided context.
+     *
+     * @param context context from which we want to retrieve from {@link ContextContainer}
+     * @param <T> type of the context
+     * @return the container retrieved from the given context
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static <T> ContextContainer restoreFrom(T context) {
+        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToRestore(context);
+        return propagator.restore(context);
+    }
+
+    /**
+     * Removes the {@link ContextContainer} from the given context.
+     *
+     * @param context context from which we want to remove the {@link ContextContainer}
+     * @param <T> type of the context
+     * @return context with {@link ContextContainer} removed
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static <T> T removeFrom(T context) {
+        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToRestore(context);
+        return (T) propagator.remove(context);
+    }
 
     /**
      * Is this a noop implementation?
@@ -240,6 +232,17 @@ public interface ContextContainer {
      * @return value returned by the supplier
      */
     <T> T tryScoped(Supplier<T> action);
+
+
+    /**
+     * Builds a new {@link ContextContainer}.
+     *
+     * @return a new {@link ContextContainer}
+     */
+    static ContextContainer create() {
+        return new SimpleContextContainer();
+    }
+
 
     /**
      * Demarcates the scope of restored ThreadLocal values.

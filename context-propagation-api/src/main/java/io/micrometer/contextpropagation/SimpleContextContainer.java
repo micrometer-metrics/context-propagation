@@ -44,21 +44,28 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     @Override
-    public void captureContext(Object context) {
-        List<ContextAccessor> contextAccessorsForSet = ContextAccessorLoader.getContextAccessorsForSet(context);
+    public void captureValues(Object context) {
+        List<ContextAccessor> contextAccessorsForSet = ContextAccessorLoader.getAccessorsToCapture(context);
         for (ContextAccessor contextAccessor : contextAccessorsForSet) {
             contextAccessor.captureValues(context, this);
         }
     }
 
     @Override
-    public <T> T restoreContext(T context) {
+    public <T> T restoreValues(T context) {
         T mergedContext = context;
-        List<ContextAccessor> contextAccessorsForGet = ContextAccessorLoader.getContextAccessorsForGet(context);
+        List<ContextAccessor> contextAccessorsForGet = ContextAccessorLoader.getAccessorsToRestore(context);
         for (ContextAccessor contextAccessor : contextAccessorsForGet) {
-            mergedContext = (T) contextAccessor.restoreValues(mergedContext, this);
+            mergedContext = (T) contextAccessor.restoreValues(this, mergedContext);
         }
         return mergedContext;
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T saveTo(T context) {
+        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToSave(context);
+        return (T) propagator.save(this, context);
     }
 
     @Override
@@ -105,13 +112,6 @@ class SimpleContextContainer implements ContextContainer {
             accessors.forEach(accessor -> accessor.resetValues(this));
             this.predicates.clear();
         };
-    }
-
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T save(T context) {
-        ContextContainerPropagator contextContainerPropagator = PropagatorLoader.getPropagatorForSet(context);
-        return (T) contextContainerPropagator.set(context, this);
     }
 
     @Override
