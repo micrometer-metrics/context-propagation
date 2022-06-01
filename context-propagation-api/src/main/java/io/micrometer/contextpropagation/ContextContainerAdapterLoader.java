@@ -23,33 +23,33 @@ import java.util.concurrent.ConcurrentHashMap;
  * Loads {@link ThreadLocalAccessor} and {@link ContextAccessor}.
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-final class ContextContainerPropagatorLoader {
+final class ContextContainerAdapterLoader {
 
-    private static final ServiceLoader<ContextContainerPropagator> propagators = ServiceLoader.load(ContextContainerPropagator.class);
+    private static final ServiceLoader<ContextContainerAdapter> adapters = ServiceLoader.load(ContextContainerAdapter.class);
 
-    private static final Map<Class, ContextContainerPropagator> cache = new ConcurrentHashMap<>();
+    private static final Map<Class, ContextContainerAdapter> cache = new ConcurrentHashMap<>();
 
-    static ContextContainerPropagator getPropagatorToWrite(Object context) {
+    static ContextContainerAdapter getAdapterToWrite(Object context) {
         return cache.computeIfAbsent(context.getClass(), aClass -> {
-            for (ContextContainerPropagator contextContainerPropagator : propagators) {
-                if (contextContainerPropagator.supportsSaveTo(aClass)) {
-                    return contextContainerPropagator;
+            for (ContextContainerAdapter contextContainerAdapter : adapters) {
+                if (contextContainerAdapter.supportsSaveTo(aClass)) {
+                    return contextContainerAdapter;
                 }
             }
             throw new IllegalStateException(
-                    "No ContextContainerPropagator for context type: " + context.getClass());
+                    "No ContextContainerAdapter for context type: " + context.getClass());
         });
     }
 
-    static ContextContainerPropagator getPropagatorToRead(Object context) {
+    static ContextContainerAdapter getAdapterToRead(Object context) {
         return cache.computeIfAbsent(context.getClass(), aClass -> {
-            for (ContextContainerPropagator contextContainerPropagator : propagators) {
-                if (contextContainerPropagator.supportsRestoreFrom(aClass)) {
-                    return contextContainerPropagator;
+            for (ContextContainerAdapter contextContainerAdapter : adapters) {
+                if (contextContainerAdapter.supportsRestoreFrom(aClass)) {
+                    return contextContainerAdapter;
                 }
             }
             throw new IllegalStateException(
-                    "No ContextContainerPropagator for context type: " + context.getClass());
+                    "No ContextContainerAdapter for context type: " + context.getClass());
         });
     }
 }

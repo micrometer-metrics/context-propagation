@@ -19,7 +19,7 @@ import java.util.ServiceLoader;
 
 /**
  * Abstraction to tell context propagation how to read from and write to
- * a given context. To register your own {@link ContextContainerPropagator}
+ * a given context. To register your own {@link ContextContainerAdapter}
  * you have to register it using the {@link ServiceLoader} mechanism.
  *
  * @param <READ> context from which we read
@@ -28,7 +28,7 @@ import java.util.ServiceLoader;
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-public interface ContextContainerPropagator<READ, WRITE> {
+public interface ContextContainerAdapter<READ, WRITE> {
 
     /**
      * Save the {@link ContextContainer} to the external context.
@@ -69,14 +69,14 @@ public interface ContextContainerPropagator<READ, WRITE> {
     /**
      * Checks if this implementation can work with the provided context for writing.
      *
-     * @return class type for which this propagator is applicable
+     * @return class type for which this adapter is applicable
      */
     boolean supportsSaveTo(Class<?> contextType);
 
     /**
      * Checks if this implementation can work with the provided context for reading.
      *
-     * @return class type for which this propagator is applicable
+     * @return class type for which this adapter is applicable
      */
     boolean supportsRestoreFrom(Class<?> contextType);
 }

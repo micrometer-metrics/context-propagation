@@ -110,7 +110,7 @@ public interface ContextContainer {
      * @param context context in which we want to store this container
      * @param <T> type of the context
      * @return the context with the stored container
-     * @throws IllegalStateException if a {@link ContextContainerPropagator}
+     * @throws IllegalStateException if a {@link ContextContainerAdapter}
      * that supports the given external context is not available
      */
     <T> T saveTo(T context);
@@ -121,15 +121,15 @@ public interface ContextContainer {
      * @param context context from which we want to retrieve from {@link ContextContainer}
      * @param <T> type of the context
      * @return the container retrieved from the given context
-     * @throws IllegalStateException if a {@link ContextContainerPropagator}
+     * @throws IllegalStateException if a {@link ContextContainerAdapter}
      * that supports the given external context is not available, or if the
      * external context does not have a {@link ContextContainer} saved
      * @see #restoreIfPresentFrom(Object)
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> ContextContainer restoreFrom(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToRead(context);
-        return propagator.restore(context);
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToRead(context);
+        return adapter.restore(context);
     }
 
     /**
@@ -141,8 +141,8 @@ public interface ContextContainer {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> ContextContainer restoreIfPresentFrom(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToRead(context);
-        return propagator.restoreIfPresent(context);
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToRead(context);
+        return adapter.restoreIfPresent(context);
     }
 
     /**
@@ -154,8 +154,8 @@ public interface ContextContainer {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T removeFrom(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToWrite(context);
-        return (T) propagator.remove(context);
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToWrite(context);
+        return (T) adapter.remove(context);
     }
 
     /**

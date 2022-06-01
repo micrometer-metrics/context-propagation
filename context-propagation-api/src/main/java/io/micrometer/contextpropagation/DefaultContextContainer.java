@@ -53,6 +53,28 @@ public class DefaultContextContainer implements ContextContainer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        return (T) this.values.get(key);
+    }
+
+    @Override
+    public boolean containsKey(String key) {
+        return this.values.containsKey(key);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T put(String key, T value) {
+        return (T) this.values.put(key, value);
+    }
+
+    @Override
+    public <T> T remove(String key) {
+        return (T) this.values.remove(key);
+    }
+
+    @Override
     public void captureValues(Object context) {
         for (ContextAccessor accessor : getContextAccessors(context, true)) {
             accessor.captureValues(context, this);
@@ -79,35 +101,6 @@ public class DefaultContextContainer implements ContextContainer {
             this.contextAccessorCache.put(context.getClass(), accessors);
         }
         return accessors;
-    }
-
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T saveTo(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToWrite(context);
-        return (T) propagator.save(this, context);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T get(String key) {
-        return (T) this.values.get(key);
-    }
-
-    @Override
-    public boolean containsKey(String key) {
-        return this.values.containsKey(key);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T put(String key, T value) {
-        return (T) this.values.put(key, value);
-    }
-
-    @Override
-    public <T> T remove(String key) {
-        return (T) this.values.remove(key);
     }
 
     @Override
@@ -140,6 +133,13 @@ public class DefaultContextContainer implements ContextContainer {
             accessors.forEach(accessor -> accessor.resetValues(this));
             this.predicates.clear();
         };
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T saveTo(T context) {
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToWrite(context);
+        return (T) adapter.save(this, context);
     }
 
     /**
