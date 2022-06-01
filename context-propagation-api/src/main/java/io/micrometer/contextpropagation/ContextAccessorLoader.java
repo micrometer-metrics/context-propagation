@@ -31,11 +31,11 @@ final class ContextAccessorLoader {
 
     private static final Map<Class, List<ContextAccessor>> cache = new ConcurrentHashMap<>();
 
-    static List<ContextAccessor> getContextAccessorsForSet(Object ctx) {
+    static List<ContextAccessor> getAccessorsToCapture(Object ctx) {
         return cache.computeIfAbsent(ctx.getClass(), aClass -> {
             List<ContextAccessor> accessors = new ArrayList<>();
             for (ContextAccessor accessor : propagators) {
-                if (accessor.getSupportedContextClassForSet().isAssignableFrom(aClass)) {
+                if (accessor.canCaptureFrom(aClass)) {
                     accessors.add(accessor);
                 }
             }
@@ -43,11 +43,11 @@ final class ContextAccessorLoader {
         });
     }
 
-    static List<ContextAccessor> getContextAccessorsForGet(Object ctx) {
+    static List<ContextAccessor> getAccessorsToRestore(Object ctx) {
         return cache.computeIfAbsent(ctx.getClass(), aClass -> {
             List<ContextAccessor> accessors = new ArrayList<>();
             for (ContextAccessor accessor : propagators) {
-                if (accessor.getSupportedContextClassForGet().isAssignableFrom(aClass)) {
+                if (accessor.canRestoreTo(aClass)) {
                     accessors.add(accessor);
                 }
             }

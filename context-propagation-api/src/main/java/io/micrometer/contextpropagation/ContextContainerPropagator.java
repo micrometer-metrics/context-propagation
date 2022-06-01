@@ -34,14 +34,14 @@ public interface ContextContainerPropagator<READ, WRITE> {
      * No-Op instance of the {@link ContextContainerPropagator}. Does nothing.
      */
     @SuppressWarnings("rawtypes")
-    ContextContainerPropagator NOOP = new ContextContainerPropagator() {
+    ContextContainerPropagator NOOP = new ContextContainerPropagator<Object, Object>() {
         @Override
-        public Object set(Object ctx, ContextContainer value) {
-            return ctx;
+        public Object save(ContextContainer contextContainer, Object context) {
+            return context;
         }
 
         @Override
-        public ContextContainer get(Object ctx) {
+        public ContextContainer restore(Object context) {
             return ContextContainer.NOOP;
         }
 
@@ -51,34 +51,34 @@ public interface ContextContainerPropagator<READ, WRITE> {
         }
 
         @Override
-        public Class<?> getSupportedContextClassForSet() {
-            return ContextContainerPropagator.class;
+        public boolean supportsSaveTo(Class<?> contextType) {
+            return false;
         }
 
         @Override
-        public Class<?> getSupportedContextClassForGet() {
-            return ContextContainerPropagator.class;
+        public boolean supportsRestoreFrom(Class<?> contextType) {
+            return false;
         }
 
     };
 
     /**
-     * Writes the {@link ContextContainer} to a context.
+     * Save the {@link ContextContainer} to the external context.
      *
-     * @param ctx context to which we write
-     * @param value value of the {@link ContextContainer} to write to the context
+     * @param contextContainer value of the {@link ContextContainer} to write to the context
+     * @param context   context to which we write
      * @return context
      */
-    WRITE set(WRITE ctx, ContextContainer value);
+    WRITE save(ContextContainer contextContainer, WRITE context);
 
     /**
-     * Reads the {@link ContextContainer} from the context. If the container
+     * Restore the {@link ContextContainer} from the external context. If the container
      * is not there the implementation should return {@link ContextContainer#NOOP}.
      *
-     * @param ctx context from which we want to retrieve the {@link ContextContainer}
+     * @param context context from which we want to retrieve the {@link ContextContainer}
      * @return container
      */
-    ContextContainer get(READ ctx);
+    ContextContainer restore(READ context);
 
     /**
      * Removes the {@link ContextContainer} from the context.
@@ -93,14 +93,14 @@ public interface ContextContainerPropagator<READ, WRITE> {
      *
      * @return class type for which this propagator is applicable
      */
-    Class<?> getSupportedContextClassForSet();
+    boolean supportsSaveTo(Class<?> contextType);
 
     /**
      * Checks if this implementation can work with the provided context for reading.
      *
      * @return class type for which this propagator is applicable
      */
-    Class<?> getSupportedContextClassForGet();
+    boolean supportsRestoreFrom(Class<?> contextType);
 }
 
 

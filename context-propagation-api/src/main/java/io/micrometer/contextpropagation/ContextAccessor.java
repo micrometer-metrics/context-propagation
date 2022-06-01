@@ -28,33 +28,36 @@ package io.micrometer.contextpropagation;
 public interface ContextAccessor<READ, WRITE> {
 
     /**
-     * Capture values from a context and save them in the given container.
+     * Capture values from an external context holder and put them in the given
+     * {@link ContextContainer}.
      *
-     * @param view context from which we read
-     * @param container container to which we put
+     * @param view the external context to capture values from
+     * @param container the container to put the values in
      */
     void captureValues(READ view, ContextContainer container);
 
     /**
-     * Restore context values from the given container.
+     * Restore values from the given {@link ContextContainer} and put them in
+     * the given external context holder.
      *
-     * @param context context to which we write
-     * @param container container from which we read
-     * @return updated context
+     * @param container the container to obtain values from
+     * @param context the external context to put values in
+     * @return the updated external context
      */
-    WRITE restoreValues(WRITE context, ContextContainer container);
+    WRITE restoreValues(ContextContainer container, WRITE context);
 
     /**
-     * Checks if this implementation can work with the provided context for writing.
+     * Whether this accessor can capture values from the given external context type.
      *
-     * @return class type for which this propagator is applicable
+     * @param contextType the type of external context
      */
-    Class<?> getSupportedContextClassForSet();
+    boolean canCaptureFrom(Class<?> contextType);
 
     /**
-     * Checks if this implementation can work with the provided context for reading.
+     * Whether this accessor can restore values to the given external context type.
      *
-     * @return class type for which this propagator is applicable
+     * @param contextType the type of external context
      */
-    Class<?> getSupportedContextClassForGet();
+    boolean canRestoreTo(Class<?> contextType);
+
 }
