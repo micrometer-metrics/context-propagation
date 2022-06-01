@@ -84,7 +84,7 @@ public class DefaultContextContainer implements ContextContainer {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T saveTo(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToSave(context);
+        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToWrite(context);
         return (T) propagator.save(this, context);
     }
 
@@ -140,11 +140,6 @@ public class DefaultContextContainer implements ContextContainer {
             accessors.forEach(accessor -> accessor.resetValues(this));
             this.predicates.clear();
         };
-    }
-
-    @Override
-    public boolean isNoOp() {
-        return false;
     }
 
     /**

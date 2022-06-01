@@ -29,25 +29,27 @@ final class ContextContainerPropagatorLoader {
 
     private static final Map<Class, ContextContainerPropagator> cache = new ConcurrentHashMap<>();
 
-    static ContextContainerPropagator getPropagatorToSave(Object ctx) {
-        return cache.computeIfAbsent(ctx.getClass(), aClass -> {
+    static ContextContainerPropagator getPropagatorToWrite(Object context) {
+        return cache.computeIfAbsent(context.getClass(), aClass -> {
             for (ContextContainerPropagator contextContainerPropagator : propagators) {
                 if (contextContainerPropagator.supportsSaveTo(aClass)) {
                     return contextContainerPropagator;
                 }
             }
-            return ContextContainerPropagator.NOOP;
+            throw new IllegalStateException(
+                    "No ContextContainerPropagator for context type: " + context.getClass());
         });
     }
 
-    static ContextContainerPropagator getPropagatorToRestore(Object ctx) {
-        return cache.computeIfAbsent(ctx.getClass(), aClass -> {
+    static ContextContainerPropagator getPropagatorToRead(Object context) {
+        return cache.computeIfAbsent(context.getClass(), aClass -> {
             for (ContextContainerPropagator contextContainerPropagator : propagators) {
                 if (contextContainerPropagator.supportsRestoreFrom(aClass)) {
                     return contextContainerPropagator;
                 }
             }
-            return ContextContainerPropagator.NOOP;
+            throw new IllegalStateException(
+                    "No ContextContainerPropagator for context type: " + context.getClass());
         });
     }
 }
