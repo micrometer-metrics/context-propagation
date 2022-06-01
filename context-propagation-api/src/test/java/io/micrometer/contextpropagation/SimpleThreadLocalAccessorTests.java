@@ -15,13 +15,16 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
 class SimpleThreadLocalAccessorTests {
 
-    ContextContainer container = ContextContainer.create();
+    ContextContainer container = new DefaultContextContainer(
+            Collections.emptyList(), Collections.singletonList(new ObservationThreadLocalAccessor()));
 
     @Test
     void should_capture_thread_local_values() {

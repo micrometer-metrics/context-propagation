@@ -238,16 +238,6 @@ public interface ContextContainer {
 
 
     /**
-     * Builds a new {@link ContextContainer}.
-     *
-     * @return a new {@link ContextContainer}
-     */
-    static ContextContainer create() {
-        return new SimpleContextContainer();
-    }
-
-
-    /**
      * Propagates the context over the {@link Runnable}.
      *
      * @param action action through which context should be propagated
