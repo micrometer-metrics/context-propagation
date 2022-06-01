@@ -32,78 +32,6 @@ import java.util.function.Supplier;
 public interface ContextContainer {
 
     /**
-     * A No-Op instance that does nothing. To be used instead of {@code null}.
-     */
-    ContextContainer NOOP = new ContextContainer() {
-        @Override
-        public void captureValues(Object context) {
-
-        }
-
-        @Override
-        public <T> T restoreValues(T context) {
-            return context;
-        }
-
-        @Override
-        public <T> T get(String key) {
-            return null;
-        }
-
-        @Override
-        public boolean containsKey(String key) {
-            return false;
-        }
-
-        @Override
-        public <T> T put(String key, T value) {
-            return value;
-        }
-
-        @Override
-        public <T> T remove(String key) {
-            return null;
-        }
-
-        @Override
-        public ContextContainer captureThreadLocalValues() {
-            return this;
-        }
-
-        @Override
-        public ContextContainer captureThreadLocalValues(Predicate<Namespace> predicate) {
-            return this;
-        }
-
-        @Override
-        public Scope restoreThreadLocalValues() {
-            return () -> {
-            };
-        }
-
-        @Override
-        public <T> T saveTo(T context) {
-            return context;
-        }
-
-        @Override
-        public boolean isNoOp() {
-            return true;
-        }
-
-        @Override
-        public void tryScoped(Runnable action) {
-            action.run();
-        }
-
-        @Override
-        public <T> T tryScoped(Supplier<T> action) {
-            return action.get();
-        }
-    };
-
-
-    /**
      * Gets an element from the container.
      *
      * @param key key under which the element is stored
@@ -182,20 +110,39 @@ public interface ContextContainer {
      * @param context context in which we want to store this container
      * @param <T> type of the context
      * @return the context with the stored container
+     * @throws IllegalStateException if a {@link ContextContainerAdapter}
+     * that supports the given external context is not available
      */
     <T> T saveTo(T context);
 
     /**
-     * Restores the {@link ContextContainer} from the provided context.
+     * Restores the {@link ContextContainer} from the provided external context.
      *
      * @param context context from which we want to retrieve from {@link ContextContainer}
      * @param <T> type of the context
      * @return the container retrieved from the given context
+     * @throws IllegalStateException if a {@link ContextContainerAdapter}
+     * that supports the given external context is not available, or if the
+     * external context does not have a {@link ContextContainer} saved
+     * @see #restoreIfPresentFrom(Object)
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> ContextContainer restoreFrom(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToRestore(context);
-        return propagator.restore(context);
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToRead(context);
+        return adapter.restore(context);
+    }
+
+    /**
+     * Restores the {@link ContextContainer} from the provided external context.
+     *
+     * @param context context from which we want to retrieve from {@link ContextContainer}
+     * @param <T> type of the context
+     * @return the container retrieved from the external context or {@code null}
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    static <T> ContextContainer restoreIfPresentFrom(T context) {
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToRead(context);
+        return adapter.restoreIfPresent(context);
     }
 
     /**
@@ -207,16 +154,9 @@ public interface ContextContainer {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     static <T> T removeFrom(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToRestore(context);
-        return (T) propagator.remove(context);
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToWrite(context);
+        return (T) adapter.remove(context);
     }
-
-    /**
-     * Is this a noop implementation?
-     *
-     * @return {@code true} if this instance is a no-op
-     */
-    boolean isNoOp();
 
     /**
      * Takes the runnable and runs it with thread local values available.
@@ -235,16 +175,6 @@ public interface ContextContainer {
      * @return value returned by the supplier
      */
     <T> T tryScoped(Supplier<T> action);
-
-
-    /**
-     * Builds a new {@link ContextContainer}.
-     *
-     * @return a new {@link ContextContainer}
-     */
-    static ContextContainer create() {
-        return new SimpleContextContainer();
-    }
 
 
     /**

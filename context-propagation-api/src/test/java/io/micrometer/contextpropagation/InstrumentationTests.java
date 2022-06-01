@@ -33,7 +33,8 @@ import static org.assertj.core.api.BDDAssertions.then;
 
 class InstrumentationTests {
 
-    ContextContainer container = ContextContainer.create();
+    ContextContainer container = new DefaultContextContainer(
+            Collections.emptyList(), Collections.singletonList(new ObservationThreadLocalAccessor()));
 
     @AfterEach
     void clear() {

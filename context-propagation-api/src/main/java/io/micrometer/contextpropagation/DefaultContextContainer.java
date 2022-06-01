@@ -15,6 +15,8 @@
  */
 package io.micrometer.contextpropagation;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,41 +33,23 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-class SimpleContextContainer implements ContextContainer {
+public class DefaultContextContainer implements ContextContainer {
 
     private final Map<String, Object> values = new ConcurrentHashMap<>();
 
+    private final List<ContextAccessor<?, ?>> contextAccessors;
+
     private final List<ThreadLocalAccessor> threadLocalAccessors;
+
+    private final Map<Class, List<ContextAccessor>> contextAccessorCache = new ConcurrentHashMap<>();
 
     private final List<Predicate<Namespace>> predicates = new CopyOnWriteArrayList<>();
 
-    SimpleContextContainer() {
-        this.threadLocalAccessors = ThreadLocalAccessorLoader.getThreadLocalAccessors();
-    }
+    public DefaultContextContainer(
+            List<ContextAccessor<?, ?>> contextAccessors, List<ThreadLocalAccessor> threadLocalAccessors) {
 
-    @Override
-    public void captureValues(Object context) {
-        List<ContextAccessor> contextAccessorsForSet = ContextAccessorLoader.getAccessorsToCapture(context);
-        for (ContextAccessor contextAccessor : contextAccessorsForSet) {
-            contextAccessor.captureValues(context, this);
-        }
-    }
-
-    @Override
-    public <T> T restoreValues(T context) {
-        T mergedContext = context;
-        List<ContextAccessor> contextAccessorsForGet = ContextAccessorLoader.getAccessorsToRestore(context);
-        for (ContextAccessor contextAccessor : contextAccessorsForGet) {
-            mergedContext = (T) contextAccessor.restoreValues(this, mergedContext);
-        }
-        return mergedContext;
-    }
-
-    @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> T saveTo(T context) {
-        ContextContainerPropagator propagator = ContextContainerPropagatorLoader.getPropagatorToSave(context);
-        return (T) propagator.save(this, context);
+        this.contextAccessors = Collections.unmodifiableList(new ArrayList<>(contextAccessors));
+        this.threadLocalAccessors = Collections.unmodifiableList(new ArrayList<>(threadLocalAccessors));
     }
 
     @Override
@@ -91,6 +75,35 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     @Override
+    public void captureValues(Object context) {
+        for (ContextAccessor accessor : getContextAccessors(context, true)) {
+            accessor.captureValues(context, this);
+        }
+    }
+
+    @Override
+    public <T> T restoreValues(T context) {
+        T mergedContext = context;
+        for (ContextAccessor accessor : getContextAccessors(context, false)) {
+            mergedContext = (T) accessor.restoreValues(this, mergedContext);
+        }
+        return mergedContext;
+    }
+
+    private List<ContextAccessor> getContextAccessors(Object context, boolean capture) {
+        List<ContextAccessor> accessors = this.contextAccessorCache.get(context.getClass());
+        if (accessors == null) {
+            accessors = this.contextAccessors.stream()
+                    .filter(capture ?
+                            accessor -> accessor.canCaptureFrom(context.getClass()) :
+                            accessor -> accessor.canRestoreTo(context.getClass()))
+                    .collect(Collectors.toList());
+            this.contextAccessorCache.put(context.getClass(), accessors);
+        }
+        return accessors;
+    }
+
+    @Override
     public ContextContainer captureThreadLocalValues() {
         this.threadLocalAccessors.forEach(accessor -> accessor.captureValues(this));
         return this;
@@ -99,14 +112,22 @@ class SimpleContextContainer implements ContextContainer {
     @Override
     public ContextContainer captureThreadLocalValues(Predicate<Namespace> predicate) {
         this.predicates.add(predicate);
-        this.threadLocalAccessors.stream().filter(t -> t.isApplicable(predicate)).forEach(accessor -> accessor.captureValues(this));
+        for (ThreadLocalAccessor accessor : this.threadLocalAccessors) {
+            if (accessor.isApplicable(predicate)) {
+                accessor.captureValues(this);
+            }
+        }
         return this;
     }
 
     @Override
     public Scope restoreThreadLocalValues() {
-        List<ThreadLocalAccessor> accessors = this.threadLocalAccessors.stream().filter(t -> this.predicates.stream().allMatch(p -> p.test(t.getNamespace())))
-                .collect(Collectors.toList());
+        List<ThreadLocalAccessor> accessors = new ArrayList<>();
+        for (ThreadLocalAccessor accessor : this.threadLocalAccessors) {
+            if (this.predicates.stream().allMatch(predicate -> predicate.test(accessor.getNamespace()))) {
+                accessors.add(accessor);
+            }
+        }
         accessors.forEach(accessor -> accessor.restoreValues(this));
         return () -> {
             accessors.forEach(accessor -> accessor.resetValues(this));
@@ -115,8 +136,10 @@ class SimpleContextContainer implements ContextContainer {
     }
 
     @Override
-    public boolean isNoOp() {
-        return false;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T saveTo(T context) {
+        ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToWrite(context);
+        return (T) adapter.save(this, context);
     }
 
     /**

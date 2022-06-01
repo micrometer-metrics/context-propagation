@@ -19,7 +19,7 @@ import java.util.ServiceLoader;
 
 /**
  * Abstraction to tell context propagation how to read from and write to
- * a given context. To register your own {@link ContextContainerPropagator}
+ * a given context. To register your own {@link ContextContainerAdapter}
  * you have to register it using the {@link ServiceLoader} mechanism.
  *
  * @param <READ> context from which we read
@@ -28,39 +28,7 @@ import java.util.ServiceLoader;
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-public interface ContextContainerPropagator<READ, WRITE> {
-
-    /**
-     * No-Op instance of the {@link ContextContainerPropagator}. Does nothing.
-     */
-    @SuppressWarnings("rawtypes")
-    ContextContainerPropagator NOOP = new ContextContainerPropagator<Object, Object>() {
-        @Override
-        public Object save(ContextContainer contextContainer, Object context) {
-            return context;
-        }
-
-        @Override
-        public ContextContainer restore(Object context) {
-            return ContextContainer.NOOP;
-        }
-
-        @Override
-        public Object remove(Object ctx) {
-            return ctx;
-        }
-
-        @Override
-        public boolean supportsSaveTo(Class<?> contextType) {
-            return false;
-        }
-
-        @Override
-        public boolean supportsRestoreFrom(Class<?> contextType) {
-            return false;
-        }
-
-    };
+public interface ContextContainerAdapter<READ, WRITE> {
 
     /**
      * Save the {@link ContextContainer} to the external context.
@@ -73,12 +41,22 @@ public interface ContextContainerPropagator<READ, WRITE> {
 
     /**
      * Restore the {@link ContextContainer} from the external context. If the container
-     * is not there the implementation should return {@link ContextContainer#NOOP}.
+     * is not there, the implementation should raise {@link IllegalStateException}.
      *
      * @param context context from which we want to retrieve the {@link ContextContainer}
-     * @return container
+     * @return the container instance
+     * @throws IllegalStateException if no {@link ContextContainer} is found
      */
     ContextContainer restore(READ context);
+
+    /**
+     * Restore the {@link ContextContainer} from the external context. If the container
+     * is not there, the implementation should raise {@link IllegalStateException}.
+     *
+     * @param context context from which we want to retrieve the {@link ContextContainer}
+     * @return the container instance or {@code null}
+     */
+    ContextContainer restoreIfPresent(READ context);
 
     /**
      * Removes the {@link ContextContainer} from the context.
@@ -91,14 +69,14 @@ public interface ContextContainerPropagator<READ, WRITE> {
     /**
      * Checks if this implementation can work with the provided context for writing.
      *
-     * @return class type for which this propagator is applicable
+     * @return class type for which this adapter is applicable
      */
     boolean supportsSaveTo(Class<?> contextType);
 
     /**
      * Checks if this implementation can work with the provided context for reading.
      *
-     * @return class type for which this propagator is applicable
+     * @return class type for which this adapter is applicable
      */
     boolean supportsRestoreFrom(Class<?> contextType);
 }
