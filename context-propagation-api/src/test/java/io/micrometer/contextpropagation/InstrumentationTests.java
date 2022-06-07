@@ -1,11 +1,11 @@
 /*
- * Copyright 2019 VMware, Inc.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,7 +49,7 @@ class InstrumentationTests {
         runInNewThread(runnable);
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
-        runInNewThread(container.wrap(runnable));
+        runInNewThread(container.instrument(runnable));
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
     }
@@ -65,7 +65,7 @@ class InstrumentationTests {
         runInNewThread(callable);
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
-        runInNewThread(container.wrap(callable));
+        runInNewThread(container.instrument(callable));
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
     }
@@ -78,7 +78,7 @@ class InstrumentationTests {
         runInNewThread(executor, valueInNewThread);
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
-        runInNewThread(container.wrap(executor), valueInNewThread);
+        runInNewThread(container.instrument(executor), valueInNewThread);
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
     }
@@ -91,7 +91,7 @@ class InstrumentationTests {
             AtomicReference<String> valueInNewThread = new AtomicReference<>();
             runInNewThread(executor, valueInNewThread, atomic -> then(atomic.get()).as("By default thread local information should not be propagated").isNull());
 
-            runInNewThread(container.wrap(executor), valueInNewThread, atomic -> then(atomic.get()).as("With context container the thread local information should be propagated").isEqualTo("hello"));
+            runInNewThread(container.instrument(executor), valueInNewThread, atomic -> then(atomic.get()).as("With context container the thread local information should be propagated").isEqualTo("hello"));
         } finally {
             executor.shutdown();
         }

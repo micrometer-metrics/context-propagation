@@ -19,7 +19,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * {@link ContextContainer} is a holder of values that are being propagated through
@@ -100,9 +99,9 @@ public interface ContextContainer {
     /**
      * Restores the previously captured thread local values and puts them in thread local
      * @return scope within which the thread local values are available
-     * @see Scope
+     * @see ContextScope
      */
-    Scope restoreThreadLocalValues();
+    ContextScope restoreThreadLocalValues();
 
     /**
      * Saves this container in the provided context.
@@ -159,33 +158,18 @@ public interface ContextContainer {
     }
 
     /**
-     * Takes the runnable and runs it with thread local values available.
-     * Clears the thread local values when the runnable has been finished.
-     *
-     * @param action runnable to run
-     */
-    void tryScoped(Runnable action);
-
-    /**
-     * Takes the supplier and runs it with thread local values available.
-     * Clears the thread local values when the supplier has been finished.
-     *
-     * @param action supplier to run
-     * @param <T> type that the supplier returns
-     * @return value returned by the supplier
-     */
-    <T> T tryScoped(Supplier<T> action);
-
-
-    /**
      * Propagates the context over the {@link Runnable}.
      *
-     * @param action action through which context should be propagated
+     * @param runnable action through which context should be propagated
      * @return wrapped action
      */
-    default Runnable wrap(Runnable action) {
-        ContextContainer container = captureThreadLocalValues();
-        return () -> container.tryScoped(action);
+    default Runnable instrument(Runnable runnable) {
+        captureThreadLocalValues();
+        return () -> {
+            try (ContextScope scope = restoreThreadLocalValues()) {
+                runnable.run();
+            }
+        };
     }
 
     /**
@@ -194,10 +178,10 @@ public interface ContextContainer {
      * @param action action through which context should be propagated
      * @return wrapped action
      */
-    default <T> Callable<T> wrap(Callable<T> action) {
+    default <T> Callable<T> instrument(Callable<T> action) {
         ContextContainer container = captureThreadLocalValues();
         return () -> {
-            try (Scope scope = container.restoreThreadLocalValues()) {
+            try (ContextScope scope = container.restoreThreadLocalValues()) {
                 return action.call();
             }
         };
@@ -209,8 +193,11 @@ public interface ContextContainer {
      * @param executor executor through which context should be propagated
      * @return wrapped executor
      */
-    default Executor wrap(Executor executor) {
-        return command -> executor.execute(wrap(command));
+    default Executor instrument(Executor executor) {
+        return runnable -> {
+            Runnable instrumentedRunnable = instrument(runnable);
+            executor.execute(instrumentedRunnable);
+        };
     }
 
     /**
@@ -219,16 +206,8 @@ public interface ContextContainer {
      * @param executorService executor service through which context should be propagated
      * @return wrapped executor
      */
-    default ExecutorService wrap(ExecutorService executorService) {
+    default ExecutorService instrument(ExecutorService executorService) {
         return new WrappedExecutorService(this, executorService);
-    }
-
-    /**
-     * Demarcates the scope of restored ThreadLocal values.
-     */
-    interface Scope extends AutoCloseable {
-        @Override
-        void close();
     }
 
 }
