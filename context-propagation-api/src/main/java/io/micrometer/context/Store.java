@@ -13,15 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.contextpropagation;
-
+package io.micrometer.context;
 
 /**
- * Demarcates the scope of restored ThreadLocal values.
+ * Storage for a {@link Namespace}.
+ *
+ * @author Marcin Grzejszczak
+ * @since 1.0.0
  */
-public interface ContextScope extends AutoCloseable {
-
-    @Override
-    void close();
+public interface Store {
 
 }
