@@ -121,7 +121,7 @@ public class DefaultContextContainer implements ContextContainer {
     }
 
     @Override
-    public Scope restoreThreadLocalValues() {
+    public ContextScope restoreThreadLocalValues() {
         List<ThreadLocalAccessor> accessors = new ArrayList<>();
         for (ThreadLocalAccessor accessor : this.threadLocalAccessors) {
             if (this.predicates.stream().allMatch(predicate -> predicate.test(accessor.getNamespace()))) {
@@ -140,35 +140,6 @@ public class DefaultContextContainer implements ContextContainer {
     public <T> T saveTo(T context) {
         ContextContainerAdapter adapter = ContextContainerAdapterLoader.getAdapterToWrite(context);
         return (T) adapter.save(this, context);
-    }
-
-    /**
-     * Restores the thread local values and runs the given action. No exception
-     * catching takes place.
-     *
-     * @param action action to run
-     */
-    @Override
-    @SuppressWarnings("unused")
-    public void tryScoped(Runnable action) {
-        try (Scope scope = restoreThreadLocalValues()) {
-            action.run();
-        }
-    }
-
-    /**
-     * Restores the thread local values and runs the given action. No exception
-     * catching takes place.
-     *
-     * @param action action to run
-     * @return result of the action
-     */
-    @Override
-    @SuppressWarnings("unused")
-    public <T> T tryScoped(Supplier<T> action) {
-        try (Scope scope = restoreThreadLocalValues()) {
-            return action.get();
-        }
     }
 
     @Override

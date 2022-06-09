@@ -62,41 +62,41 @@ class WrappedExecutorService implements ExecutorService {
 
     @Override
     public <T> Future<T> submit(Callable<T> task) {
-        return executorService.submit(this.contextContainer.wrap(task));
+        return executorService.submit(this.contextContainer.instrument(task));
     }
 
     @Override
     public <T> Future<T> submit(Runnable task, T result) {
-        return executorService.submit(this.contextContainer.wrap(task), result);
+        return executorService.submit(this.contextContainer.instrument(task), result);
     }
 
     @Override
     public Future<?> submit(Runnable task) {
-        return executorService.submit(this.contextContainer.wrap(task));
+        return executorService.submit(this.contextContainer.instrument(task));
     }
 
     @Override
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-        return executorService.invokeAll(tasks.stream().map(this.contextContainer::wrap).collect(Collectors.toList()));
+        return executorService.invokeAll(tasks.stream().map(this.contextContainer::instrument).collect(Collectors.toList()));
     }
 
     @Override
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
-        return executorService.invokeAll(tasks.stream().map(this.contextContainer::wrap).collect(Collectors.toList()), timeout, unit);
+        return executorService.invokeAll(tasks.stream().map(this.contextContainer::instrument).collect(Collectors.toList()), timeout, unit);
     }
 
     @Override
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-        return executorService.invokeAny(tasks.stream().map(this.contextContainer::wrap).collect(Collectors.toList()));
+        return executorService.invokeAny(tasks.stream().map(this.contextContainer::instrument).collect(Collectors.toList()));
     }
 
     @Override
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return executorService.invokeAny(tasks.stream().map(this.contextContainer::wrap).collect(Collectors.toList()), timeout, unit);
+        return executorService.invokeAny(tasks.stream().map(this.contextContainer::instrument).collect(Collectors.toList()), timeout, unit);
     }
 
     @Override
     public void execute(Runnable command) {
-        executorService.execute(this.contextContainer.wrap(command));
+        executorService.execute(this.contextContainer.instrument(command));
     }
 }
