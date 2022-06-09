@@ -91,8 +91,10 @@ class InstrumentationTests {
             AtomicReference<String> valueInNewThread = new AtomicReference<>();
             runInNewThread(executor, valueInNewThread, atomic -> then(atomic.get()).as("By default thread local information should not be propagated").isNull());
 
-            runInNewThread(container.instrument(executor), valueInNewThread, atomic -> then(atomic.get()).as("With context container the thread local information should be propagated").isEqualTo("hello"));
-        } finally {
+            runInNewThread(container.instrument(executor), valueInNewThread, atomic -> then(atomic.get()).as("With context container the thread local information should be propagated")
+                    .isEqualTo("hello"));
+        }
+        finally {
             executor.shutdown();
         }
     }
@@ -107,7 +109,8 @@ class InstrumentationTests {
         ExecutorService service = Executors.newSingleThreadExecutor();
         try {
             service.submit(callable).get(5, TimeUnit.MILLISECONDS);
-        } finally {
+        }
+        finally {
             service.shutdown();
         }
     }

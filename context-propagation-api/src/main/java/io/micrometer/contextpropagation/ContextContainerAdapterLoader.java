@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Loads {@link ThreadLocalAccessor} and {@link ContextAccessor}.
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 final class ContextContainerAdapterLoader {
 
     private static final ServiceLoader<ContextContainerAdapter> adapters = ServiceLoader.load(ContextContainerAdapter.class);

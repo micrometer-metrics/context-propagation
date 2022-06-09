@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +31,7 @@ import java.util.stream.Collectors;
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultContextContainer implements ContextContainer {
 
     private final Map<String, Object> values = new ConcurrentHashMap<>();
