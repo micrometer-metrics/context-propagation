@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.contextpropagation;
+package io.micrometer.context;
 
 public class ObservationThreadLocalHolder {
     static final ThreadLocal<String> holder = new ThreadLocal<>();
