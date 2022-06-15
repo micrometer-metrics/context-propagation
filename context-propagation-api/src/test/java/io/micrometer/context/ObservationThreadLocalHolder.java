@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,5 +16,23 @@
 package io.micrometer.context;
 
 public class ObservationThreadLocalHolder {
-    static final ThreadLocal<String> holder = new ThreadLocal<>();
+
+    private static final ThreadLocal<String> holder = new ThreadLocal<>();
+
+    public static void resetValue() {
+        holder.remove();
+    }
+
+    public static void setValue(String value) {
+        holder.set(value);
+    }
+
+    public static String getValue() {
+        return holder.get();
+    }
+
+    public static void reset() {
+        holder.remove();
+    }
+
 }

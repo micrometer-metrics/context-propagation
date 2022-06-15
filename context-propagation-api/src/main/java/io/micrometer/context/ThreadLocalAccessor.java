@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,62 +15,37 @@
  */
 package io.micrometer.context;
 
-import java.util.ServiceLoader;
-import java.util.function.Predicate;
-
 /**
- * Contract to assist with extracting and restoring ThreadLocal values to and
- * from a {@link ContextContainer}. To register your own {@link ThreadLocalAccessor}
- * you have to register it using the {@link ServiceLoader} mechanism.
+ * Contract to assist with access to a {@link ThreadLocal} including the ability
+ * to get, set, and reset it.
  *
+ * @author Rossen Stoyanchev
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-public interface ThreadLocalAccessor {
+public interface ThreadLocalAccessor<V> {
 
     /**
-     * Capture ThreadLocal values and add them to the given container, so they
-     * can be saved and subsequently {@link #restoreValues(ContextContainer)
-     * restored} on a different thread.
-     *
-     * @param container {@link ContextContainer} to which we put the thread locals
+     * The key to associate with the ThreadLocal value. This is the key under
+     * which the value is saved within a {@link ContextSnapshot} and the key
+     * under which it is looked up.
      */
-    void captureValues(ContextContainer container);
+    Object key();
 
     /**
-     * Restore ThreadLocal values from the given container.
-     *
-     * @param container {@link ContextContainer} for which we restore thread locals
+     * Return the {@link ThreadLocal} value, or {@code null} if not set.
      */
-    void restoreValues(ContextContainer container);
+    V getValue();
 
     /**
-     * Reset ThreadLocal values holders.
-     *
-     * @param container {@link ContextContainer} for which we reset thread locals
+     * Set the {@link ThreadLocal} value.
+     * @param value the value to set
      */
-    void resetValues(ContextContainer container);
+    void setValue(V value);
 
     /**
-     * Corresponding {@link Namespace}.
-     *
-     * @return corresponding {@link Namespace} or {@code null} if entries should go to the global namespace
+     * Remove the {@link ThreadLocal} value.
      */
-    default Namespace getNamespace() {
-        return null;
-    }
-
-    /**
-     * Used to filter out {@link ThreadLocalAccessor} by {@link Namespace}.
-     *
-     * @param predicate conditional logic for this accessor
-     * @return {@code true} if this {@link ThreadLocalAccessor} should be applied
-     */
-    default boolean isApplicable(Predicate<Namespace> predicate) {
-        if (getNamespace() == null) {
-            return true;
-        }
-        return predicate.test(getNamespace());
-    }
+    void reset();
 
 }

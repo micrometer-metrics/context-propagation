@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,59 +15,32 @@
  */
 package io.micrometer.context;
 
-public class ObservationThreadLocalAccessor implements ThreadLocalAccessor {
+/**
+ * Example {@link ThreadLocalAccessor} implementation.
+ */
+public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
     public static final String KEY = "micrometer.observation";
 
-    public static final Namespace OBSERVATION = Namespace.of(KEY);
-
-    private final NamespaceAccessor<ObservationStore> namespaceAccessor = new NamespaceAccessor<>(OBSERVATION);
 
     @Override
-    public void captureValues(ContextContainer container) {
-        String value = ObservationThreadLocalHolder.holder.get();
-        if (value != null) {
-            this.namespaceAccessor.putStore(container, new ObservationStore(value));
-        }
+    public Object key() {
+        return KEY;
     }
 
     @Override
-    public void restoreValues(ContextContainer container) {
-        if (this.namespaceAccessor.isPresent(container)) {
-            ObservationStore store = this.namespaceAccessor.getStore(container);
-            String observation = store.getObservation();
-            ObservationThreadLocalHolder.holder.set(observation);
-        }
+    public String getValue() {
+        return ObservationThreadLocalHolder.getValue();
     }
 
     @Override
-    public void resetValues(ContextContainer container) {
-        if (this.namespaceAccessor.isPresent(container)) {
-            this.namespaceAccessor.getRequiredStore(container).close();
-        }
+    public void setValue(String value) {
+        ObservationThreadLocalHolder.setValue(value);
     }
 
     @Override
-    public Namespace getNamespace() {
-        return OBSERVATION;
+    public void reset() {
+        ObservationThreadLocalHolder.reset();
     }
 
 }
-
-class ObservationStore implements Store, AutoCloseable {
-    final String observation;
-
-    ObservationStore(String observation) {
-        this.observation = observation;
-    }
-
-    String getObservation() {
-        return this.observation;
-    }
-
-    @Override
-    public void close() {
-        ObservationThreadLocalHolder.holder.remove();
-    }
-}
-

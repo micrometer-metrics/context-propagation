@@ -15,49 +15,51 @@
  */
 package io.micrometer.context;
 
+import java.util.Map;
+import java.util.function.Predicate;
+
 /**
- * Contract to assist with extracting and restoring context values to
- * and from a {@link ContextContainer}.
+ * Contract to assist with access to an external, map-like context, such as the
+ * Project Reactor {@code Context}, including the ability to read values from it
+ * a {@link Map} and to write values to it from a {@link Map}.
  *
- * @param <READ> type for context reading
- * @param <WRITE> type for context writing
+ * @param <READ> type of context for reading
+ * @param <WRITE> type of context for writing
  *
  * @author Marcin Grzejszczak
+ * @author Rossen Stoyanchev
  * @since 1.0.0
  */
 public interface ContextAccessor<READ, WRITE> {
 
     /**
-     * Capture values from an external context holder and put them in the given
-     * {@link ContextContainer}.
-     *
-     * @param view the external context to capture values from
-     * @param container the container to put the values in
-     */
-    void captureValues(READ view, ContextContainer container);
-
-    /**
-     * Restore values from the given {@link ContextContainer} and put them in
-     * the given external context holder.
-     *
-     * @param container the container to obtain values from
-     * @param context the external context to put values in
-     * @return the updated external context
-     */
-    WRITE restoreValues(ContextContainer container, WRITE context);
-
-    /**
-     * Whether this accessor can capture values from the given external context type.
-     *
+     * Whether this accessor can capture values from the given type of context.
      * @param contextType the type of external context
      */
-    boolean canCaptureFrom(Class<?> contextType);
+    boolean canReadFrom(Class<?> contextType);
 
     /**
-     * Whether this accessor can restore values to the given external context type.
-     *
+     * Read values from a source context into a {@link Map}.
+     * @param sourceContext the context to read from; the context type should be
+     * checked with {@link #canReadFrom(Class)} before this method is called
+     * @param keyPredicate a predicate to decide which keys to read
+     * @param readValues a map where to put read values
+     */
+    void readValues(READ sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues);
+
+    /**
+     * Whether this accessor can restore values to the given type of context.
      * @param contextType the type of external context
      */
-    boolean canRestoreTo(Class<?> contextType);
+    boolean canWriteTo(Class<?> contextType);
+
+    /**
+     * Write values from a {@link Map} to a target context.
+     * @param valuesToWrite the values to write to the target context
+     * @param targetContext the context to write to; the context type should be
+     * checked with {@link #canWriteTo(Class)}  before this method is called
+     * @return a context with the written values
+     */
+    WRITE writeValues(Map<Object, Object> valuesToWrite, WRITE targetContext);
 
 }

@@ -27,75 +27,91 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
 
+/**
+ * 
+ */
 class InstrumentationTests {
 
-    ContextContainer container = new DefaultContextContainer(
-            Collections.emptyList(), Collections.singletonList(new ObservationThreadLocalAccessor()));
+    private ContextSnapshot.Builder snapshotBuilder;
+
+
+    @BeforeEach
+    void setUp() {
+        ContextRegistry registry = new ContextRegistry();
+        registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        this.snapshotBuilder = ContextSnapshot.builder(registry);
+    }
 
     @AfterEach
     void clear() {
-        ObservationThreadLocalHolder.holder.remove();
+        ObservationThreadLocalHolder.reset();
     }
 
     @Test
     void should_instrument_runnable() throws InterruptedException {
-        ObservationThreadLocalHolder.holder.set("hello");
+        ObservationThreadLocalHolder.setValue("hello");
         AtomicReference<String> valueInNewThread = new AtomicReference<>();
         Runnable runnable = runnable(valueInNewThread);
         runInNewThread(runnable);
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
-        runInNewThread(container.instrument(runnable));
+        runInNewThread(this.snapshotBuilder.build().instrumentRunnable(runnable));
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
     }
 
     @Test
     void should_instrument_callable() throws ExecutionException, InterruptedException, TimeoutException {
-        ObservationThreadLocalHolder.holder.set("hello");
+        ObservationThreadLocalHolder.setValue("hello");
         AtomicReference<String> valueInNewThread = new AtomicReference<>();
         Callable<String> callable = () -> {
-            valueInNewThread.set(ObservationThreadLocalHolder.holder.get());
+            valueInNewThread.set(ObservationThreadLocalHolder.getValue());
             return "foo";
         };
         runInNewThread(callable);
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
-        runInNewThread(container.instrument(callable));
+        runInNewThread(this.snapshotBuilder.build().instrumentCallable(callable));
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
     }
 
     @Test
     void should_instrument_executor() throws InterruptedException {
-        ObservationThreadLocalHolder.holder.set("hello");
+        ObservationThreadLocalHolder.setValue("hello");
         AtomicReference<String> valueInNewThread = new AtomicReference<>();
         Executor executor = command -> new Thread(command).start();
         runInNewThread(executor, valueInNewThread);
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
-        runInNewThread(container.instrument(executor), valueInNewThread);
+        runInNewThread(this.snapshotBuilder.build().instrumentExecutor(executor), valueInNewThread);
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
     }
 
     @Test
     void should_instrument_executor_service() throws InterruptedException, ExecutionException, TimeoutException {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         try {
-            ObservationThreadLocalHolder.holder.set("hello");
+            ObservationThreadLocalHolder.setValue("hello");
             AtomicReference<String> valueInNewThread = new AtomicReference<>();
-            runInNewThread(executor, valueInNewThread, atomic -> then(atomic.get()).as("By default thread local information should not be propagated").isNull());
+            runInNewThread(executorService, valueInNewThread,
+                    atomic -> then(atomic.get())
+                            .as("By default thread local information should not be propagated")
+                            .isNull());
 
-            runInNewThread(container.instrument(executor), valueInNewThread, atomic -> then(atomic.get()).as("With context container the thread local information should be propagated")
-                    .isEqualTo("hello"));
+            runInNewThread(this.snapshotBuilder.build().instrumentExecutorService(executorService), valueInNewThread,
+                    atomic -> then(atomic.get())
+                            .as("With context container the thread local information should be propagated")
+                            .isEqualTo("hello"));
         }
         finally {
-            executor.shutdown();
+            executorService.shutdown();
         }
     }
 
@@ -105,7 +121,7 @@ class InstrumentationTests {
         Thread.sleep(5);
     }
 
-    private void runInNewThread(Callable callable) throws InterruptedException, ExecutionException, TimeoutException {
+    private void runInNewThread(Callable<?> callable) throws InterruptedException, ExecutionException, TimeoutException {
         ExecutorService service = Executors.newSingleThreadExecutor();
         try {
             service.submit(callable).get(5, TimeUnit.MILLISECONDS);
@@ -148,12 +164,12 @@ class InstrumentationTests {
     }
 
     private Runnable runnable(AtomicReference<String> valueInNewThread) {
-        return () -> valueInNewThread.set(ObservationThreadLocalHolder.holder.get());
+        return () -> valueInNewThread.set(ObservationThreadLocalHolder.getValue());
     }
 
     private Callable<Object> callable(AtomicReference<String> valueInNewThread) {
         return () -> {
-            valueInNewThread.set(ObservationThreadLocalHolder.holder.get());
+            valueInNewThread.set(ObservationThreadLocalHolder.getValue());
             return "foo";
         };
     }
