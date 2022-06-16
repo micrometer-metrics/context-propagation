@@ -97,6 +97,11 @@ final class DefaultContextSnapshot implements ContextSnapshot {
         ((ThreadLocalAccessor<V>) accessor).setValue((V) this.savedValues.get(key));
     }
 
+    @Override
+    public String toString() {
+        return "DefaultContextSnapshot" + this.savedValues;
+    }
+
 
     /**
      * Default implementation of {@link Scope}.

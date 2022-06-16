@@ -18,6 +18,7 @@ package io.micrometer.context;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -89,6 +90,20 @@ public interface ContextSnapshot {
         return () -> {
             try (Scope scope = setThreadLocalValues()) {
                 return callable.call();
+            }
+        };
+    }
+
+    /**
+     * Return a new {@code Consumer} that sets {@code ThreadLocal} values from
+     * the snapshot around the invocation of the given {@code Consumer}.
+     * @param consumer the callable to instrument
+     * @param <T> the type of value produced by the {@code Callable}
+     */
+    default <T> Consumer<T> instrumentConsumer(Consumer<T> consumer) {
+        return value -> {
+            try (Scope scope = setThreadLocalValues()) {
+                consumer.accept(value);
             }
         };
     }
