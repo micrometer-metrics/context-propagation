@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+	optionalApi 'io.projectreactor:reactor-core:3.4.18'
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.assertj:assertj-core'
 	testImplementation 'org.mockito:mockito-core'
