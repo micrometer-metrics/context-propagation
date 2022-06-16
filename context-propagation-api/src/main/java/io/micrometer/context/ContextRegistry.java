@@ -15,18 +15,19 @@
  */
 package io.micrometer.context;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
  * Registry that provides access to, instances of {@link ContextAccessor} and
  * {@link ThreadLocalAccessor}.
  *
- * <p>A static instance is available via {@link #getInstance()} and intended to
- * expose all known accessors. A {@link ContextSnapshot} can narrow down which
- * accessors to use at a particular point.
+ * <p>A static instance is available via {@link #getInstance()}. It is intended
+ * to be initialized on startup, and to be aware of all available accessors, as
+ * many as possible. The means to control what context gets propagated is in
+ * {@link ContextSnapshot}, which filters context values by key.
  *
  * @author Rossen Stoyanchev
  * @since 1.0.0
@@ -36,9 +37,9 @@ public class ContextRegistry {
     private static final ContextRegistry instance = new ContextRegistry();
 
 
-    private final List<ContextAccessor<?, ?>> contextAccessors = new ArrayList<>();
+    private final List<ContextAccessor<?, ?>> contextAccessors = new CopyOnWriteArrayList<>();
 
-    private final List<ThreadLocalAccessor<?>> threadLocalAccessors = new ArrayList<>();
+    private final List<ThreadLocalAccessor<?>> threadLocalAccessors = new CopyOnWriteArrayList<>();
 
 
     private final List<ContextAccessor<?, ?>> readOnlyContextAccessors =
@@ -49,8 +50,25 @@ public class ContextRegistry {
 
 
     /**
-     * Return a {@link ContextAccessor} that can read the given context.
+     * Register a {@link ContextAccessor}.
+     */
+    public ContextRegistry registerContextAccessor(ContextAccessor<?, ?> accessor) {
+        this.contextAccessors.add(accessor);
+        return this;
+    }
+
+    /**
+     * Register a {@link ThreadLocalAccessor}.
+     */
+    public ContextRegistry registerThreadLocalAccessor(ThreadLocalAccessor<?> accessor) {
+        this.threadLocalAccessors.add(accessor);
+        return this;
+    }
+
+    /**
+     * Find a {@link ContextAccessor} that can read the given context.
      * @param context the context to read from
+     * @throws IllegalStateException if no match is found
      */
     public ContextAccessor<?, ?> getContextAccessorForRead(Object context) {
         for (ContextAccessor<?, ?> accessor : this.contextAccessors) {
@@ -58,12 +76,13 @@ public class ContextRegistry {
                 return accessor;
             }
         }
-        throw new IllegalStateException("No ContextAccessor for context type: " + context.getClass());
+        throw new IllegalStateException("No ContextAccessor for contextType: " + context.getClass());
     }
 
     /**
      * Return a {@link ContextAccessor} that can write the given context.
      * @param context the context to write to
+     * @throws IllegalStateException if no match is found
      */
     public ContextAccessor<?, ?> getContextAccessorForWrite(Object context) {
         for (ContextAccessor<?, ?> accessor : this.contextAccessors) {
@@ -71,40 +90,39 @@ public class ContextRegistry {
                 return accessor;
             }
         }
-        throw new IllegalStateException("No ContextAccessor for context type: " + context.getClass());
+        throw new IllegalStateException("No ContextAccessor for contextType: " + context.getClass());
     }
 
     /**
-     * Return a read-only list of registered {@link ContextAccessor}s.
+     * Return a read-only list of registered {@link ContextAccessor}'s.
      */
     public List<ContextAccessor<?, ?>> getContextAccessors() {
         return this.readOnlyContextAccessors;
     }
 
     /**
-     * Return a read-only list of registered {@link ThreadLocalAccessor}s.
+     * Return a read-only list of registered {@link ThreadLocalAccessor}'s.
      */
     public List<ThreadLocalAccessor<?>> getThreadLocalAccessors() {
         return this.readOnlyThreadLocalAccessors;
     }
 
-    /**
-     * Register a {@link ContextAccessor}.
-     */
-    public void registerContextAccessor(ContextAccessor<?, ?> accessor) {
-        this.contextAccessors.add(accessor);
-    }
-
-    /**
-     * Register a {@link ThreadLocalAccessor}.
-     */
-    public void registerThreadLocalAccessor(ThreadLocalAccessor<?> accessor) {
-        this.threadLocalAccessors.add(accessor);
+    @Override
+    public String toString() {
+        return "ContextRegistry{" +
+                "contextAccessors=" + this.contextAccessors + ", " +
+                "threadLocalAccessors=" + this.threadLocalAccessors + "}";
     }
 
 
     /**
      * Return a global {@link ContextRegistry} instance.
+     * <p><strong>Note:</strong> The global instance should be initialized on
+     * startup to ensure it has the ability to propagate to and from different
+     * types of context throughout the application. The registry itself is not
+     * intended to as a mechanism to control what gets propagated. It is in
+     * {@link ContextSnapshot} where more fine-grained decisions can be made
+     * about which context values to propagate.
      */
     public static ContextRegistry getInstance() {
         return instance;
