@@ -29,26 +29,27 @@ import java.util.function.Predicate;
  */
 final class DefaultContextSnapshot implements ContextSnapshot {
 
-    private final Map<Object, Object> savedValues;
+    private final Map<Object, Object> values;
 
     private final ContextRegistry accessorRegistry;
 
 
-    DefaultContextSnapshot(Map<Object, Object> savedValues, ContextRegistry accessorRegistry) {
-        this.savedValues = savedValues;
+    DefaultContextSnapshot(Map<Object, Object> values, ContextRegistry accessorRegistry) {
+        this.values = values;
         this.accessorRegistry = accessorRegistry;
     }
 
+
     @Override
     public <C> C updateContext(C context) {
-        return updateContextInternal(context, this.savedValues);
+        return updateContextInternal(context, this.values);
     }
 
     @Override
     public <C> C updateContext(C context, Predicate<Object> keyPredicate) {
-        if (!this.savedValues.isEmpty()) {
+        if (!this.values.isEmpty()) {
             Map<Object, Object> valuesToWrite = new HashMap<>();
-            this.savedValues.forEach((key, value) -> {
+            this.values.forEach((key, value) -> {
                 if (keyPredicate.test(key)) {
                     valuesToWrite.put(key, value);
                 }
@@ -60,7 +61,7 @@ final class DefaultContextSnapshot implements ContextSnapshot {
 
     @SuppressWarnings("unchecked")
     private <C> C updateContextInternal(C context, Map<Object, Object> valueContainer) {
-        if (!this.savedValues.isEmpty()) {
+        if (!this.values.isEmpty()) {
             ContextAccessor<?, ?> accessor = this.accessorRegistry.getContextAccessorForWrite(context);
             context = ((ContextAccessor<?, C>) accessor).writeValues(valueContainer, context);
         }
@@ -78,7 +79,7 @@ final class DefaultContextSnapshot implements ContextSnapshot {
         Map<Object, Object> previousValues = null;
         for (ThreadLocalAccessor<?> accessor : this.accessorRegistry.getThreadLocalAccessors()) {
             Object key = accessor.key();
-            if (this.savedValues.containsKey(key)) {
+            if (this.values.containsKey(key)) {
                 keys = (keys != null ? keys : new HashSet<>());
                 keys.add(key);
 
@@ -94,12 +95,12 @@ final class DefaultContextSnapshot implements ContextSnapshot {
 
     @SuppressWarnings("unchecked")
     private <V> void setThreadLocalValue(Object key, ThreadLocalAccessor<?> accessor) {
-        ((ThreadLocalAccessor<V>) accessor).setValue((V) this.savedValues.get(key));
+        ((ThreadLocalAccessor<V>) accessor).setValue((V) this.values.get(key));
     }
 
     @Override
     public String toString() {
-        return "DefaultContextSnapshot" + this.savedValues;
+        return "DefaultContextSnapshot" + this.values;
     }
 
 
@@ -128,7 +129,7 @@ final class DefaultContextSnapshot implements ContextSnapshot {
         }
 
         @SuppressWarnings("unchecked")
-        private <V> void resetThreadLocalValue(ThreadLocalAccessor<?> accessor, V previousValue) {
+        private <V> void resetThreadLocalValue(ThreadLocalAccessor<?> accessor, @Nullable V previousValue) {
             if (previousValue != null) {
                 ((ThreadLocalAccessor<V>) accessor).setValue(previousValue);
             }

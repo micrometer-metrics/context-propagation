@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context.reactor;
+package io.micrometer.context;
 
 import java.util.Map;
 import java.util.function.Predicate;
 
-import io.micrometer.context.ContextAccessor;
 import reactor.util.context.Context;
 import reactor.util.context.ContextView;
 

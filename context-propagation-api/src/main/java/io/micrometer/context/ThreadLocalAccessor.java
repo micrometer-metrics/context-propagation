@@ -35,6 +35,7 @@ public interface ThreadLocalAccessor<V> {
     /**
      * Return the {@link ThreadLocal} value, or {@code null} if not set.
      */
+    @Nullable
     V getValue();
 
     /**

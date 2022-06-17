@@ -38,8 +38,10 @@ final class DefaultContextSnapshotBuilder implements ContextSnapshot.Builder {
 
     private final ContextRegistry accessorRegistry;
 
+    @Nullable
     private List<Object> keys;
 
+    @Nullable
     private Predicate<Object> keyPredicate;
 
 
