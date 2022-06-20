@@ -76,7 +76,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         Map<Object, Object> previousValues = null;
         for (ThreadLocalAccessor<?> accessor : this.accessorRegistry.getThreadLocalAccessors()) {
             Object key = accessor.key();
-            if (containsKey(key)) {
+            if (keyPredicate.test(key) && containsKey(key)) {
                 keys = (keys != null ? keys : new HashSet<>());
                 keys.add(key);
 
