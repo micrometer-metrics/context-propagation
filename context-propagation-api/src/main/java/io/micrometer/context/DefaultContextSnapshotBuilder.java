@@ -17,10 +17,7 @@ package io.micrometer.context;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 
 
@@ -32,8 +29,7 @@ import java.util.function.Predicate;
  */
 final class DefaultContextSnapshotBuilder implements ContextSnapshot.Builder {
 
-    private static final ContextSnapshot emptyContextSnapshot =
-            new DefaultContextSnapshot(Collections.emptyMap(), ContextRegistry.getInstance());
+    private static final ContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry());
 
 
     private final ContextRegistry accessorRegistry;
@@ -63,26 +59,26 @@ final class DefaultContextSnapshotBuilder implements ContextSnapshot.Builder {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ContextSnapshot build(Object... contexts) {
         Predicate<Object> predicate = getPredicate();
-        Map<Object, Object> valueContainer = null;
+        DefaultContextSnapshot snapshot = null;
         for (ThreadLocalAccessor<?> accessor : this.accessorRegistry.getThreadLocalAccessors()) {
             if (predicate.test(accessor.key())) {
                 Object value = accessor.getValue();
                 if (value != null) {
-                    valueContainer = (valueContainer != null ? valueContainer : new HashMap<>());
-                    valueContainer.put(accessor.key(), value);
+                    snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(this.accessorRegistry));
+                    snapshot.put(accessor.key(), value);
                 }
             }
         }
         for (Object context : contexts) {
             ContextAccessor<?, ?> accessor = this.accessorRegistry.getContextAccessorForRead(context);
-            valueContainer = (valueContainer != null ? valueContainer : new HashMap<>());
-            addContextValues(accessor, context, predicate, valueContainer);
+            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(this.accessorRegistry));
+            ((ContextAccessor<Object, ?>) accessor).readValues(context, predicate, snapshot);
         }
-        return (valueContainer != null && !valueContainer.isEmpty() ?
-                new DefaultContextSnapshot(valueContainer, this.accessorRegistry) : emptyContextSnapshot);
+        return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
 
     private Predicate<Object> getPredicate() {
@@ -97,14 +93,6 @@ final class DefaultContextSnapshotBuilder implements ContextSnapshot.Builder {
             predicate = (predicate != null ? predicate.and(this.keyPredicate) : this.keyPredicate);
         }
         return predicate;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <R> void addContextValues(
-            ContextAccessor<?, ?> accessor, Object context, Predicate<Object> predicate,
-            Map<Object, Object> valueContainer) {
-
-        ((ContextAccessor<R, ?>) accessor).readValues((R) context, predicate, valueContainer);
     }
 
 }
