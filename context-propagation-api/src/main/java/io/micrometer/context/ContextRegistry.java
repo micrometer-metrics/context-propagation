@@ -17,6 +17,7 @@ package io.micrometer.context;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 
@@ -34,7 +35,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class ContextRegistry {
 
-    private static final ContextRegistry instance = new ContextRegistry();
+    private static final ContextRegistry instance =
+            new ContextRegistry().loadContextAccessors().loadThreadLocalAccessors();
 
 
     private final List<ContextAccessor<?, ?>> contextAccessors = new CopyOnWriteArrayList<>();
@@ -50,18 +52,55 @@ public class ContextRegistry {
 
 
     /**
-     * Register a {@link ContextAccessor}.
+     * Register a {@link ContextAccessor}. If there is an existing registration
+     * of the same {@code ContextAccessor} type, it is removed first.
      */
     public ContextRegistry registerContextAccessor(ContextAccessor<?, ?> accessor) {
+        for (ContextAccessor<?, ?> existing : this.contextAccessors) {
+            if (existing.getClass().equals(accessor.getClass())) {
+                this.contextAccessors.remove(existing);
+                break;
+            }
+        }
         this.contextAccessors.add(accessor);
         return this;
     }
 
     /**
-     * Register a {@link ThreadLocalAccessor}.
+     * Register a {@link ThreadLocalAccessor}. If there is an existing
+     * registration with the same {@link ThreadLocalAccessor#key() key}, it is
+     * removed first.
      */
     public ContextRegistry registerThreadLocalAccessor(ThreadLocalAccessor<?> accessor) {
+        for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
+            if (existing.key().equals(accessor.key())) {
+                this.threadLocalAccessors.remove(existing);
+                break;
+            }
+        }
         this.threadLocalAccessors.add(accessor);
+        return this;
+    }
+
+    /**
+     * Load {@link ContextAccessor} implementations through the
+     * {@link ServiceLoader} mechanism.
+     * <p>Note that existing registrations of the same {@code ContextAccessor}
+     * type, if any, are removed first.
+     */
+    public ContextRegistry loadContextAccessors() {
+        ServiceLoader.load(ContextAccessor.class).forEach(this::registerContextAccessor);
+        return this;
+    }
+
+    /**
+     * Load {@link ThreadLocalAccessor} implementations through the
+     * {@link ServiceLoader} mechanism.
+     * <p>Note that existing registrations with the same
+     * {@link ThreadLocalAccessor#key() key}, if any, are removed first.
+     */
+    public ContextRegistry loadThreadLocalAccessors() {
+        ServiceLoader.load(ThreadLocalAccessor.class).forEach(this::registerThreadLocalAccessor);
         return this;
     }
 

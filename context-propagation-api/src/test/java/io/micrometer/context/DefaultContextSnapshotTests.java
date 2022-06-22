@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -148,6 +149,25 @@ public class DefaultContextSnapshotTests {
 
         then(fooThreadLocal.get()).isNull();
         then(barThreadLocal.get()).isNull();
+    }
+
+    @Test
+    void toString_should_include_values() {
+        ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
+        ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
+
+        this.registry
+                .registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
+                .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+
+        fooThreadLocal.set("fooValue");
+        barThreadLocal.set("barValue");
+
+        assertThat(this.snapshotBuilder.build().toString())
+                .isEqualTo("DefaultContextSnapshot{bar=barValue, foo=fooValue}");
+
+        fooThreadLocal.remove();
+        barThreadLocal.remove();
     }
 
 }
