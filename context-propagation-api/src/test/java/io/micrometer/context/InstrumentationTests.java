@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.BDDAssertions.then;
@@ -37,15 +36,9 @@ import static org.assertj.core.api.BDDAssertions.then;
  */
 class InstrumentationTests {
 
-    private ContextSnapshot.Builder snapshotBuilder;
+    private final ContextRegistry registry = new ContextRegistry()
+            .registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
 
-
-    @BeforeEach
-    void setUp() {
-        ContextRegistry registry = new ContextRegistry();
-        registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
-        this.snapshotBuilder = ContextSnapshot.builder(registry);
-    }
 
     @AfterEach
     void clear() {
@@ -58,11 +51,15 @@ class InstrumentationTests {
         AtomicReference<String> valueInNewThread = new AtomicReference<>();
         Runnable runnable = runnable(valueInNewThread);
         runInNewThread(runnable);
-        then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
+        then(valueInNewThread.get())
+                .as("By default thread local information should not be propagated")
+                .isNull();
 
-        runInNewThread(this.snapshotBuilder.build().instrumentRunnable(runnable));
+        runInNewThread(ContextSnapshot.capture(this.registry, key -> true).instrumentRunnable(runnable));
 
-        then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
+        then(valueInNewThread.get())
+                .as("With context container the thread local information should be propagated")
+                .isEqualTo("hello");
     }
 
     @Test
@@ -74,11 +71,15 @@ class InstrumentationTests {
             return "foo";
         };
         runInNewThread(callable);
-        then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
+        then(valueInNewThread.get())
+                .as("By default thread local information should not be propagated")
+                .isNull();
 
-        runInNewThread(this.snapshotBuilder.build().instrumentCallable(callable));
+        runInNewThread(ContextSnapshot.capture(this.registry, key -> true).instrumentCallable(callable));
 
-        then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
+        then(valueInNewThread.get())
+                .as("With context container the thread local information should be propagated")
+                .isEqualTo("hello");
     }
 
     @Test
@@ -87,11 +88,17 @@ class InstrumentationTests {
         AtomicReference<String> valueInNewThread = new AtomicReference<>();
         Executor executor = command -> new Thread(command).start();
         runInNewThread(executor, valueInNewThread);
-        then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
+        then(valueInNewThread.get())
+                .as("By default thread local information should not be propagated")
+                .isNull();
 
-        runInNewThread(this.snapshotBuilder.build().instrumentExecutor(executor), valueInNewThread);
+        runInNewThread(
+                ContextSnapshot.capture(this.registry, key -> true).instrumentExecutor(executor),
+                valueInNewThread);
 
-        then(valueInNewThread.get()).as("With context container the thread local information should be propagated").isEqualTo("hello");
+        then(valueInNewThread.get())
+                .as("With context container the thread local information should be propagated")
+                .isEqualTo("hello");
     }
 
     @Test
@@ -105,7 +112,9 @@ class InstrumentationTests {
                             .as("By default thread local information should not be propagated")
                             .isNull());
 
-            runInNewThread(this.snapshotBuilder.build().instrumentExecutorService(executorService), valueInNewThread,
+            runInNewThread(
+                    ContextSnapshot.capture(this.registry, key -> true).instrumentExecutorService(executorService),
+                    valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
                             .isEqualTo("hello"));
@@ -136,7 +145,11 @@ class InstrumentationTests {
         Thread.sleep(5);
     }
 
-    private void runInNewThread(ExecutorService executor, AtomicReference<String> valueInNewThread, Consumer<AtomicReference<String>> assertion) throws InterruptedException, ExecutionException, TimeoutException {
+    private void runInNewThread(
+            ExecutorService executor, AtomicReference<String> valueInNewThread,
+            Consumer<AtomicReference<String>> assertion)
+            throws InterruptedException, ExecutionException, TimeoutException {
+
         executor.execute(runnable(valueInNewThread));
         Thread.sleep(5);
         assertion.accept(valueInNewThread);

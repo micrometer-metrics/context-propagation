@@ -17,8 +17,6 @@ package io.micrometer.context;
 
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
@@ -32,8 +30,6 @@ public class DefaultContextSnapshotTests {
 
     private final ContextRegistry registry = new ContextRegistry();
 
-    private final ContextSnapshot.Builder snapshotBuilder = ContextSnapshot.builder(registry);
-
 
     @Test
     void should_propagate_thread_local() {
@@ -42,7 +38,7 @@ public class DefaultContextSnapshotTests {
         then(ObservationThreadLocalHolder.getValue()).isNull();
         ObservationThreadLocalHolder.setValue("hello");
 
-        ContextSnapshot snapshot = this.snapshotBuilder.build();
+        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
 
         ObservationThreadLocalHolder.reset();
         then(ObservationThreadLocalHolder.getValue()).isNull();
@@ -59,7 +55,7 @@ public class DefaultContextSnapshotTests {
         this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
 
         ObservationThreadLocalHolder.setValue("hello");
-        ContextSnapshot snapshot = this.snapshotBuilder.build();
+        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
 
         ObservationThreadLocalHolder.setValue("hola");
         try {
@@ -79,7 +75,7 @@ public class DefaultContextSnapshotTests {
 
         then(ObservationThreadLocalHolder.getValue()).isNull();
 
-        ContextSnapshot snapshot = this.snapshotBuilder.build();
+        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
 
         ObservationThreadLocalHolder.reset();
         then(ObservationThreadLocalHolder.getValue()).isNull();
@@ -91,9 +87,8 @@ public class DefaultContextSnapshotTests {
         then(ObservationThreadLocalHolder.getValue()).isNull();
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void should_filter_thread_locals_on_capture(boolean useIncludeName) {
+    @Test
+    void should_filter_thread_locals_on_capture() {
         ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
 
@@ -104,9 +99,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = (useIncludeName ?
-                this.snapshotBuilder.include("foo").build() :
-                this.snapshotBuilder.filter(key -> key.equals("foo")).build());
+        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> key.equals("foo"));
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -132,7 +125,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = this.snapshotBuilder.build();
+        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -163,7 +156,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        assertThat(this.snapshotBuilder.build().toString())
+        assertThat(ContextSnapshot.capture(this.registry, key -> true).toString())
                 .isEqualTo("DefaultContextSnapshot{bar=barValue, foo=fooValue}");
 
         fooThreadLocal.remove();

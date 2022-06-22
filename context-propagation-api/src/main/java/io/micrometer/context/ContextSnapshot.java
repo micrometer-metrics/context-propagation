@@ -25,7 +25,7 @@ import java.util.function.Predicate;
  * Holds values extracted from {@link ThreadLocal} and other types of context and
  * exposes methods to propagate those values.
  *
- * <p>Use {@link #builder()} to create a snapshot.
+ * <p>Use static factory methods on this interface to create a snapshot.
  *
  * @author Rossen Stoyanchev
  * @since 1.0.0
@@ -131,53 +131,39 @@ public interface ContextSnapshot {
 
 
     /**
-     * Return a {@link Builder} to create a snapshot that uses accessors from
-     * the global {@link ContextRegistry}.
+     * Capture values from {@link ThreadLocal} and from other context objects
+     * using all accessors from the {@link ContextRegistry#getInstance() global}
+     * ContextRegistry instance.
+     * @param contexts one more context objects to extract values from
+     * @return a snapshot with saved context values
      */
-    static Builder builder() {
-        return builder(ContextRegistry.getInstance());
+    static ContextSnapshot forContextAndThreadLocalValues(Object... contexts) {
+        return capture(ContextRegistry.getInstance(), key -> true, contexts);
     }
 
     /**
-     * Variant of {@link #builder()} with the {@link ContextRegistry} to use.
+     * Variant of {@link #forContextAndThreadLocalValues(Object...)} that uses a
+     * {@link Predicate} to decide which context values to capture.
+     * @param keyPredicate predicate for context value keys
+     * @param contexts one more context objects to extract values from
+     * @return a snapshot with saved context values
      */
-    static Builder builder(ContextRegistry registry) {
-        return new DefaultContextSnapshotBuilder(registry);
+    static ContextSnapshot capture(Predicate<Object> keyPredicate, Object... contexts) {
+        return capture(ContextRegistry.getInstance(), keyPredicate, contexts);
     }
 
-
     /**
-     * Builder to create a {@link ContextSnapshot} with.
+     * Variant of {@link #capture(Predicate, Object...)} with a specific
+     * {@link ContextRegistry} instead of the global instance.
+     * @param contextRegistry the {@code ContextRegistry} instance to use
+     * @param keyPredicate predicate for context value keys
+     * @param contexts one more context objects to extract values from
+     * @return a snapshot with saved context values
      */
-    interface Builder {
+    static ContextSnapshot capture(
+            ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
 
-        /**
-         * Specify keys for context values of interest to extract and save.
-         * <p>By default, this is not set. If neither this nor
-         * {@link #filter(Predicate)} is set, then all context values are saved.
-         * @param keys the keys of interest
-         * @return the same builder instance
-         */
-        Builder include(Object... keys);
-
-        /**
-         * Configure a filter to decide which context values to save. Supports
-         * multiple invocations in which case filters are chained.
-         * <p>By default, this is not set. If neither this nor
-         * {@link #include(Object...)} is set, then all context values are saved.
-         * @param keyPredicate predicate for context value keys
-         * @return the same builder instance
-         */
-        Builder filter(Predicate<Object> keyPredicate);
-
-        /**
-         * Build a snapshot by extracting ThreadLocal values as well as values
-         * from the given context objects.
-         * @param contexts one more context objects to extract values from
-         * @return a snapshot with saved context values
-         */
-        ContextSnapshot build(Object... contexts);
-
+        return DefaultContextSnapshot.capture(contextRegistry, keyPredicate, contexts);
     }
 
 
