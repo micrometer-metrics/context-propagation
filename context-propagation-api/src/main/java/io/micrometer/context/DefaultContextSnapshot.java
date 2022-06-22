@@ -29,6 +29,8 @@ import java.util.function.Predicate;
  */
 final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
 
+    private static final ContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry());
+
     private final ContextRegistry accessorRegistry;
 
 
@@ -93,6 +95,28 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     @SuppressWarnings("unchecked")
     private <V> void setThreadLocalValue(Object key, ThreadLocalAccessor<?> accessor) {
         ((ThreadLocalAccessor<V>) accessor).setValue((V) get(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    static ContextSnapshot capture(
+            ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
+
+        DefaultContextSnapshot snapshot = null;
+        for (ThreadLocalAccessor<?> accessor : contextRegistry.getThreadLocalAccessors()) {
+            if (keyPredicate.test(accessor.key())) {
+                Object value = accessor.getValue();
+                if (value != null) {
+                    snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
+                    snapshot.put(accessor.key(), value);
+                }
+            }
+        }
+        for (Object context : contexts) {
+            ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
+            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
+            ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
+        }
+        return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
 
     @Override
