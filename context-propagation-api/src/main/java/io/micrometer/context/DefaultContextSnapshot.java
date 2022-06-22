@@ -97,7 +97,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
     @Override
     public String toString() {
-        return "DefaultContextSnapshot" + this;
+        return "DefaultContextSnapshot" + super.toString();
     }
 
 
