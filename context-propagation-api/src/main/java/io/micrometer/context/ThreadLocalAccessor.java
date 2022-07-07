@@ -15,6 +15,9 @@
  */
 package io.micrometer.context;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 /**
  * Contract to assist with access to a {@link ThreadLocal} including the ability
  * to get, set, and reset it.
@@ -22,6 +25,8 @@ package io.micrometer.context;
  * @author Rossen Stoyanchev
  * @author Marcin Grzejszczak
  * @since 1.0.0
+ * @see ContextRegistry#registerThreadLocalAccessor(ThreadLocalAccessor)
+ * @see ContextRegistry#registerThreadLocalAccessor(String, Supplier, Consumer, Runnable)
  */
 public interface ThreadLocalAccessor<V> {
 
