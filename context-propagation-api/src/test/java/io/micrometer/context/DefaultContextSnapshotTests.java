@@ -38,7 +38,7 @@ public class DefaultContextSnapshotTests {
         then(ObservationThreadLocalHolder.getValue()).isNull();
         ObservationThreadLocalHolder.setValue("hello");
 
-        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
+        ContextSnapshot snapshot = ContextSnapshot.captureUsing(this.registry, key -> true);
 
         ObservationThreadLocalHolder.reset();
         then(ObservationThreadLocalHolder.getValue()).isNull();
@@ -55,7 +55,7 @@ public class DefaultContextSnapshotTests {
         this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
 
         ObservationThreadLocalHolder.setValue("hello");
-        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
+        ContextSnapshot snapshot = ContextSnapshot.captureUsing(this.registry, key -> true);
 
         ObservationThreadLocalHolder.setValue("hola");
         try {
@@ -75,7 +75,7 @@ public class DefaultContextSnapshotTests {
 
         then(ObservationThreadLocalHolder.getValue()).isNull();
 
-        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
+        ContextSnapshot snapshot = ContextSnapshot.captureUsing(this.registry, key -> true);
 
         ObservationThreadLocalHolder.reset();
         then(ObservationThreadLocalHolder.getValue()).isNull();
@@ -99,7 +99,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> key.equals("foo"));
+        ContextSnapshot snapshot = ContextSnapshot.captureUsing(this.registry, key -> key.equals("foo"));
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -125,7 +125,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = ContextSnapshot.capture(this.registry, key -> true);
+        ContextSnapshot snapshot = ContextSnapshot.captureUsing(this.registry, key -> true);
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -156,7 +156,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        assertThat(ContextSnapshot.capture(this.registry, key -> true).toString())
+        assertThat(ContextSnapshot.captureUsing(this.registry, key -> true).toString())
                 .isEqualTo("DefaultContextSnapshot{bar=barValue, foo=fooValue}");
 
         fooThreadLocal.remove();

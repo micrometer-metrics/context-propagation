@@ -32,9 +32,9 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
- * 
+ * Unit tests for the {@code "wrap"} methods in {@link ContextSnapshot}.
  */
-class InstrumentationTests {
+class ContextWrappingTests {
 
     private final ContextRegistry registry = new ContextRegistry()
             .registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
@@ -55,7 +55,7 @@ class InstrumentationTests {
                 .as("By default thread local information should not be propagated")
                 .isNull();
 
-        runInNewThread(ContextSnapshot.capture(this.registry, key -> true).instrumentRunnable(runnable));
+        runInNewThread(ContextSnapshot.captureUsing(this.registry, key -> true).wrap(runnable));
 
         then(valueInNewThread.get())
                 .as("With context container the thread local information should be propagated")
@@ -75,7 +75,7 @@ class InstrumentationTests {
                 .as("By default thread local information should not be propagated")
                 .isNull();
 
-        runInNewThread(ContextSnapshot.capture(this.registry, key -> true).instrumentCallable(callable));
+        runInNewThread(ContextSnapshot.captureUsing(this.registry, key -> true).wrap(callable));
 
         then(valueInNewThread.get())
                 .as("With context container the thread local information should be propagated")
@@ -93,7 +93,7 @@ class InstrumentationTests {
                 .isNull();
 
         runInNewThread(
-                ContextSnapshot.capture(this.registry, key -> true).instrumentExecutor(executor),
+                ContextSnapshot.captureUsing(this.registry, key -> true).wrapExecutor(executor),
                 valueInNewThread);
 
         then(valueInNewThread.get())
@@ -113,7 +113,7 @@ class InstrumentationTests {
                             .isNull());
 
             runInNewThread(
-                    ContextSnapshot.capture(this.registry, key -> true).instrumentExecutorService(executorService),
+                    ContextSnapshot.captureUsing(this.registry, key -> true).wrapExecutorService(executorService),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
