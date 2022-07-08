@@ -25,6 +25,7 @@ class TestThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
     private final String key;
 
+    // Normally this wouldn't be a field in the accessor but ok for testing purposes
     private final ThreadLocal<String> threadLocal;
 
     TestThreadLocalAccessor(String key, ThreadLocal<String> threadLocal) {

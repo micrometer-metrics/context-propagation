@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 
 /**
@@ -80,6 +82,45 @@ public class ContextRegistry {
         }
         this.threadLocalAccessors.add(accessor);
         return this;
+    }
+
+    /**
+     * Shortcut to register a {@link ThreadLocalAccessor} from callbacks,
+     * without the declaring a class.
+     * @param key the {@link ThreadLocalAccessor#key() key} to associate with
+     * the ThreadLocal value
+     * @param getSupplier callback to use for getting the value
+     * @param setConsumer callback to use for setting the value
+     * @param resetTask callback to use for resetting the value
+     * @return the created {@code ThreadLocalAccessor}
+     * @param <V> the type of value stored in the ThreadLocal
+     */
+    public <V> ThreadLocalAccessor<V> registerThreadLocalAccessor(
+            String key, Supplier<V> getSupplier, Consumer<V> setConsumer, Runnable resetTask) {
+
+        return new ThreadLocalAccessor<V>() {
+
+            @Override
+            public Object key() {
+                return key;
+            }
+
+            @Nullable
+            @Override
+            public V getValue() {
+                return getSupplier.get();
+            }
+
+            @Override
+            public void setValue(V value) {
+                setConsumer.accept(value);
+            }
+
+            @Override
+            public void reset() {
+                resetTask.run();
+            }
+        };
     }
 
     /**
