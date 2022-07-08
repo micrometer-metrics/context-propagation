@@ -22,4 +22,4 @@ gradleEnterprise {
 	server = 'https://ge.micrometer.io'
 }
 
-include 'context-propagation-api'
+include 'context-propagation'
