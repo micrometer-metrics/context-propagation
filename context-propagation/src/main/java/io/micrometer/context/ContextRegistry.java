@@ -69,30 +69,25 @@ public class ContextRegistry {
     }
 
     /**
-     * Register a {@link ThreadLocalAccessor}. If there is an existing
-     * registration with the same {@link ThreadLocalAccessor#key() key}, it is
-     * removed first.
+     * Register a {@link ThreadLocalAccessor} for the given {@link ThreadLocal}.
+     * @param key the {@link ThreadLocalAccessor#key() key} to associate with
+     * the ThreadLocal value
+     * @param threadLocal the underlying {@code ThreadLocal}
+     * @return the same registry instance
+     * @param <V> the type of value stored in the ThreadLocal
      */
-    public ContextRegistry registerThreadLocalAccessor(ThreadLocalAccessor<?> accessor) {
-        for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
-            if (existing.key().equals(accessor.key())) {
-                this.threadLocalAccessors.remove(existing);
-                break;
-            }
-        }
-        this.threadLocalAccessors.add(accessor);
-        return this;
+    public <V> ContextRegistry registerThreadLocalAccessor(String key, ThreadLocal<V> threadLocal) {
+        return registerThreadLocalAccessor(key, threadLocal::get, threadLocal::set, threadLocal::remove);
     }
 
     /**
-     * Shortcut to register a {@link ThreadLocalAccessor} from callbacks,
-     * without the declaring a class.
+     * Register a {@link ThreadLocalAccessor} from callbacks.
      * @param key the {@link ThreadLocalAccessor#key() key} to associate with
      * the ThreadLocal value
      * @param getSupplier callback to use for getting the value
      * @param setConsumer callback to use for setting the value
      * @param resetTask callback to use for resetting the value
-     * @return the created {@code ThreadLocalAccessor}
+     * @return the same registry instance
      * @param <V> the type of value stored in the ThreadLocal
      */
     public <V> ContextRegistry registerThreadLocalAccessor(
@@ -121,6 +116,24 @@ public class ContextRegistry {
                 resetTask.run();
             }
         });
+    }
+
+    /**
+     * Register a {@link ThreadLocalAccessor}. If there is an existing
+     * registration with the same {@link ThreadLocalAccessor#key() key}, it is
+     * removed first.
+     * @param accessor the accessor to register
+     * @return the same registry instance
+     */
+    public ContextRegistry registerThreadLocalAccessor(ThreadLocalAccessor<?> accessor) {
+        for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
+            if (existing.key().equals(accessor.key())) {
+                this.threadLocalAccessors.remove(existing);
+                break;
+            }
+        }
+        this.threadLocalAccessors.add(accessor);
+        return this;
     }
 
     /**
