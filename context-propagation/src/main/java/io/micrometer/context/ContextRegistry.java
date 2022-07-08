@@ -95,10 +95,10 @@ public class ContextRegistry {
      * @return the created {@code ThreadLocalAccessor}
      * @param <V> the type of value stored in the ThreadLocal
      */
-    public <V> ThreadLocalAccessor<V> registerThreadLocalAccessor(
+    public <V> ContextRegistry registerThreadLocalAccessor(
             String key, Supplier<V> getSupplier, Consumer<V> setConsumer, Runnable resetTask) {
 
-        return new ThreadLocalAccessor<V>() {
+        return registerThreadLocalAccessor(new ThreadLocalAccessor<V>() {
 
             @Override
             public Object key() {
@@ -120,7 +120,7 @@ public class ContextRegistry {
             public void reset() {
                 resetTask.run();
             }
-        };
+        });
     }
 
     /**
