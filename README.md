@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.micrometer:context-propagation-api:latest.integration'
+    implementation 'io.micrometer:context-propagation:latest.integration'
 }
 ```
 
