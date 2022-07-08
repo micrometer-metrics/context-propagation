@@ -72,7 +72,7 @@ public interface ContextSnapshot {
      * the snapshot around the invocation of the given {@code Runnable}.
      * @param runnable the runnable to instrument
      */
-    default Runnable instrumentRunnable(Runnable runnable) {
+    default Runnable wrap(Runnable runnable) {
         return () -> {
             try (Scope scope = setThreadLocalValues()) {
                 runnable.run();
@@ -86,7 +86,7 @@ public interface ContextSnapshot {
      * @param callable the callable to instrument
      * @param <T> the type of value produced by the {@code Callable}
      */
-    default <T> Callable<T> instrumentCallable(Callable<T> callable) {
+    default <T> Callable<T> wrap(Callable<T> callable) {
         return () -> {
             try (Scope scope = setThreadLocalValues()) {
                 return callable.call();
@@ -100,7 +100,7 @@ public interface ContextSnapshot {
      * @param consumer the callable to instrument
      * @param <T> the type of value produced by the {@code Callable}
      */
-    default <T> Consumer<T> instrumentConsumer(Consumer<T> consumer) {
+    default <T> Consumer<T> wrap(Consumer<T> consumer) {
         return value -> {
             try (Scope scope = setThreadLocalValues()) {
                 consumer.accept(value);
@@ -113,9 +113,9 @@ public interface ContextSnapshot {
      * the snapshot around the invocation of any executed, {@code Runnable}.
      * @param executor the executor to instrument
      */
-    default Executor instrumentExecutor(Executor executor) {
+    default Executor wrapExecutor(Executor executor) {
         return runnable -> {
-            Runnable instrumentedRunnable = instrumentRunnable(runnable);
+            Runnable instrumentedRunnable = wrap(runnable);
             executor.execute(instrumentedRunnable);
         };
     }
@@ -125,8 +125,8 @@ public interface ContextSnapshot {
      * the snapshot around the invocation of any executed task.
      * @param executorService the executorService to instrument
      */
-    default ExecutorService instrumentExecutorService(ExecutorService executorService) {
-        return new InstrumentedExecutorService(executorService, this);
+    default ExecutorService wrapExecutorService(ExecutorService executorService) {
+        return new ContextExecutorService(executorService, this);
     }
 
 
@@ -137,30 +137,30 @@ public interface ContextSnapshot {
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    static ContextSnapshot forContextAndThreadLocalValues(Object... contexts) {
-        return capture(ContextRegistry.getInstance(), key -> true, contexts);
+    static ContextSnapshot capture(Object... contexts) {
+        return captureUsing(ContextRegistry.getInstance(), key -> true, contexts);
     }
 
     /**
-     * Variant of {@link #forContextAndThreadLocalValues(Object...)} that uses a
+     * Variant of {@link #capture(Object...)} that uses a
      * {@link Predicate} to decide which context values to capture.
      * @param keyPredicate predicate for context value keys
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    static ContextSnapshot capture(Predicate<Object> keyPredicate, Object... contexts) {
-        return capture(ContextRegistry.getInstance(), keyPredicate, contexts);
+    static ContextSnapshot captureUsing(Predicate<Object> keyPredicate, Object... contexts) {
+        return captureUsing(ContextRegistry.getInstance(), keyPredicate, contexts);
     }
 
     /**
-     * Variant of {@link #capture(Predicate, Object...)} with a specific
+     * Variant of {@link #captureUsing(Predicate, Object...)} with a specific
      * {@link ContextRegistry} instead of the global instance.
      * @param contextRegistry the {@code ContextRegistry} instance to use
      * @param keyPredicate predicate for context value keys
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    static ContextSnapshot capture(
+    static ContextSnapshot captureUsing(
             ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
 
         return DefaultContextSnapshot.capture(contextRegistry, keyPredicate, contexts);

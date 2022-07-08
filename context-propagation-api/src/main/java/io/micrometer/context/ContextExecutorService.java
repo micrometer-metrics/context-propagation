@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * @author Rossen Stoyanchev
  * @since 1.0.0
  */
-final class InstrumentedExecutorService implements ExecutorService {
+final class ContextExecutorService implements ExecutorService {
 
     private final ContextSnapshot contextSnapshot;
 
@@ -46,7 +46,7 @@ final class InstrumentedExecutorService implements ExecutorService {
      * @param executorService the {@code ExecutorService} to delegate to
      * @param contextSnapshot the {@code ContextSnapshot} with values to propagate
      */
-    InstrumentedExecutorService(ExecutorService executorService, ContextSnapshot contextSnapshot) {
+    ContextExecutorService(ExecutorService executorService, ContextSnapshot contextSnapshot) {
         this.contextSnapshot = contextSnapshot;
         this.executorService = executorService;
     }
@@ -79,17 +79,17 @@ final class InstrumentedExecutorService implements ExecutorService {
 
     @Override
     public <T> Future<T> submit(Callable<T> task) {
-        return this.executorService.submit(this.contextSnapshot.instrumentCallable(task));
+        return this.executorService.submit(this.contextSnapshot.wrap(task));
     }
 
     @Override
     public <T> Future<T> submit(Runnable task, T result) {
-        return this.executorService.submit(this.contextSnapshot.instrumentRunnable(task), result);
+        return this.executorService.submit(this.contextSnapshot.wrap(task), result);
     }
 
     @Override
     public Future<?> submit(Runnable task) {
-        return this.executorService.submit(this.contextSnapshot.instrumentRunnable(task));
+        return this.executorService.submit(this.contextSnapshot.wrap(task));
     }
 
     @Override
@@ -97,7 +97,7 @@ final class InstrumentedExecutorService implements ExecutorService {
             throws InterruptedException {
 
         List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::instrumentCallable)
+                .map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAll(instrumentedTasks);
@@ -109,7 +109,7 @@ final class InstrumentedExecutorService implements ExecutorService {
             throws InterruptedException {
 
         List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::instrumentCallable)
+                .map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAll(instrumentedTasks, timeout, unit);
@@ -120,7 +120,7 @@ final class InstrumentedExecutorService implements ExecutorService {
             throws InterruptedException, ExecutionException {
 
         List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::instrumentCallable)
+                .map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAny(instrumentedTasks);
@@ -132,7 +132,7 @@ final class InstrumentedExecutorService implements ExecutorService {
             throws InterruptedException, ExecutionException, TimeoutException {
 
         List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::instrumentCallable)
+                .map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAny(instrumentedTasks, timeout, unit);
@@ -140,7 +140,7 @@ final class InstrumentedExecutorService implements ExecutorService {
 
     @Override
     public void execute(Runnable command) {
-        this.executorService.execute(this.contextSnapshot.instrumentRunnable(command));
+        this.executorService.execute(this.contextSnapshot.wrap(command));
     }
 
 }
