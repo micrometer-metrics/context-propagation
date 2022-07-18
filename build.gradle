@@ -315,6 +315,10 @@ nexusPublishing {
 	}
 }
 
+task deleteLockFiles (type: Delete) {
+	delete fileTree(dir: '.', include: '**/*.lockfile')
+}
+
 wrapper {
 	gradleVersion = '7.3'
 }
