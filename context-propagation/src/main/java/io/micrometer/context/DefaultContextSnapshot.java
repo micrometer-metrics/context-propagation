@@ -16,9 +16,7 @@
 package io.micrometer.context;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -31,11 +29,11 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
     private static final ContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry());
 
-    private final ContextRegistry accessorRegistry;
+    private final ContextRegistry contextRegistry;
 
 
-    DefaultContextSnapshot(ContextRegistry accessorRegistry) {
-        this.accessorRegistry = accessorRegistry;
+    DefaultContextSnapshot(ContextRegistry contextRegistry) {
+        this.contextRegistry = contextRegistry;
     }
 
 
@@ -48,7 +46,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     public <C> C updateContext(C context, Predicate<Object> keyPredicate) {
         if (!isEmpty()) {
             Map<Object, Object> valuesToWrite = new HashMap<>();
-            forEach((key, value) -> {
+            this.forEach((key, value) -> {
                 if (keyPredicate.test(key)) {
                     valuesToWrite.put(key, value);
                 }
@@ -61,7 +59,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     @SuppressWarnings("unchecked")
     private <C> C updateContextInternal(C context, Map<Object, Object> valueContainer) {
         if (!isEmpty()) {
-            ContextAccessor<?, ?> accessor = this.accessorRegistry.getContextAccessorForWrite(context);
+            ContextAccessor<?, ?> accessor = this.contextRegistry.getContextAccessorForWrite(context);
             context = ((ContextAccessor<?, C>) accessor).writeValues(valueContainer, context);
         }
         return context;
@@ -74,27 +72,41 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
     @Override
     public Scope setThreadLocalValues(Predicate<Object> keyPredicate) {
-        Set<Object> keys = null;
         Map<Object, Object> previousValues = null;
-        for (ThreadLocalAccessor<?> accessor : this.accessorRegistry.getThreadLocalAccessors()) {
+        for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
             Object key = accessor.key();
-            if (keyPredicate.test(key) && containsKey(key)) {
-                keys = (keys != null ? keys : new HashSet<>());
-                keys.add(key);
-
-                Object previousValue = accessor.getValue();
-                previousValues = (previousValues != null ? previousValues : new HashMap<>());
-                previousValues.put(key, previousValue);
-
-                setThreadLocalValue(key, accessor);
+            if (keyPredicate.test(key) && this.containsKey(key)) {
+                previousValues = setThreadLocal(key, get(key), accessor, previousValues);
             }
         }
-        return (keys != null ? new DefaultScope(keys, previousValues) : () -> { });
+        return DefaultScope.from(previousValues, this.contextRegistry);
     }
 
     @SuppressWarnings("unchecked")
-    private <V> void setThreadLocalValue(Object key, ThreadLocalAccessor<?> accessor) {
-        ((ThreadLocalAccessor<V>) accessor).setValue((V) get(key));
+    private static <V> Map<Object, Object> setThreadLocal(
+            Object key, V value, ThreadLocalAccessor<?> accessor, @Nullable Map<Object, Object> previousValues) {
+
+        previousValues = (previousValues != null ? previousValues : new HashMap<>());
+        previousValues.put(key, accessor.getValue());
+        ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        return previousValues;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <C> Scope setThreadLocalsFrom(Object context, ContextRegistry registry, String... keys) {
+        ContextAccessor<?, ?> contextAccessor = registry.getContextAccessorForRead(context);
+        Map<Object, Object> previousValues = null;
+        for (String key : keys) {
+            Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) context, key);
+            if (value != null) {
+                for (ThreadLocalAccessor<?> threadLocalAccessor : registry.getThreadLocalAccessors()) {
+                    if (key.equals(threadLocalAccessor.key())) {
+                        previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
+                    }
+                }
+            }
+        }
+        return DefaultScope.from(previousValues, registry);
     }
 
     @SuppressWarnings("unchecked")
@@ -128,21 +140,21 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     /**
      * Default implementation of {@link Scope}.
      */
-    private class DefaultScope implements Scope {
-
-        private final Set<Object> keys;
+    private static class DefaultScope implements Scope {
 
         private final Map<Object, Object> previousValues;
 
-        private DefaultScope(Set<Object> keys, Map<Object, Object> previousValues) {
-            this.keys = keys;
+        private final ContextRegistry contextRegistry;
+
+        private DefaultScope(Map<Object, Object> previousValues, ContextRegistry contextRegistry) {
             this.previousValues = previousValues;
+            this.contextRegistry = contextRegistry;
         }
 
         @Override
         public void close() {
-            for (ThreadLocalAccessor<?> accessor : accessorRegistry.getThreadLocalAccessors()) {
-                if (this.keys.contains(accessor.key())) {
+            for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
+                if (this.previousValues.containsKey(accessor.key())) {
                     Object previousValue = this.previousValues.get(accessor.key());
                     resetThreadLocalValue(accessor, previousValue);
                 }
@@ -158,6 +170,11 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
                 accessor.reset();
             }
         }
+
+        public static Scope from(@Nullable Map<Object, Object> previousValues, ContextRegistry registry) {
+            return (previousValues != null ? new DefaultScope(previousValues, registry) : () -> { });
+        }
+
     }
 
 }
