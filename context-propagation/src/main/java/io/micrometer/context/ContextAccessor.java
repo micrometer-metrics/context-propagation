@@ -48,6 +48,16 @@ public interface ContextAccessor<READ, WRITE> {
     void readValues(READ sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues);
 
     /**
+     * Read a single value from the source context.
+     * @param sourceContext the context to read from; the context type should be
+     * checked with {@link #canReadFrom(Class)} before this method is called
+     * @param key the key to use to look up the context value
+     * @return the value, if any
+     */
+    @Nullable
+    <T> T readValue(READ sourceContext, Object key);
+
+    /**
      * Whether this accessor can restore values to the given type of context.
      * @param contextType the type of external context
      */

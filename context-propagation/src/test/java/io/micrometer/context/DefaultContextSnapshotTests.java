@@ -16,6 +16,10 @@
 package io.micrometer.context;
 
 
+import java.util.Collections;
+import java.util.Map;
+
+import io.micrometer.context.ContextSnapshot.Scope;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,31 +39,32 @@ public class DefaultContextSnapshotTests {
     void should_propagate_thread_local() {
         this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
 
-        then(ObservationThreadLocalHolder.getValue()).isNull();
-        ObservationThreadLocalHolder.setValue("hello");
-
-        ContextSnapshot snapshot = ContextSnapshot.captureUsing(this.registry, key -> true);
-
-        ObservationThreadLocalHolder.reset();
-        then(ObservationThreadLocalHolder.getValue()).isNull();
-
-        try (ContextSnapshot.Scope scope = snapshot.setThreadLocalValues()) {
-            then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
-        }
-
-        then(ObservationThreadLocalHolder.getValue()).isNull();
-    }
-
-    @Test
-    void should_reset_to_thread_local_to_previous_value() {
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
-
         ObservationThreadLocalHolder.setValue("hello");
         ContextSnapshot snapshot = ContextSnapshot.captureUsing(this.registry, key -> true);
 
         ObservationThreadLocalHolder.setValue("hola");
         try {
-            try (ContextSnapshot.Scope scope = snapshot.setThreadLocalValues()) {
+            try (Scope scope = snapshot.setThreadLocalValues()) {
+                then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
+            }
+            then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
+        }
+        finally {
+            ObservationThreadLocalHolder.reset();
+        }
+    }
+
+    @Test
+    void should_propagate_single_thread_local_value() {
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+
+        String key = ObservationThreadLocalAccessor.KEY;
+        Map<String, String> sourceContext = Collections.singletonMap(key, "hello");
+
+        ObservationThreadLocalHolder.setValue("hola");
+        try {
+            try (Scope scope = ContextSnapshot.setThreadLocalsFrom(sourceContext, this.registry, key)) {
                 then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
             }
             then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
@@ -80,7 +85,7 @@ public class DefaultContextSnapshotTests {
         ObservationThreadLocalHolder.reset();
         then(ObservationThreadLocalHolder.getValue()).isNull();
 
-        try (ContextSnapshot.Scope scope = snapshot.setThreadLocalValues()) {
+        try (Scope scope = snapshot.setThreadLocalValues()) {
             then(ObservationThreadLocalHolder.getValue()).isNull();
         }
 
@@ -104,7 +109,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.remove();
         barThreadLocal.remove();
 
-        try (ContextSnapshot.Scope scope = snapshot.setThreadLocalValues()) {
+        try (Scope scope = snapshot.setThreadLocalValues()) {
             then(fooThreadLocal.get()).isEqualTo("fooValue");
             then(barThreadLocal.get()).isNull();
         }
@@ -130,12 +135,12 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.remove();
         barThreadLocal.remove();
 
-        try (ContextSnapshot.Scope scope = snapshot.setThreadLocalValues(key -> key.equals("foo"))) {
+        try (Scope scope = snapshot.setThreadLocalValues(key -> key.equals("foo"))) {
             then(fooThreadLocal.get()).isEqualTo("fooValue");
             then(barThreadLocal.get()).isNull();
         }
 
-        try (ContextSnapshot.Scope scope = snapshot.setThreadLocalValues(key -> key.equals("bar"))) {
+        try (Scope scope = snapshot.setThreadLocalValues(key -> key.equals("bar"))) {
             then(fooThreadLocal.get()).isNull();
             then(barThreadLocal.get()).isEqualTo("barValue");
         }

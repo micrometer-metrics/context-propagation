@@ -36,6 +36,13 @@ class TestContextAccessor implements ContextAccessor<Map<?, ?>, Map<?, ?>> {
         readValues.putAll(sourceContext);
     }
 
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T> T readValue(Map<?, ?> sourceContext, Object key) {
+        return (T) sourceContext.get(key);
+    }
+
     @Override
     public boolean canWriteTo(Class<?> contextType) {
         return Map.class.isAssignableFrom(contextType);

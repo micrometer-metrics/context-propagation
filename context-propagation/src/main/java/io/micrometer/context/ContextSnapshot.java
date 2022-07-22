@@ -155,7 +155,7 @@ public interface ContextSnapshot {
     /**
      * Variant of {@link #captureUsing(Predicate, Object...)} with a specific
      * {@link ContextRegistry} instead of the global instance.
-     * @param contextRegistry the {@code ContextRegistry} instance to use
+     * @param contextRegistry the registry with the accessors to use
      * @param keyPredicate predicate for context value keys
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
@@ -164,6 +164,35 @@ public interface ContextSnapshot {
             ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
 
         return DefaultContextSnapshot.capture(contextRegistry, keyPredicate, contexts);
+    }
+
+    /**
+     * Read the values specified by from the given source context, and if found,
+     * use them to set {@link ThreadLocal} values. Essentially, a shortcut that
+     * bypasses the need to create of {@link ContextSnapshot} first via
+     * {@link #capture(Object...)}, followed by {@link #setThreadLocalValues()}.
+     * @param sourceContext the source context to read values from
+     * @param keys the keys of the values to read
+     * @return an object that can be used to reset {@link ThreadLocal} values
+     * at the end of the context scope, either removing them or restoring their
+     * previous values, if any.
+     */
+    static Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
+        return setThreadLocalsFrom(sourceContext, ContextRegistry.getInstance(), keys);
+    }
+
+    /**
+     * Variant of {@link #setThreadLocalsFrom(Object, String...)} with a specific
+     * {@link ContextRegistry} instead of the global instance.
+     * @param sourceContext the source context to read values from
+     * @param contextRegistry the registry with the accessors to use
+     * @param keys the keys of the values to read
+     * @return an object that can be used to reset {@link ThreadLocal} values
+     * at the end of the context scope, either removing them or restoring their
+     * previous values, if any.
+     */
+    static Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {
+        return DefaultContextSnapshot.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
     }
 
 
