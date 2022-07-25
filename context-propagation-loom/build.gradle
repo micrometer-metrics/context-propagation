@@ -1,0 +1,32 @@
+plugins {
+	id 'idea'
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(19)
+	}
+}
+
+tasks {
+	compileJava {
+		options.encoding = 'UTF-8'
+		options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+
+		sourceCompatibility = JavaVersion.VERSION_19
+		targetCompatibility = JavaVersion.VERSION_19
+
+	}
+	compileTestJava {
+		options.encoding = 'UTF-8'
+		options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+		sourceCompatibility = JavaVersion.VERSION_19
+		targetCompatibility = JavaVersion.VERSION_19
+	}
+
+}
+
+dependencies {
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.assertj:assertj-core'
+}
