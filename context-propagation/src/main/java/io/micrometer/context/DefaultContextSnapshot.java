@@ -109,9 +109,19 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         return DefaultScope.from(previousValues, registry);
     }
 
-    @SuppressWarnings("unchecked")
     static ContextSnapshot capture(
             ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
+
+        DefaultContextSnapshot snapshot = captureFromThreadLocals(contextRegistry, keyPredicate);
+        for (Object context : contexts) {
+            snapshot = captureFromContext(contextRegistry, keyPredicate, context, snapshot);
+        }
+        return (snapshot != null ? snapshot : emptyContextSnapshot);
+    }
+
+    @Nullable
+    private static DefaultContextSnapshot captureFromThreadLocals(
+            ContextRegistry contextRegistry, Predicate<Object> keyPredicate) {
 
         DefaultContextSnapshot snapshot = null;
         for (ThreadLocalAccessor<?> accessor : contextRegistry.getThreadLocalAccessors()) {
@@ -123,12 +133,18 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
                 }
             }
         }
-        for (Object context : contexts) {
-            ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
-            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
-            ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
-        }
-        return (snapshot != null ? snapshot : emptyContextSnapshot);
+        return snapshot;
+    }
+
+    @SuppressWarnings("unchecked")
+    static DefaultContextSnapshot captureFromContext(
+            ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object context,
+            @Nullable DefaultContextSnapshot snapshot) {
+
+        ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
+        snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
+        ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
+        return snapshot;
     }
 
     @Override

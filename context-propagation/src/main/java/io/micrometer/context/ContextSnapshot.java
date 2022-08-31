@@ -167,6 +167,15 @@ public interface ContextSnapshot {
     }
 
     /**
+     * Create a {@link ContextSnapshot} by reading values from the given context object.
+     * @param context the context to read values from
+     * @return the created {@link ContextSnapshot}
+     */
+    static ContextSnapshot captureFrom(Object context) {
+        return DefaultContextSnapshot.captureFromContext(ContextRegistry.getInstance(), key -> true, context, null);
+    }
+
+    /**
      * Read the values specified by from the given source context, and if found,
      * use them to set {@link ThreadLocal} values. Essentially, a shortcut that
      * bypasses the need to create of {@link ContextSnapshot} first via
