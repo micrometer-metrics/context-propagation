@@ -71,7 +71,7 @@ See our [Contributing Guide](CONTRIBUTING.md) for information about contributing
 
 ## Join the discussion
 
-Join the [Micrometer Slack](https://slack.micrometer.io) to share your questions, concerns, and feature requests.
+Join the [Micrometer Slack](https://slack.micrometer.io) (#context-propagation channel) to share your questions, concerns, and feature requests.
 
 
 -------------------------------------
