@@ -109,7 +109,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         return DefaultScope.from(previousValues, registry);
     }
 
-    static ContextSnapshot capture(
+    static ContextSnapshot captureAll(
             ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
 
         DefaultContextSnapshot snapshot = captureFromThreadLocals(contextRegistry, keyPredicate);

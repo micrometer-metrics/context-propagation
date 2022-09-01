@@ -137,33 +137,33 @@ public interface ContextSnapshot {
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    static ContextSnapshot capture(Object... contexts) {
-        return captureUsing(ContextRegistry.getInstance(), key -> true, contexts);
+    static ContextSnapshot captureAll(Object... contexts) {
+        return captureAllUsing(ContextRegistry.getInstance(), key -> true, contexts);
     }
 
     /**
-     * Variant of {@link #capture(Object...)} that uses a
+     * Variant of {@link #captureAll(Object...)} that uses a
      * {@link Predicate} to decide which context values to capture.
      * @param keyPredicate predicate for context value keys
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    static ContextSnapshot captureUsing(Predicate<Object> keyPredicate, Object... contexts) {
-        return captureUsing(ContextRegistry.getInstance(), keyPredicate, contexts);
+    static ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, Object... contexts) {
+        return captureAllUsing(ContextRegistry.getInstance(), keyPredicate, contexts);
     }
 
     /**
-     * Variant of {@link #captureUsing(Predicate, Object...)} with a specific
+     * Variant of {@link #captureAllUsing(Predicate, Object...)} with a specific
      * {@link ContextRegistry} instead of the global instance.
      * @param contextRegistry the registry with the accessors to use
      * @param keyPredicate predicate for context value keys
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    static ContextSnapshot captureUsing(
+    static ContextSnapshot captureAllUsing(
             ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
 
-        return DefaultContextSnapshot.capture(contextRegistry, keyPredicate, contexts);
+        return DefaultContextSnapshot.captureAll(contextRegistry, keyPredicate, contexts);
     }
 
     /**
@@ -179,7 +179,7 @@ public interface ContextSnapshot {
      * Read the values specified by from the given source context, and if found,
      * use them to set {@link ThreadLocal} values. Essentially, a shortcut that
      * bypasses the need to create of {@link ContextSnapshot} first via
-     * {@link #capture(Object...)}, followed by {@link #setThreadLocalValues()}.
+     * {@link #captureAll(Object...)}, followed by {@link #setThreadLocalValues()}.
      * @param sourceContext the source context to read values from
      * @param keys the keys of the values to read
      * @return an object that can be used to reset {@link ThreadLocal} values

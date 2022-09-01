@@ -55,7 +55,7 @@ class ContextWrappingTests {
                 .as("By default thread local information should not be propagated")
                 .isNull();
 
-        runInNewThread(ContextSnapshot.captureUsing(this.registry, key -> true).wrap(runnable));
+        runInNewThread(ContextSnapshot.captureAllUsing(this.registry, key -> true).wrap(runnable));
 
         then(valueInNewThread.get())
                 .as("With context container the thread local information should be propagated")
@@ -75,7 +75,7 @@ class ContextWrappingTests {
                 .as("By default thread local information should not be propagated")
                 .isNull();
 
-        runInNewThread(ContextSnapshot.captureUsing(this.registry, key -> true).wrap(callable));
+        runInNewThread(ContextSnapshot.captureAllUsing(this.registry, key -> true).wrap(callable));
 
         then(valueInNewThread.get())
                 .as("With context container the thread local information should be propagated")
@@ -93,7 +93,7 @@ class ContextWrappingTests {
                 .isNull();
 
         runInNewThread(
-                ContextSnapshot.captureUsing(this.registry, key -> true).wrapExecutor(executor),
+                ContextSnapshot.captureAllUsing(this.registry, key -> true).wrapExecutor(executor),
                 valueInNewThread);
 
         then(valueInNewThread.get())
@@ -113,7 +113,7 @@ class ContextWrappingTests {
                             .isNull());
 
             runInNewThread(
-                    ContextSnapshot.captureUsing(this.registry, key -> true).wrapExecutorService(executorService),
+                    ContextSnapshot.captureAllUsing(this.registry, key -> true).wrapExecutorService(executorService),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
