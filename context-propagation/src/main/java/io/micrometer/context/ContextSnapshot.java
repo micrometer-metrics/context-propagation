@@ -56,16 +56,16 @@ public interface ContextSnapshot {
      * at the end of the context scope, either removing them or restoring their
      * previous values, if any.
      */
-    Scope setThreadLocalValues();
+    Scope setThreadLocals();
 
     /**
-     * Variant of {@link #setThreadLocalValues()} with a predicate to select
+     * Variant of {@link #setThreadLocals()} with a predicate to select
      * context values by key.
      * @return an object that can be used to reset {@link ThreadLocal} values
      * at the end of the context scope, either removing them or restoring their
      * previous values, if any.
      */
-    Scope setThreadLocalValues(Predicate<Object> keyPredicate);
+    Scope setThreadLocals(Predicate<Object> keyPredicate);
 
     /**
      * Return a new {@code Runnable} that sets {@code ThreadLocal} values from
@@ -74,7 +74,7 @@ public interface ContextSnapshot {
      */
     default Runnable wrap(Runnable runnable) {
         return () -> {
-            try (Scope scope = setThreadLocalValues()) {
+            try (Scope scope = setThreadLocals()) {
                 runnable.run();
             }
         };
@@ -88,7 +88,7 @@ public interface ContextSnapshot {
      */
     default <T> Callable<T> wrap(Callable<T> callable) {
         return () -> {
-            try (Scope scope = setThreadLocalValues()) {
+            try (Scope scope = setThreadLocals()) {
                 return callable.call();
             }
         };
@@ -102,7 +102,7 @@ public interface ContextSnapshot {
      */
     default <T> Consumer<T> wrap(Consumer<T> consumer) {
         return value -> {
-            try (Scope scope = setThreadLocalValues()) {
+            try (Scope scope = setThreadLocals()) {
                 consumer.accept(value);
             }
         };
@@ -179,7 +179,7 @@ public interface ContextSnapshot {
      * Read the values specified by from the given source context, and if found,
      * use them to set {@link ThreadLocal} values. Essentially, a shortcut that
      * bypasses the need to create of {@link ContextSnapshot} first via
-     * {@link #captureAll(Object...)}, followed by {@link #setThreadLocalValues()}.
+     * {@link #captureAll(Object...)}, followed by {@link #setThreadLocals()}.
      * @param sourceContext the source context to read values from
      * @param keys the keys of the values to read
      * @return an object that can be used to reset {@link ThreadLocal} values

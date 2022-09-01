@@ -44,7 +44,7 @@ public class DefaultContextSnapshotTests {
 
         ObservationThreadLocalHolder.setValue("hola");
         try {
-            try (Scope scope = snapshot.setThreadLocalValues()) {
+            try (Scope scope = snapshot.setThreadLocals()) {
                 then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
             }
             then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
@@ -85,7 +85,7 @@ public class DefaultContextSnapshotTests {
         ObservationThreadLocalHolder.reset();
         then(ObservationThreadLocalHolder.getValue()).isNull();
 
-        try (Scope scope = snapshot.setThreadLocalValues()) {
+        try (Scope scope = snapshot.setThreadLocals()) {
             then(ObservationThreadLocalHolder.getValue()).isNull();
         }
 
@@ -109,7 +109,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.remove();
         barThreadLocal.remove();
 
-        try (Scope scope = snapshot.setThreadLocalValues()) {
+        try (Scope scope = snapshot.setThreadLocals()) {
             then(fooThreadLocal.get()).isEqualTo("fooValue");
             then(barThreadLocal.get()).isNull();
         }
@@ -135,12 +135,12 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.remove();
         barThreadLocal.remove();
 
-        try (Scope scope = snapshot.setThreadLocalValues(key -> key.equals("foo"))) {
+        try (Scope scope = snapshot.setThreadLocals(key -> key.equals("foo"))) {
             then(fooThreadLocal.get()).isEqualTo("fooValue");
             then(barThreadLocal.get()).isNull();
         }
 
-        try (Scope scope = snapshot.setThreadLocalValues(key -> key.equals("bar"))) {
+        try (Scope scope = snapshot.setThreadLocals(key -> key.equals("bar"))) {
             then(fooThreadLocal.get()).isNull();
             then(barThreadLocal.get()).isEqualTo("barValue");
         }

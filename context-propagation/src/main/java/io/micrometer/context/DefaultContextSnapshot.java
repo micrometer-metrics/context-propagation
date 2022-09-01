@@ -66,12 +66,12 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @Override
-    public Scope setThreadLocalValues() {
-        return setThreadLocalValues(key -> true);
+    public Scope setThreadLocals() {
+        return setThreadLocals(key -> true);
     }
 
     @Override
-    public Scope setThreadLocalValues(Predicate<Object> keyPredicate) {
+    public Scope setThreadLocals(Predicate<Object> keyPredicate) {
         Map<Object, Object> previousValues = null;
         for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
             Object key = accessor.key();
