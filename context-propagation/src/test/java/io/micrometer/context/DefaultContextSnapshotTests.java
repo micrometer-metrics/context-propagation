@@ -40,7 +40,7 @@ public class DefaultContextSnapshotTests {
         this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
 
         ObservationThreadLocalHolder.setValue("hello");
-        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(this.registry, key -> true);
+        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(key -> true, this.registry);
 
         ObservationThreadLocalHolder.setValue("hola");
         try {
@@ -80,7 +80,7 @@ public class DefaultContextSnapshotTests {
 
         then(ObservationThreadLocalHolder.getValue()).isNull();
 
-        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(this.registry, key -> true);
+        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(key -> true, this.registry);
 
         ObservationThreadLocalHolder.reset();
         then(ObservationThreadLocalHolder.getValue()).isNull();
@@ -104,7 +104,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(this.registry, key -> key.equals("foo"));
+        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(key -> key.equals("foo"), this.registry);
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -130,7 +130,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(this.registry, key -> true);
+        ContextSnapshot snapshot = ContextSnapshot.captureAllUsing(key -> true, this.registry);
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -161,7 +161,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        assertThat(ContextSnapshot.captureAllUsing(this.registry, key -> true).toString())
+        assertThat(ContextSnapshot.captureAllUsing(key -> true, this.registry).toString())
                 .isEqualTo("DefaultContextSnapshot{bar=barValue, foo=fooValue}");
 
         fooThreadLocal.remove();

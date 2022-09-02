@@ -138,30 +138,20 @@ public interface ContextSnapshot {
      * @return a snapshot with saved context values
      */
     static ContextSnapshot captureAll(Object... contexts) {
-        return captureAllUsing(ContextRegistry.getInstance(), key -> true, contexts);
+        return captureAllUsing(key -> true, ContextRegistry.getInstance(), contexts);
     }
 
     /**
-     * Variant of {@link #captureAll(Object...)} that uses a
-     * {@link Predicate} to decide which context values to capture.
-     * @param keyPredicate predicate for context value keys
-     * @param contexts one more context objects to extract values from
-     * @return a snapshot with saved context values
-     */
-    static ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, Object... contexts) {
-        return captureAllUsing(ContextRegistry.getInstance(), keyPredicate, contexts);
-    }
-
-    /**
-     * Variant of {@link #captureAllUsing(Predicate, Object...)} with a specific
-     * {@link ContextRegistry} instead of the global instance.
+     * Variant of {@link #captureAll(Object...)} with a predicate to filter
+     * context keys and with a specific {@link ContextRegistry} instance.
+     *
+     * @param keyPredicate    predicate for context value keys
      * @param contextRegistry the registry with the accessors to use
-     * @param keyPredicate predicate for context value keys
-     * @param contexts one more context objects to extract values from
+     * @param contexts        one more context objects to extract values from
      * @return a snapshot with saved context values
      */
     static ContextSnapshot captureAllUsing(
-            ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
+            Predicate<Object> keyPredicate, ContextRegistry contextRegistry, Object... contexts) {
 
         return DefaultContextSnapshot.captureAll(contextRegistry, keyPredicate, contexts);
     }
@@ -172,7 +162,16 @@ public interface ContextSnapshot {
      * @return the created {@link ContextSnapshot}
      */
     static ContextSnapshot captureFrom(Object context) {
-        return DefaultContextSnapshot.captureFromContext(ContextRegistry.getInstance(), key -> true, context, null);
+        return captureFrom(context, key -> true, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Create a {@link ContextSnapshot} by reading values from the given context object.
+     * @param context the context to read values from
+     * @return the created {@link ContextSnapshot}
+     */
+    static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {
+        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, context, null);
     }
 
     /**
