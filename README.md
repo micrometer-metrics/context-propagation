@@ -19,6 +19,8 @@ Abstractions:
 * `ContextRegistry` - registry for instances of `ThreadLocalAccessor` and `ContextAccessor`. 
 * `ContextSnapshot` - holder of contextual values, that provides methods to capture and to propagate.
 
+You can read the full [reference documentation here](https://micrometer.io/docs/contextPropagation).
+
 Example Scenarios:
 
 * In imperative code, e.g. Spring MVC controller, capture `ThreadLocal` values into a
