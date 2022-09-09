@@ -55,13 +55,36 @@ public class ContextRegistry {
 
     /**
      * Register a {@link ContextAccessor}. If there is an existing registration
-     * of the same {@code ContextAccessor} type, it is removed first.
+     * of another {@code ContextAccessor} that can work with its declared types,
+     * an exception is thrown.
      */
     public ContextRegistry registerContextAccessor(ContextAccessor<?, ?> accessor) {
         for (ContextAccessor<?, ?> existing : this.contextAccessors) {
-            if (existing.getClass().equals(accessor.getClass())) {
-                this.contextAccessors.remove(existing);
-                break;
+            if (existing.readableType().isAssignableFrom(accessor.readableType())) {
+                throw new IllegalArgumentException(
+                        "Already registered an accessor capable of reading "
+                                + accessor.readableType().getCanonicalName()
+                );
+            }
+            if (accessor.readableType().isAssignableFrom(existing.readableType())) {
+                throw new IllegalArgumentException(
+                        "Trying to register an accessor capable of reading "
+                                + existing.readableType().getCanonicalName() +
+                                " which already has a registered accessor"
+                );
+            }
+            if (existing.writeableType().isAssignableFrom(accessor.writeableType())) {
+                throw new IllegalArgumentException(
+                        "Already registered an accessor capable of writing "
+                                + accessor.writeableType().getCanonicalName()
+                );
+            }
+            if (accessor.writeableType().isAssignableFrom(existing.writeableType())) {
+                throw new IllegalArgumentException(
+                        "Trying to register an accessor capable of writing "
+                                + existing.writeableType().getCanonicalName() +
+                                " which already has a registered accessor"
+                );
             }
         }
         this.contextAccessors.add(accessor);
@@ -165,7 +188,7 @@ public class ContextRegistry {
      */
     public ContextAccessor<?, ?> getContextAccessorForRead(Object context) {
         for (ContextAccessor<?, ?> accessor : this.contextAccessors) {
-            if (accessor.canReadFrom(context.getClass())) {
+            if (accessor.readableType().isAssignableFrom(context.getClass())) {
                 return accessor;
             }
         }
@@ -179,7 +202,7 @@ public class ContextRegistry {
      */
     public ContextAccessor<?, ?> getContextAccessorForWrite(Object context) {
         for (ContextAccessor<?, ?> accessor : this.contextAccessors) {
-            if (accessor.canWriteTo(context.getClass())) {
+            if (accessor.writeableType().isAssignableFrom(context.getClass())) {
                 return accessor;
             }
         }

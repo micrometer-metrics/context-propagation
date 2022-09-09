@@ -19,6 +19,7 @@ package io.micrometer.context;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link ContextRegistry}.
@@ -31,15 +32,87 @@ public class ContextRegistryTests {
 
 
     @Test
-    void should_remove_existing_context_accessors_of_same_type() {
-        TestContextAccessor contextAccessor1 = new TestContextAccessor();
-        TestContextAccessor contextAccessor2 = new TestContextAccessor();
+    void should_reject_accessors_reading_and_writing_same_or_child_types() {
+        TestContextAccessor contextAccessor = new TestContextAccessor();
+        TestContextAccessor sameTypeContextAccessor = new TestContextAccessor();
+        FixedReadHashMapWriterAccessor childTypeWriterAccessor =
+                new FixedReadHashMapWriterAccessor();
+        HashMapReaderFixedWriterAccessor childTypeReaderAccessor =
+                new HashMapReaderFixedWriterAccessor();
 
-        this.registry.registerContextAccessor(contextAccessor1);
-        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor1);
+        this.registry.registerContextAccessor(contextAccessor);
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
-        this.registry.registerContextAccessor(contextAccessor2);
-        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor2);
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> this.registry.registerContextAccessor(sameTypeContextAccessor));
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> this.registry.registerContextAccessor(childTypeWriterAccessor));
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> this.registry.registerContextAccessor(childTypeReaderAccessor));
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+    }
+
+    @Test
+    void should_reject_accessors_reading_child_type_already_read_by_existing() {
+        TestContextAccessor contextAccessor = new TestContextAccessor();
+        HashMapReaderAccessor readChildTypeAccessor = new HashMapReaderAccessor();
+
+        this.registry.registerContextAccessor(contextAccessor);
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> this.registry.registerContextAccessor(readChildTypeAccessor));
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+    }
+
+    @Test
+    void should_reject_accessor_reading_parent_type_of_type_read_by_existing() {
+        HashMapReaderAccessor contextAccessor = new HashMapReaderAccessor();
+        TestContextAccessor readParentTypeAccessor = new TestContextAccessor();
+
+        this.registry.registerContextAccessor(contextAccessor);
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> this.registry.registerContextAccessor(readParentTypeAccessor));
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+    }
+
+    @Test
+    void should_reject_accessors_writing_child_type_already_read_by_existing() {
+        TestContextAccessor contextAccessor = new TestContextAccessor();
+        HashMapWriterAccessor writeChildTypeAccessor = new HashMapWriterAccessor();
+
+        this.registry.registerContextAccessor(contextAccessor);
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> this.registry.registerContextAccessor(writeChildTypeAccessor));
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+    }
+
+    @Test
+    void should_reject_accessor_writing_parent_type_of_type_read_by_existing() {
+        HashMapWriterAccessor contextAccessor = new HashMapWriterAccessor();
+        TestContextAccessor writeParentTypeAccessor = new TestContextAccessor();
+
+        this.registry.registerContextAccessor(contextAccessor);
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> this.registry.registerContextAccessor(writeParentTypeAccessor));
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
     }
 
     @Test
