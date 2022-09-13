@@ -1,4 +1,4 @@
-= Getting support for Micrometer Tracing
+= Getting support for Context Propagation
 
 == GitHub issues
 We choose not to use GitHub issues for general usage questions and support, preferring to
@@ -12,7 +12,7 @@ reproduces the problem.
 
 == Stack Overflow
 The Micrometer community monitors the
-https://stackoverflow.com/tags/micrometer[`micrometer-tracing`] tag on Stack Overflow. Before
+https://stackoverflow.com/tags/micrometer[`micrometer`] tag on Stack Overflow. Before
 asking a question, please familiarize yourself with Stack Overflow's
 https://stackoverflow.com/help/how-to-ask[advice on how to ask a good question].
 

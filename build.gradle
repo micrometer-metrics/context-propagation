@@ -45,141 +45,139 @@ allprojects {
 subprojects {
 	apply plugin: 'signing'
 
-	if (project.name != 'micrometer-tracing-bom') {
-		apply plugin: 'java-library'
-		apply plugin: 'com.github.hierynomus.license'
-		apply plugin: 'checkstyle'
-		apply plugin: 'io.spring.nohttp'
-		apply plugin: 'org.gradle.test-retry'
+	apply plugin: 'java-library'
+	apply plugin: 'com.github.hierynomus.license'
+	apply plugin: 'checkstyle'
+	apply plugin: 'io.spring.nohttp'
+	apply plugin: 'org.gradle.test-retry'
 
-		java {
-			// It is more idiomatic to define different features for different sets of optional
-			// dependencies, e.g., 'dropwizard' and 'reactor'. If this library published Gradle
-			// metadata, Gradle users would be able to use these feature names in their dependency
-			// declarations instead of understanding the actual required optional dependencies.
-			// But we don't publish Gradle metadata yet and this may be overkill so just have a
-			// single feature for now to correspond to any optional dependency.
-			registerFeature('optional') {
-				usingSourceSet(sourceSets.main)
-			}
+	java {
+		// It is more idiomatic to define different features for different sets of optional
+		// dependencies, e.g., 'dropwizard' and 'reactor'. If this library published Gradle
+		// metadata, Gradle users would be able to use these feature names in their dependency
+		// declarations instead of understanding the actual required optional dependencies.
+		// But we don't publish Gradle metadata yet and this may be overkill so just have a
+		// single feature for now to correspond to any optional dependency.
+		registerFeature('optional') {
+			usingSourceSet(sourceSets.main)
 		}
+	}
 
-		// All projects use optional annotations, but since we don't expose them downstream we would
-		// have to add the dependency in every project, which is tedious so just do it here.
-		dependencies {
-			// JSR-305 only used for non-required meta-annotations
-			optionalApi "com.google.code.findbugs:jsr305:latest.release"
-			checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:latest.release")
-		}
+	// All projects use optional annotations, but since we don't expose them downstream we would
+	// have to add the dependency in every project, which is tedious so just do it here.
+	dependencies {
+		// JSR-305 only used for non-required meta-annotations
+		optionalApi "com.google.code.findbugs:jsr305:latest.release"
+		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:latest.release")
+	}
 
-		tasks {
-			compileJava {
-				options.encoding = 'UTF-8'
-				options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+	tasks {
+		compileJava {
+			options.encoding = 'UTF-8'
+			options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
 
-				sourceCompatibility = JavaVersion.VERSION_1_8
-				targetCompatibility = JavaVersion.VERSION_1_8
-
-				// ensure Java 8 baseline is enforced for main source
-				if (JavaVersion.current().isJava9Compatible()) {
-					options.release = 8
-				}
-			}
-			compileTestJava {
-				options.encoding = 'UTF-8'
-				options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
-				sourceCompatibility = JavaVersion.VERSION_1_8
-				targetCompatibility = JavaVersion.VERSION_1_8
-			}
-
-			javadoc {
-				configure(options) {
-					tags(
-							'apiNote:a:API Note:',
-							'implSpec:a:Implementation Requirements:',
-							'implNote:a:Implementation Note:'
-					)
-				}
-			}
-		}
-
-		normalization {
-			runtimeClasspath {
-				metaInf {
-					[
-							'Build-Date',
-							'Built-By',
-							'Built-OS',
-							'Build-Host',
-							'Build-Job',
-							'Build-Number',
-							'Build-Id',
-							'Change',
-							'Full-Change',
-							'Branch',
-							'Module-Origin'
-					].each {
-						ignoreAttribute it
-						ignoreProperty it
-					}
-				}
-			}
-		}
-
-		//noinspection GroovyAssignabilityCheck
-		test {
-			// set heap size for the test JVM(s)
-			maxHeapSize = "1500m"
-
-			useJUnitPlatform {
-				excludeTags 'docker'
-			}
-
-			retry {
-				maxFailures = 5
-				maxRetries = 3
-			}
-		}
-
-		project.tasks.withType(Test) { Test testTask ->
-			testTask.testLogging.exceptionFormat = 'full'
-		}
-
-		license {
-			header rootProject.file('gradle/licenseHeader.txt')
-			strictCheck true
-			mapping {
-				kt = 'JAVADOC_STYLE'
-			}
-			sourceSets = project.sourceSets
-
-			ext.year = Calendar.getInstance().get(Calendar.YEAR)
-			skipExistingHeaders = true
-			exclude '**/*.json' // comments not supported
-		}
-
-		// Publish resolved versions.
-		plugins.withId('maven-publish') {
 			sourceCompatibility = JavaVersion.VERSION_1_8
 			targetCompatibility = JavaVersion.VERSION_1_8
 
-			publishing {
-				publications {
-					nebula(MavenPublication) {
-						versionMapping {
-							allVariants {
-								fromResolutionResult()
-							}
-						}
+			// ensure Java 8 baseline is enforced for main source
+			if (JavaVersion.current().isJava9Compatible()) {
+				options.release = 8
+			}
+		}
+		compileTestJava {
+			options.encoding = 'UTF-8'
+			options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+			sourceCompatibility = JavaVersion.VERSION_1_8
+			targetCompatibility = JavaVersion.VERSION_1_8
+		}
 
-						// We publish resolved versions so don't need to publish our dependencyManagement
-						// too. This is different from many Maven projects, where published artifacts often
-						// don't include resolved versions and have a parent POM including dependencyManagement.
-						pom.withXml {
-							def dependencyManagement = asNode().get('dependencyManagement')
-							if (dependencyManagement != null) {
-								asNode().remove(dependencyManagement)
-							}
+		javadoc {
+			configure(options) {
+				tags(
+						'apiNote:a:API Note:',
+						'implSpec:a:Implementation Requirements:',
+						'implNote:a:Implementation Note:'
+				)
+			}
+		}
+	}
+
+	normalization {
+		runtimeClasspath {
+			metaInf {
+				[
+						'Build-Date',
+						'Built-By',
+						'Built-OS',
+						'Build-Host',
+						'Build-Job',
+						'Build-Number',
+						'Build-Id',
+						'Change',
+						'Full-Change',
+						'Branch',
+						'Module-Origin'
+				].each {
+					ignoreAttribute it
+					ignoreProperty it
+				}
+			}
+		}
+	}
+
+	//noinspection GroovyAssignabilityCheck
+	test {
+		// set heap size for the test JVM(s)
+		maxHeapSize = "1500m"
+
+		useJUnitPlatform {
+			excludeTags 'docker'
+		}
+
+		retry {
+			maxFailures = 5
+			maxRetries = 3
+		}
+	}
+
+	project.tasks.withType(Test) { Test testTask ->
+		testTask.testLogging.exceptionFormat = 'full'
+	}
+
+	license {
+		header rootProject.file('gradle/licenseHeader.txt')
+		strictCheck true
+		mapping {
+			kt = 'JAVADOC_STYLE'
+		}
+		sourceSets = project.sourceSets
+
+		ext.year = Calendar.getInstance().get(Calendar.YEAR)
+		skipExistingHeaders = true
+		exclude '**/*.json' // comments not supported
+	}
+
+	// Publish resolved versions.
+	plugins.withId('maven-publish') {
+		sourceCompatibility = JavaVersion.VERSION_1_8
+		targetCompatibility = JavaVersion.VERSION_1_8
+
+		publishing {
+			publications {
+				nebula(MavenPublication) {
+					versionMapping {
+						allVariants {
+							fromResolutionResult()
+						}
+					}
+
+					// We publish resolved versions so don't need to publish our dependencyManagement
+					// too. This is different from many Maven projects, where published artifacts often
+					// don't include resolved versions and have a parent POM including dependencyManagement.
+					pom.withXml {
+						def dependencyManagement = asNode().get('dependencyManagement')
+						if (dependencyManagement != null) {
+							asNode().remove(dependencyManagement)
 						}
 					}
 				}
@@ -261,13 +259,11 @@ subprojects {
 		apply plugin: 'nebula.info'
 		apply plugin: 'nebula.project'
 
-		if (project.name != 'micrometer-tracing-bom') {
-			jar {
-				manifest.attributes.put('Automatic-Module-Name', project.name.replace('-', '.'))
-				metaInf {
-					from "$rootDir/LICENSE"
-					from "$rootDir/NOTICE"
-				}
+		jar {
+			manifest.attributes.put('Automatic-Module-Name', project.name.replace('-', '.'))
+			metaInf {
+				from "$rootDir/LICENSE"
+				from "$rootDir/NOTICE"
 			}
 		}
 
@@ -287,7 +283,7 @@ subprojects {
 		}
 	}
 
-	description = 'Facade over tracing concepts'
+	description = 'A library that assists with context propagation across different types of context mechanisms such as ThreadLocal, Reactor Context etc.'
 
 	repositories {
 		mavenCentral()

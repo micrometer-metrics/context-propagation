@@ -17,7 +17,7 @@ contributions in all forms.
 For example, those with Micrometer Context Propagation knowledge and experience can contribute by:
 
 * TODO: [Contributing documentation]()
-* Answering [Stackoverflow questions](https://stackoverflow.com/tags/micrometer-tracing)
+* Answering [Stackoverflow questions](https://stackoverflow.com/tags/micrometer)
 * Answering questions on the [Micrometer slack](https://slack.micrometer.io)
 * Share Micrometer Context Propagation knowledge in other ways (e.g. presentations, blogs)
 
@@ -31,7 +31,7 @@ the [Contributor License Agreement](https://cla.pivotal.io/sign/pivotal) if you 
 
 ## Getting the source
 
-The Micrometer Context Propagation source code is hosted on GitHub at https://github.com/micrometer-metrics/tracing. You can use a
+The Micrometer Context Propagation source code is hosted on GitHub at https://github.com/micrometer-metrics/context-propagation. You can use a
 Git client to clone the source code to your local machine.
 
 ## Building

@@ -69,7 +69,7 @@ These artifacts work with Java 8 or later.
 
 ## Contributing
 
-See our [Contributing Guide](CONTRIBUTING.md) for information about contributing to Micrometer Tracing.
+See our [Contributing Guide](CONTRIBUTING.md) for information about contributing to Micrometer Context Propagation.
 
 ## Join the discussion
 
