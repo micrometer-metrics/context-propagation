@@ -18,6 +18,7 @@ package io.micrometer.context;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -126,9 +127,17 @@ public interface ContextSnapshot {
      * @param executorService the executorService to instrument
      */
     default ExecutorService wrapExecutorService(ExecutorService executorService) {
-        return new ContextExecutorService(executorService, this);
+        return new ContextPropagatingExecutorService<>(executorService, this);
     }
 
+    /**
+     * Return a new {@code ScheduledExecutorService} that sets {@code ThreadLocal} values from
+     * the snapshot around the invocation of any executed task.
+     * @param scheduledExecutorService the scheduledExecutorService to instrument
+     */
+    default ScheduledExecutorService wrapScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
+        return new ContextPropagatingScheduledExecutorService(scheduledExecutorService, this);
+    }
 
     /**
      * Capture values from {@link ThreadLocal} and from other context objects
