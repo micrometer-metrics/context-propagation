@@ -34,11 +34,11 @@ import java.util.stream.Collectors;
  * @author Rossen Stoyanchev
  * @since 1.0.0
  */
-class ContextExecutorService<EXECUTOR extends ExecutorService> implements ExecutorService {
+class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implements ExecutorService {
 
-    final ContextSnapshot contextSnapshot;
+    private final ContextSnapshot contextSnapshot;
 
-    final EXECUTOR executorService;
+    private final EXECUTOR executorService;
 
 
     /**
@@ -46,7 +46,7 @@ class ContextExecutorService<EXECUTOR extends ExecutorService> implements Execut
      * @param executorService the {@code ExecutorService} to delegate to
      * @param contextSnapshot the {@code ContextSnapshot} with values to propagate
      */
-    ContextExecutorService(EXECUTOR executorService, ContextSnapshot contextSnapshot) {
+    ContextPropagatingExecutorService(EXECUTOR executorService, ContextSnapshot contextSnapshot) {
         this.contextSnapshot = contextSnapshot;
         this.executorService = executorService;
     }
@@ -143,4 +143,11 @@ class ContextExecutorService<EXECUTOR extends ExecutorService> implements Execut
         this.executorService.execute(this.contextSnapshot.wrap(command));
     }
 
+    ContextSnapshot getContextSnapshot() {
+        return this.contextSnapshot;
+    }
+
+    EXECUTOR getExecutorService() {
+        return this.executorService;
+    }
 }

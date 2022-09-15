@@ -127,7 +127,7 @@ public interface ContextSnapshot {
      * @param executorService the executorService to instrument
      */
     default ExecutorService wrapExecutorService(ExecutorService executorService) {
-        return new ContextExecutorService(executorService, this);
+        return new ContextPropagatingExecutorService<>(executorService, this);
     }
 
     /**
@@ -136,7 +136,7 @@ public interface ContextSnapshot {
      * @param scheduledExecutorService the scheduledExecutorService to instrument
      */
     default ScheduledExecutorService wrapScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
-        return new ContextScheduledExecutorService(scheduledExecutorService, this);
+        return new ContextPropagatingScheduledExecutorService(scheduledExecutorService, this);
     }
 
     /**

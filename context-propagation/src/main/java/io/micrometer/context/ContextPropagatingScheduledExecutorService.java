@@ -30,34 +30,34 @@ import java.util.concurrent.TimeUnit;
  * @author Rossen Stoyanchev
  * @since 1.0.0
  */
-final class ContextScheduledExecutorService extends ContextExecutorService<ScheduledExecutorService> implements ScheduledExecutorService {
+final class ContextPropagatingScheduledExecutorService extends ContextPropagatingExecutorService<ScheduledExecutorService> implements ScheduledExecutorService {
 
     /**
      * Create an instance
      * @param executorService the {@code ScheduledExecutorService} to delegate to
      * @param contextSnapshot the {@code ContextSnapshot} with values to propagate
      */
-    ContextScheduledExecutorService(ScheduledExecutorService executorService, ContextSnapshot contextSnapshot) {
+    ContextPropagatingScheduledExecutorService(ScheduledExecutorService executorService, ContextSnapshot contextSnapshot) {
         super(executorService, contextSnapshot);
     }
 
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
-        return this.executorService.schedule(this.contextSnapshot.wrap(command), delay, unit);
+        return getExecutorService().schedule(getContextSnapshot().wrap(command), delay, unit);
     }
 
     @Override
     public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
-        return this.executorService.schedule(this.contextSnapshot.wrap(callable), delay, unit);
+        return getExecutorService().schedule(getContextSnapshot().wrap(callable), delay, unit);
     }
 
     @Override
     public ScheduledFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
-        return this.executorService.scheduleAtFixedRate(this.contextSnapshot.wrap(command), initialDelay, period, unit);
+        return getExecutorService().scheduleAtFixedRate(getContextSnapshot().wrap(command), initialDelay, period, unit);
     }
 
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        return this.executorService.scheduleWithFixedDelay(this.contextSnapshot.wrap(command), initialDelay, delay, unit);
+        return getExecutorService().scheduleWithFixedDelay(getContextSnapshot().wrap(command), initialDelay, delay, unit);
     }
 }
