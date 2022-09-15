@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -124,6 +125,29 @@ class ContextWrappingTests {
         }
     }
 
+    @Test
+    void should_instrument_scheduled_executor_service() throws InterruptedException, ExecutionException, TimeoutException {
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        try {
+            ObservationThreadLocalHolder.setValue("hello");
+            AtomicReference<String> valueInNewThread = new AtomicReference<>();
+            runInNewThread(executorService, valueInNewThread,
+                    atomic -> then(atomic.get())
+                            .as("By default thread local information should not be propagated")
+                            .isNull());
+
+            runInNewThread(
+                    ContextSnapshot.captureAllUsing(key -> true, this.registry).wrapExecutorService(executorService),
+                    valueInNewThread,
+                    atomic -> then(atomic.get())
+                            .as("With context container the thread local information should be propagated")
+                            .isEqualTo("hello"));
+        }
+        finally {
+            executorService.shutdown();
+        }
+    }
+
     private void runInNewThread(Runnable runnable) throws InterruptedException {
         Thread thread = new Thread(runnable);
         thread.start();
@@ -173,6 +197,25 @@ class ContextWrappingTests {
         assertion.accept(valueInNewThread);
 
         executor.invokeAny(Collections.singletonList(callable(valueInNewThread)), 5, TimeUnit.MILLISECONDS);
+        assertion.accept(valueInNewThread);
+    }
+
+    private void runInNewThread(
+            ScheduledExecutorService executor, AtomicReference<String> valueInNewThread,
+            Consumer<AtomicReference<String>> assertion)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        runInNewThread((ExecutorService) executor, valueInNewThread, assertion);
+
+        executor.schedule(runnable(valueInNewThread), 0, TimeUnit.MILLISECONDS).get(5, TimeUnit.MILLISECONDS);
+        assertion.accept(valueInNewThread);
+
+        executor.schedule(callable(valueInNewThread), 0, TimeUnit.MILLISECONDS).get(5, TimeUnit.MILLISECONDS);;
+        assertion.accept(valueInNewThread);
+
+        executor.scheduleAtFixedRate(runnable(valueInNewThread), 0, 1, TimeUnit.MILLISECONDS).cancel(true);
+        assertion.accept(valueInNewThread);
+
+        executor.scheduleWithFixedDelay(runnable(valueInNewThread), 0, 1, TimeUnit.MILLISECONDS).cancel(true);
         assertion.accept(valueInNewThread);
     }
 
