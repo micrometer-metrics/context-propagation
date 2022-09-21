@@ -15,6 +15,9 @@
  */
 package io.micrometer.context;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.Test;
 
@@ -131,4 +134,138 @@ public class ContextRegistryTests {
         assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor2, accessor3);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static class HashMapReaderAccessor implements ContextAccessor<HashMap, Map> {
+
+        @Override
+        public Class<? extends HashMap> readableType() {
+            return HashMap.class;
+        }
+
+        @Override
+        public void readValues(HashMap sourceContext,
+                Predicate<Object> keyPredicate,
+                Map<Object, Object> readValues) {
+            readValues.putAll(sourceContext);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T readValue(HashMap sourceContext, Object key) {
+            return (T) sourceContext.get(key);
+        }
+
+        @Override
+        public Class<? extends Map> writeableType() {
+            return Map.class;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Map writeValues(Map<Object, Object> valuesToWrite,
+                Map targetContext) {
+            targetContext.putAll(valuesToWrite);
+            return targetContext;
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static class HashMapWriterAccessor implements ContextAccessor<Map, HashMap> {
+
+        @Override
+        public Class<? extends Map> readableType() {
+            return Map.class;
+        }
+
+        @Override
+        public void readValues(Map sourceContext,
+                Predicate<Object> keyPredicate,
+                Map<Object, Object> readValues) {
+            readValues.putAll(sourceContext);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T readValue(Map sourceContext, Object key) {
+            return (T) sourceContext.get(key);
+        }
+
+        @Override
+        public Class<? extends HashMap> writeableType() {
+            return HashMap.class;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public HashMap writeValues(Map<Object, Object> valuesToWrite,
+                HashMap targetContext) {
+            targetContext.putAll(valuesToWrite);
+            return targetContext;
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static class FixedReadHashMapWriterAccessor implements ContextAccessor<String, HashMap> {
+
+        @Override
+        public Class<? extends String> readableType() {
+            return String.class;
+        }
+
+        @Override
+        public void readValues(String sourceContext,
+                Predicate<Object> keyPredicate,
+                Map<Object, Object> readValues) {
+            readValues.put("DUMMY", sourceContext);
+        }
+
+        @Override
+        public <T> T readValue(String sourceContext, Object key) {
+            return null;
+        }
+
+        @Override
+        public Class<? extends HashMap> writeableType() {
+            return HashMap.class;
+        }
+
+        @Override
+        public HashMap writeValues(Map<Object, Object> valuesToWrite,
+                HashMap targetContext) {
+            targetContext.putAll(valuesToWrite);
+            return targetContext;
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static class HashMapReaderFixedWriterAccessor implements ContextAccessor<HashMap, String> {
+
+        @Override
+        public Class<? extends HashMap> readableType() {
+            return HashMap.class;
+        }
+
+        @Override
+        public void readValues(HashMap sourceContext,
+                Predicate<Object> keyPredicate,
+                Map<Object, Object> readValues) {
+            readValues.putAll(sourceContext);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> T readValue(HashMap sourceContext, Object key) {
+            return (T) sourceContext.get(key);
+        }
+
+        @Override
+        public Class<? extends String> writeableType() {
+            return String.class;
+        }
+
+        @Override
+        public String writeValues(Map<Object, Object> valuesToWrite, String targetContext) {
+            return "DUMMY";
+        }
+    }
 }

@@ -36,12 +36,13 @@ public interface ContextAccessor<READ, WRITE> {
      * {@link Class} representing the type of context this accessor is capable of
      * reading values from.
      */
-    Class<?> readableType();
+    Class<? extends READ> readableType();
 
     /**
      * Read values from a source context into a {@link Map}.
      * @param sourceContext the context to read from; the context type should be
-     * checked with {@link #canReadFrom(Class)} before this method is called
+     * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
+     * {@link #readableType()}.
      * @param keyPredicate a predicate to decide which keys to read
      * @param readValues a map where to put read values
      */
@@ -61,7 +62,7 @@ public interface ContextAccessor<READ, WRITE> {
     /**
      * {@link Class} representing the type of context this accessor can restore values to.
      */
-    Class<?> writeableType();
+    Class<? extends WRITE> writeableType();
 
     /**
      * Write values from a {@link Map} to a target context.

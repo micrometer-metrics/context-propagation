@@ -60,30 +60,26 @@ public class ContextRegistry {
      */
     public ContextRegistry registerContextAccessor(ContextAccessor<?, ?> accessor) {
         for (ContextAccessor<?, ?> existing : this.contextAccessors) {
-            if (existing.readableType().isAssignableFrom(accessor.readableType())) {
+            if (existing.readableType().isAssignableFrom(accessor.readableType()) ||
+                    accessor.readableType().isAssignableFrom(existing.readableType())) {
                 throw new IllegalArgumentException(
-                        "Already registered an accessor capable of reading "
-                                + accessor.readableType().getCanonicalName()
+                        "Found an already registered accessor (" +
+                        existing.getClass().getCanonicalName() + ") reading " +
+                        existing.readableType().getCanonicalName() +
+                        " when trying to add accessor (" +
+                        accessor.getClass().getCanonicalName() + ") reading " +
+                        accessor.readableType().getCanonicalName()
                 );
             }
-            if (accessor.readableType().isAssignableFrom(existing.readableType())) {
+            if (existing.writeableType().isAssignableFrom(accessor.writeableType()) ||
+                    accessor.writeableType().isAssignableFrom(existing.writeableType())) {
                 throw new IllegalArgumentException(
-                        "Trying to register an accessor capable of reading "
-                                + existing.readableType().getCanonicalName() +
-                                " which already has a registered accessor"
-                );
-            }
-            if (existing.writeableType().isAssignableFrom(accessor.writeableType())) {
-                throw new IllegalArgumentException(
-                        "Already registered an accessor capable of writing "
-                                + accessor.writeableType().getCanonicalName()
-                );
-            }
-            if (accessor.writeableType().isAssignableFrom(existing.writeableType())) {
-                throw new IllegalArgumentException(
-                        "Trying to register an accessor capable of writing "
-                                + existing.writeableType().getCanonicalName() +
-                                " which already has a registered accessor"
+                        "Found an already registered accessor (" +
+                                existing.getClass().getCanonicalName() + ") writing " +
+                                existing.writeableType().getCanonicalName() +
+                                " when trying to add accessor (" +
+                                accessor.getClass().getCanonicalName() + ") writing " +
+                                accessor.writeableType().getCanonicalName()
                 );
             }
         }
