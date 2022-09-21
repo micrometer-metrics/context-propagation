@@ -33,15 +33,16 @@ import java.util.function.Predicate;
 public interface ContextAccessor<READ, WRITE> {
 
     /**
-     * Whether this accessor can capture values from the given type of context.
-     * @param contextType the type of external context
+     * {@link Class} representing the type of context this accessor is capable of
+     * reading values from.
      */
-    boolean canReadFrom(Class<?> contextType);
+    Class<? extends READ> readableType();
 
     /**
      * Read values from a source context into a {@link Map}.
      * @param sourceContext the context to read from; the context type should be
-     * checked with {@link #canReadFrom(Class)} before this method is called
+     * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
+     * {@link #readableType()}.
      * @param keyPredicate a predicate to decide which keys to read
      * @param readValues a map where to put read values
      */
@@ -50,7 +51,8 @@ public interface ContextAccessor<READ, WRITE> {
     /**
      * Read a single value from the source context.
      * @param sourceContext the context to read from; the context type should be
-     * checked with {@link #canReadFrom(Class)} before this method is called
+     * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
+     * {@link #readableType()}.
      * @param key the key to use to look up the context value
      * @return the value, if any
      */
@@ -58,16 +60,16 @@ public interface ContextAccessor<READ, WRITE> {
     <T> T readValue(READ sourceContext, Object key);
 
     /**
-     * Whether this accessor can restore values to the given type of context.
-     * @param contextType the type of external context
+     * {@link Class} representing the type of context this accessor can restore values to.
      */
-    boolean canWriteTo(Class<?> contextType);
+    Class<? extends WRITE> writeableType();
 
     /**
      * Write values from a {@link Map} to a target context.
      * @param valuesToWrite the values to write to the target context
      * @param targetContext the context to write to; the context type should be
-     * checked with {@link #canWriteTo(Class)}  before this method is called
+     * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
+     * {@link #writeableType()}.
      * @return a context with the written values
      */
     WRITE writeValues(Map<Object, Object> valuesToWrite, WRITE targetContext);

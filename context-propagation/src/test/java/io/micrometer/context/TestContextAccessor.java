@@ -24,35 +24,36 @@ import java.util.function.Predicate;
  *
  * @author Rossen Stoyanchev
  */
-class TestContextAccessor implements ContextAccessor<Map<?, ?>, Map<?, ?>> {
+@SuppressWarnings({"unchecked", "rawtypes"})
+class TestContextAccessor implements ContextAccessor<Map, Map> {
 
     @Override
-    public boolean canReadFrom(Class<?> contextType) {
-        return Map.class.isAssignableFrom(contextType);
+    public Class<Map> readableType() {
+        return Map.class;
     }
 
     @Override
-    public void readValues(Map<?, ?> sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues) {
+    public void readValues(
+            Map sourceContext, Predicate<Object> keyPredicate,
+            Map<Object, Object> readValues
+    ) {
         readValues.putAll(sourceContext);
     }
 
-    @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <T> T readValue(Map<?, ?> sourceContext, Object key) {
+    public <T> T readValue(Map sourceContext, Object key) {
         return (T) sourceContext.get(key);
     }
 
     @Override
-    public boolean canWriteTo(Class<?> contextType) {
-        return Map.class.isAssignableFrom(contextType);
+    public Class<Map> writeableType() {
+        return Map.class;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Map<?, ?> writeValues(Map<Object, Object> valuesToWrite, Map<?, ?> targetContext) {
-        ((Map<Object, Object>) targetContext).putAll(valuesToWrite);
+    public Map writeValues(Map<Object, Object> valuesToWrite, Map targetContext) {
+        targetContext.putAll(valuesToWrite);
         return targetContext;
     }
-
 }
