@@ -71,6 +71,13 @@ These artifacts work with Java 8 or later.
 
 See our [Contributing Guide](CONTRIBUTING.md) for information about contributing to Micrometer Context Propagation.
 
+## Code formatting
+
+The [spring-javaformat plugin](https://github.com/spring-io/spring-javaformat) is configured to check and apply consistent formatting in the codebase through the build.
+The `checkFormat` task checks the formatting as part of the `check` task.
+Apply formatting with the `format` task.
+You should rely on the formatting the `format` task applies instead of your IDE's configured formatting.
+
 ## Join the discussion
 
 Join the [Micrometer Slack](https://slack.micrometer.io) (#context-propagation channel) to share your questions, concerns, and feature requests.
