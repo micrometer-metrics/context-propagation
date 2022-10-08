@@ -109,6 +109,7 @@ subprojects {
 			metaInf {
 				[
 						'Build-Date',
+						'Build-Date-UTC',
 						'Built-By',
 						'Built-OS',
 						'Build-Host',
@@ -118,7 +119,9 @@ subprojects {
 						'Change',
 						'Full-Change',
 						'Branch',
-						'Module-Origin'
+						'Module-Origin',
+						'Created-By',
+						'Build-Java-Version'
 				].each {
 					ignoreAttribute it
 					ignoreProperty it
@@ -150,7 +153,7 @@ subprojects {
 		header rootProject.file('gradle/licenseHeader.txt')
 		strictCheck true
 		mapping {
-			kt = 'JAVADOC_STYLE'
+			kt = 'SLASHSTAR_STYLE'
 		}
 		sourceSets = project.sourceSets
 
@@ -289,13 +292,6 @@ subprojects {
 
 	repositories {
 		mavenCentral()
-		if (((String) project.version).matches(".*-(M|RC)[0-9][0-9]?")) {
-			maven { url "https://repo.spring.io/milestone" }
-		}
-		if (((String) project.version).endsWith("SNAPSHOT")) {
-			maven { url "https://repo.spring.io/snapshot" }
-		}
-		mavenLocal()
 	}
 
 	def check = tasks.findByName('check')
