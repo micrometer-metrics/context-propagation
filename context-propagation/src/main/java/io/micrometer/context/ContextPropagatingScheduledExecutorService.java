@@ -21,23 +21,24 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-
 /**
- * Wrap and delegate to an {@link ExecutorService} in order to instrument all
- * tasks executed through it.
+ * Wrap and delegate to an {@link ExecutorService} in order to instrument all tasks
+ * executed through it.
  *
  * @author Marcin Grzejszczak
  * @author Rossen Stoyanchev
  * @since 1.0.0
  */
-final class ContextPropagatingScheduledExecutorService extends ContextPropagatingExecutorService<ScheduledExecutorService> implements ScheduledExecutorService {
+final class ContextPropagatingScheduledExecutorService
+        extends ContextPropagatingExecutorService<ScheduledExecutorService> implements ScheduledExecutorService {
 
     /**
      * Create an instance
      * @param executorService the {@code ScheduledExecutorService} to delegate to
      * @param contextSnapshot the {@code ContextSnapshot} with values to propagate
      */
-    ContextPropagatingScheduledExecutorService(ScheduledExecutorService executorService, ContextSnapshot contextSnapshot) {
+    ContextPropagatingScheduledExecutorService(ScheduledExecutorService executorService,
+            ContextSnapshot contextSnapshot) {
         super(executorService, contextSnapshot);
     }
 
@@ -58,6 +59,8 @@ final class ContextPropagatingScheduledExecutorService extends ContextPropagatin
 
     @Override
     public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-        return getExecutorService().scheduleWithFixedDelay(getContextSnapshot().wrap(command), initialDelay, delay, unit);
+        return getExecutorService().scheduleWithFixedDelay(getContextSnapshot().wrap(command), initialDelay, delay,
+                unit);
     }
+
 }

@@ -31,11 +31,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
     private final ContextRegistry contextRegistry;
 
-
     DefaultContextSnapshot(ContextRegistry contextRegistry) {
         this.contextRegistry = contextRegistry;
     }
-
 
     @Override
     public <C> C updateContext(C context) {
@@ -83,8 +81,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    private static <V> Map<Object, Object> setThreadLocal(
-            Object key, V value, ThreadLocalAccessor<?> accessor, @Nullable Map<Object, Object> previousValues) {
+    private static <V> Map<Object, Object> setThreadLocal(Object key, V value, ThreadLocalAccessor<?> accessor,
+            @Nullable Map<Object, Object> previousValues) {
 
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
         previousValues.put(key, accessor.getValue());
@@ -109,8 +107,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         return DefaultScope.from(previousValues, registry);
     }
 
-    static ContextSnapshot captureAll(
-            ContextRegistry contextRegistry, Predicate<Object> keyPredicate, Object... contexts) {
+    static ContextSnapshot captureAll(ContextRegistry contextRegistry, Predicate<Object> keyPredicate,
+            Object... contexts) {
 
         DefaultContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, contextRegistry);
         for (Object context : contexts) {
@@ -120,8 +118,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @Nullable
-    private static DefaultContextSnapshot captureFromThreadLocals(
-            Predicate<Object> keyPredicate, ContextRegistry contextRegistry) {
+    private static DefaultContextSnapshot captureFromThreadLocals(Predicate<Object> keyPredicate,
+            ContextRegistry contextRegistry) {
 
         DefaultContextSnapshot snapshot = null;
         for (ThreadLocalAccessor<?> accessor : contextRegistry.getThreadLocalAccessors()) {
@@ -137,9 +135,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    static DefaultContextSnapshot captureFromContext(
-            Predicate<Object> keyPredicate, ContextRegistry contextRegistry, Object context,
-            @Nullable DefaultContextSnapshot snapshot) {
+    static DefaultContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
+            Object context, @Nullable DefaultContextSnapshot snapshot) {
 
         ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
         snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
@@ -151,7 +148,6 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     public String toString() {
         return "DefaultContextSnapshot" + super.toString();
     }
-
 
     /**
      * Default implementation of {@link Scope}.
@@ -188,7 +184,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         }
 
         public static Scope from(@Nullable Map<Object, Object> previousValues, ContextRegistry registry) {
-            return (previousValues != null ? new DefaultScope(previousValues, registry) : () -> { });
+            return (previousValues != null ? new DefaultScope(previousValues, registry) : () -> {
+            });
         }
 
     }

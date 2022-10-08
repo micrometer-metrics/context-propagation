@@ -27,19 +27,20 @@ import javax.annotation.meta.When;
 
 /**
  * Annotation to declare that a method parameter, return value, or field can be
- * {@code null} under some circumstance. Uses JSR-305 meta-annotations to
- * indicate nullability. Overridden methods override should redeclare the
- * annotation unless they behave differently.
+ * {@code null} under some circumstance. Uses JSR-305 meta-annotations to indicate
+ * nullability. Overridden methods override should redeclare the annotation unless they
+ * behave differently.
  *
  * @author Rossen Stoyanchev
  * @since 1.0.0
  * @see NonNullApi
  * @see NonNullFields
  */
-@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
+@Target({ ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Nonnull(when = When.MAYBE)
 @TypeQualifierNickname
 @interface Nullable {
+
 }

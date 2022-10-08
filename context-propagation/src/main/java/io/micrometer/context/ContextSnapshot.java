@@ -23,10 +23,11 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * Holds values extracted from {@link ThreadLocal} and other types of context and
- * exposes methods to propagate those values.
+ * Holds values extracted from {@link ThreadLocal} and other types of context and exposes
+ * methods to propagate those values.
  *
- * <p>Use static factory methods on this interface to create a snapshot.
+ * <p>
+ * Use static factory methods on this interface to create a snapshot.
  *
  * @author Rossen Stoyanchev
  * @since 1.0.0
@@ -42,8 +43,8 @@ public interface ContextSnapshot {
     <C> C updateContext(C context);
 
     /**
-     * Variant of {@link #updateContext(Object)} to update the given context
-     * with a subset of snapshot values.
+     * Variant of {@link #updateContext(Object)} to update the given context with a subset
+     * of snapshot values.
      * @param context the context to write to
      * @param keyPredicate predicate for context value keys
      * @return a context, possibly a new instance, with the written values
@@ -53,24 +54,24 @@ public interface ContextSnapshot {
 
     /**
      * Set {@link ThreadLocal} values from the snapshot.
-     * @return an object that can be used to reset {@link ThreadLocal} values
-     * at the end of the context scope, either removing them or restoring their
-     * previous values, if any.
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
      */
     Scope setThreadLocals();
 
     /**
-     * Variant of {@link #setThreadLocals()} with a predicate to select
-     * context values by key.
-     * @return an object that can be used to reset {@link ThreadLocal} values
-     * at the end of the context scope, either removing them or restoring their
-     * previous values, if any.
+     * Variant of {@link #setThreadLocals()} with a predicate to select context values by
+     * key.
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
      */
     Scope setThreadLocals(Predicate<Object> keyPredicate);
 
     /**
-     * Return a new {@code Runnable} that sets {@code ThreadLocal} values from
-     * the snapshot around the invocation of the given {@code Runnable}.
+     * Return a new {@code Runnable} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Runnable}.
      * @param runnable the runnable to instrument
      */
     default Runnable wrap(Runnable runnable) {
@@ -82,8 +83,8 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Return a new {@code Callable} that sets {@code ThreadLocal} values from
-     * the snapshot around the invocation of the given {@code Callable}.
+     * Return a new {@code Callable} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Callable}.
      * @param callable the callable to instrument
      * @param <T> the type of value produced by the {@code Callable}
      */
@@ -96,8 +97,8 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Return a new {@code Consumer} that sets {@code ThreadLocal} values from
-     * the snapshot around the invocation of the given {@code Consumer}.
+     * Return a new {@code Consumer} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Consumer}.
      * @param consumer the callable to instrument
      * @param <T> the type of value produced by the {@code Callable}
      */
@@ -110,8 +111,8 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Return a new {@code Executor} that sets {@code ThreadLocal} values from
-     * the snapshot around the invocation of any executed, {@code Runnable}.
+     * Return a new {@code Executor} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of any executed, {@code Runnable}.
      * @param executor the executor to instrument
      */
     default Executor wrapExecutor(Executor executor) {
@@ -122,8 +123,8 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from
-     * the snapshot around the invocation of any executed task.
+     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of any executed task.
      * @param executorService the executorService to instrument
      */
     default ExecutorService wrapExecutorService(ExecutorService executorService) {
@@ -131,8 +132,8 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Return a new {@code ScheduledExecutorService} that sets {@code ThreadLocal} values from
-     * the snapshot around the invocation of any executed task.
+     * Return a new {@code ScheduledExecutorService} that sets {@code ThreadLocal} values
+     * from the snapshot around the invocation of any executed task.
      * @param scheduledExecutorService the scheduledExecutorService to instrument
      */
     default ScheduledExecutorService wrapScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
@@ -140,9 +141,9 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Capture values from {@link ThreadLocal} and from other context objects
-     * using all accessors from the {@link ContextRegistry#getInstance() global}
-     * ContextRegistry instance.
+     * Capture values from {@link ThreadLocal} and from other context objects using all
+     * accessors from the {@link ContextRegistry#getInstance() global} ContextRegistry
+     * instance.
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
@@ -151,16 +152,15 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Variant of {@link #captureAll(Object...)} with a predicate to filter
-     * context keys and with a specific {@link ContextRegistry} instance.
-     *
-     * @param keyPredicate    predicate for context value keys
+     * Variant of {@link #captureAll(Object...)} with a predicate to filter context keys
+     * and with a specific {@link ContextRegistry} instance.
+     * @param keyPredicate predicate for context value keys
      * @param contextRegistry the registry with the accessors to use
-     * @param contexts        one more context objects to extract values from
+     * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    static ContextSnapshot captureAllUsing(
-            Predicate<Object> keyPredicate, ContextRegistry contextRegistry, Object... contexts) {
+    static ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
+            Object... contexts) {
 
         return DefaultContextSnapshot.captureAll(contextRegistry, keyPredicate, contexts);
     }
@@ -184,15 +184,15 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Read the values specified by from the given source context, and if found,
-     * use them to set {@link ThreadLocal} values. Essentially, a shortcut that
-     * bypasses the need to create of {@link ContextSnapshot} first via
-     * {@link #captureAll(Object...)}, followed by {@link #setThreadLocals()}.
+     * Read the values specified by from the given source context, and if found, use them
+     * to set {@link ThreadLocal} values. Essentially, a shortcut that bypasses the need
+     * to create of {@link ContextSnapshot} first via {@link #captureAll(Object...)},
+     * followed by {@link #setThreadLocals()}.
      * @param sourceContext the source context to read values from
      * @param keys the keys of the values to read
-     * @return an object that can be used to reset {@link ThreadLocal} values
-     * at the end of the context scope, either removing them or restoring their
-     * previous values, if any.
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
      */
     static Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
         return setThreadLocalsFrom(sourceContext, ContextRegistry.getInstance(), keys);
@@ -204,24 +204,22 @@ public interface ContextSnapshot {
      * @param sourceContext the source context to read values from
      * @param contextRegistry the registry with the accessors to use
      * @param keys the keys of the values to read
-     * @return an object that can be used to reset {@link ThreadLocal} values
-     * at the end of the context scope, either removing them or restoring their
-     * previous values, if any.
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
      */
     static Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {
         return DefaultContextSnapshot.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
     }
 
-
     /**
-     * An object to use to reset {@link ThreadLocal} values at the end of a
-     * context scope.
+     * An object to use to reset {@link ThreadLocal} values at the end of a context scope.
      */
     interface Scope extends AutoCloseable {
 
         /**
-         * Reset {@link ThreadLocal} values, either removing them or restoring
-         * their previous values, if any.
+         * Reset {@link ThreadLocal} values, either removing them or restoring their
+         * previous values, if any.
          */
         @Override
         void close();

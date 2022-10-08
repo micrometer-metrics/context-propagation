@@ -25,10 +25,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-
 /**
- * Wrap and delegate to an {@link ExecutorService} in order to instrument all
- * tasks executed through it.
+ * Wrap and delegate to an {@link ExecutorService} in order to instrument all tasks
+ * executed through it.
  *
  * @author Marcin Grzejszczak
  * @author Rossen Stoyanchev
@@ -40,7 +39,6 @@ class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implem
 
     private final EXECUTOR executorService;
 
-
     /**
      * Create an instance
      * @param executorService the {@code ExecutorService} to delegate to
@@ -50,7 +48,6 @@ class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implem
         this.contextSnapshot = contextSnapshot;
         this.executorService = executorService;
     }
-
 
     @Override
     public void shutdown() {
@@ -93,46 +90,38 @@ class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implem
     }
 
     @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) 
-            throws InterruptedException {
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
 
-        List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::wrap)
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAll(instrumentedTasks);
     }
 
     @Override
-    public <T> List<Future<T>> invokeAll(
-            Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) 
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
             throws InterruptedException {
 
-        List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::wrap)
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAll(instrumentedTasks, timeout, unit);
     }
 
     @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) 
-            throws InterruptedException, ExecutionException {
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
 
-        List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::wrap)
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAny(instrumentedTasks);
     }
 
     @Override
-    public <T> T invokeAny(
-            Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
             throws InterruptedException, ExecutionException, TimeoutException {
 
-        List<Callable<T>> instrumentedTasks = tasks.stream()
-                .map(this.contextSnapshot::wrap)
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(this.contextSnapshot::wrap)
                 .collect(Collectors.toList());
 
         return this.executorService.invokeAny(instrumentedTasks, timeout, unit);
@@ -150,4 +139,5 @@ class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implem
     EXECUTOR getExecutorService() {
         return this.executorService;
     }
+
 }

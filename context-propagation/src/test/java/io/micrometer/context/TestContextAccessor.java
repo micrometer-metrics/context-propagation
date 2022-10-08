@@ -19,12 +19,12 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 /**
- * ThreadLocalAccessor for testing purposes with a given key and
- * {@link ThreadLocal} instance.
+ * ThreadLocalAccessor for testing purposes with a given key and {@link ThreadLocal}
+ * instance.
  *
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings({ "unchecked", "rawtypes" })
 class TestContextAccessor implements ContextAccessor<Map, Map> {
 
     @Override
@@ -33,10 +33,7 @@ class TestContextAccessor implements ContextAccessor<Map, Map> {
     }
 
     @Override
-    public void readValues(
-            Map sourceContext, Predicate<Object> keyPredicate,
-            Map<Object, Object> readValues
-    ) {
+    public void readValues(Map sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues) {
         readValues.putAll(sourceContext);
     }
 
@@ -56,4 +53,5 @@ class TestContextAccessor implements ContextAccessor<Map, Map> {
         targetContext.putAll(valuesToWrite);
         return targetContext;
     }
+
 }

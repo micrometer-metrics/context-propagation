@@ -22,7 +22,6 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Strin
 
     public static final String KEY = "micrometer.observation";
 
-
     @Override
     public Object key() {
         return KEY;

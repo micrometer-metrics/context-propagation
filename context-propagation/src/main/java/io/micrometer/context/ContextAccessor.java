@@ -19,13 +19,12 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 /**
- * Contract to assist with access to an external, map-like context, such as the
- * Project Reactor {@code Context}, including the ability to read values from it
- * a {@link Map} and to write values to it from a {@link Map}.
+ * Contract to assist with access to an external, map-like context, such as the Project
+ * Reactor {@code Context}, including the ability to read values from it a {@link Map} and
+ * to write values to it from a {@link Map}.
  *
  * @param <READ> type of context for reading
  * @param <WRITE> type of context for writing
- *
  * @author Marcin Grzejszczak
  * @author Rossen Stoyanchev
  * @since 1.0.0
@@ -33,8 +32,8 @@ import java.util.function.Predicate;
 public interface ContextAccessor<READ, WRITE> {
 
     /**
-     * {@link Class} representing the type of context this accessor is capable of
-     * reading values from.
+     * {@link Class} representing the type of context this accessor is capable of reading
+     * values from.
      */
     Class<? extends READ> readableType();
 

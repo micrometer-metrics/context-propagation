@@ -33,15 +33,12 @@ public class ContextRegistryTests {
 
     private final ContextRegistry registry = new ContextRegistry();
 
-
     @Test
     void should_reject_accessors_reading_and_writing_same_or_child_types() {
         TestContextAccessor contextAccessor = new TestContextAccessor();
         TestContextAccessor sameTypeContextAccessor = new TestContextAccessor();
-        FixedReadHashMapWriterAccessor childTypeWriterAccessor =
-                new FixedReadHashMapWriterAccessor();
-        HashMapReaderFixedWriterAccessor childTypeReaderAccessor =
-                new HashMapReaderFixedWriterAccessor();
+        FixedReadHashMapWriterAccessor childTypeWriterAccessor = new FixedReadHashMapWriterAccessor();
+        HashMapReaderFixedWriterAccessor childTypeReaderAccessor = new HashMapReaderFixedWriterAccessor();
 
         this.registry.registerContextAccessor(contextAccessor);
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
@@ -134,7 +131,7 @@ public class ContextRegistryTests {
         assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor2, accessor3);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static class HashMapReaderAccessor implements ContextAccessor<HashMap, Map> {
 
         @Override
@@ -143,9 +140,7 @@ public class ContextRegistryTests {
         }
 
         @Override
-        public void readValues(HashMap sourceContext,
-                Predicate<Object> keyPredicate,
-                Map<Object, Object> readValues) {
+        public void readValues(HashMap sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues) {
             readValues.putAll(sourceContext);
         }
 
@@ -162,14 +157,14 @@ public class ContextRegistryTests {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Map writeValues(Map<Object, Object> valuesToWrite,
-                Map targetContext) {
+        public Map writeValues(Map<Object, Object> valuesToWrite, Map targetContext) {
             targetContext.putAll(valuesToWrite);
             return targetContext;
         }
+
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static class HashMapWriterAccessor implements ContextAccessor<Map, HashMap> {
 
         @Override
@@ -178,9 +173,7 @@ public class ContextRegistryTests {
         }
 
         @Override
-        public void readValues(Map sourceContext,
-                Predicate<Object> keyPredicate,
-                Map<Object, Object> readValues) {
+        public void readValues(Map sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues) {
             readValues.putAll(sourceContext);
         }
 
@@ -197,14 +190,14 @@ public class ContextRegistryTests {
 
         @SuppressWarnings("unchecked")
         @Override
-        public HashMap writeValues(Map<Object, Object> valuesToWrite,
-                HashMap targetContext) {
+        public HashMap writeValues(Map<Object, Object> valuesToWrite, HashMap targetContext) {
             targetContext.putAll(valuesToWrite);
             return targetContext;
         }
+
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static class FixedReadHashMapWriterAccessor implements ContextAccessor<String, HashMap> {
 
         @Override
@@ -213,9 +206,7 @@ public class ContextRegistryTests {
         }
 
         @Override
-        public void readValues(String sourceContext,
-                Predicate<Object> keyPredicate,
-                Map<Object, Object> readValues) {
+        public void readValues(String sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues) {
             readValues.put("DUMMY", sourceContext);
         }
 
@@ -230,14 +221,14 @@ public class ContextRegistryTests {
         }
 
         @Override
-        public HashMap writeValues(Map<Object, Object> valuesToWrite,
-                HashMap targetContext) {
+        public HashMap writeValues(Map<Object, Object> valuesToWrite, HashMap targetContext) {
             targetContext.putAll(valuesToWrite);
             return targetContext;
         }
+
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private static class HashMapReaderFixedWriterAccessor implements ContextAccessor<HashMap, String> {
 
         @Override
@@ -246,9 +237,7 @@ public class ContextRegistryTests {
         }
 
         @Override
-        public void readValues(HashMap sourceContext,
-                Predicate<Object> keyPredicate,
-                Map<Object, Object> readValues) {
+        public void readValues(HashMap sourceContext, Predicate<Object> keyPredicate, Map<Object, Object> readValues) {
             readValues.putAll(sourceContext);
         }
 
@@ -267,5 +256,7 @@ public class ContextRegistryTests {
         public String writeValues(Map<Object, Object> valuesToWrite, String targetContext) {
             return "DUMMY";
         }
+
     }
+
 }

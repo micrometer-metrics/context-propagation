@@ -17,19 +17,17 @@
 /**
  * This package contains abstractions and implementations for context propagation.
  * <ul>
- * <li>{@link io.micrometer.context.ThreadLocalAccessor} and {@link io.micrometer.context.ContextAccessor}
- * allow applications and frameworks to plug in support for
- * {@link java.lang.ThreadLocal} and other Map-like types of context such as the
- * Project Reactor Contexts.
- * <li>{@link io.micrometer.context.ContextRegistry} provides a static instance
- * with global access to all known accessors that should be registered on
- * startup.
- * <li>{@link io.micrometer.context.ContextSnapshot} uses the {@code ContextRegistry}
- * and is used to capture context values, and then propagate them from one type
- * of context to another or from one thread to another.
+ * <li>{@link io.micrometer.context.ThreadLocalAccessor} and
+ * {@link io.micrometer.context.ContextAccessor} allow applications and frameworks to plug
+ * in support for {@link java.lang.ThreadLocal} and other Map-like types of context such
+ * as the Project Reactor Contexts.
+ * <li>{@link io.micrometer.context.ContextRegistry} provides a static instance with
+ * global access to all known accessors that should be registered on startup.
+ * <li>{@link io.micrometer.context.ContextSnapshot} uses the {@code ContextRegistry} and
+ * is used to capture context values, and then propagate them from one type of context to
+ * another or from one thread to another.
  * </ul>
  */
 @NonNullApi
 @NonNullFields
 package io.micrometer.context;
-

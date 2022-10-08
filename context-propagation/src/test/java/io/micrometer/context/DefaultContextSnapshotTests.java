@@ -15,7 +15,6 @@
  */
 package io.micrometer.context;
 
-
 import java.util.Collections;
 import java.util.Map;
 
@@ -33,7 +32,6 @@ import static org.assertj.core.api.BDDAssertions.then;
 public class DefaultContextSnapshotTests {
 
     private final ContextRegistry registry = new ContextRegistry();
-
 
     @Test
     void should_propagate_thread_local() {
@@ -97,8 +95,7 @@ public class DefaultContextSnapshotTests {
         ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
 
-        this.registry
-                .registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
                 .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
 
         fooThreadLocal.set("fooValue");
@@ -123,8 +120,7 @@ public class DefaultContextSnapshotTests {
         ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
 
-        this.registry
-                .registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
                 .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
 
         fooThreadLocal.set("fooValue");
@@ -154,8 +150,7 @@ public class DefaultContextSnapshotTests {
         ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
 
-        this.registry
-                .registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
                 .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
 
         fooThreadLocal.set("fooValue");

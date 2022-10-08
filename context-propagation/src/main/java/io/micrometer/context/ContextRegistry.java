@@ -22,14 +22,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-
 /**
  * Registry that provides access to, instances of {@link ContextAccessor} and
  * {@link ThreadLocalAccessor}.
  *
- * <p>A static instance is available via {@link #getInstance()}. It is intended
- * to be initialized on startup, and to be aware of all available accessors, as
- * many as possible. The means to control what context gets propagated is in
+ * <p>
+ * A static instance is available via {@link #getInstance()}. It is intended to be
+ * initialized on startup, and to be aware of all available accessors, as many as
+ * possible. The means to control what context gets propagated is in
  * {@link ContextSnapshot}, which filters context values by key.
  *
  * @author Rossen Stoyanchev
@@ -37,50 +37,41 @@ import java.util.function.Supplier;
  */
 public class ContextRegistry {
 
-    private static final ContextRegistry instance =
-            new ContextRegistry().loadContextAccessors().loadThreadLocalAccessors();
-
+    private static final ContextRegistry instance = new ContextRegistry().loadContextAccessors()
+            .loadThreadLocalAccessors();
 
     private final List<ContextAccessor<?, ?>> contextAccessors = new CopyOnWriteArrayList<>();
 
     private final List<ThreadLocalAccessor<?>> threadLocalAccessors = new CopyOnWriteArrayList<>();
 
+    private final List<ContextAccessor<?, ?>> readOnlyContextAccessors = Collections
+            .unmodifiableList(this.contextAccessors);
 
-    private final List<ContextAccessor<?, ?>> readOnlyContextAccessors =
-            Collections.unmodifiableList(this.contextAccessors);
-
-    private final List<ThreadLocalAccessor<?>> readOnlyThreadLocalAccessors =
-            Collections.unmodifiableList(this.threadLocalAccessors);
-
+    private final List<ThreadLocalAccessor<?>> readOnlyThreadLocalAccessors = Collections
+            .unmodifiableList(this.threadLocalAccessors);
 
     /**
-     * Register a {@link ContextAccessor}. If there is an existing registration
-     * of another {@code ContextAccessor} that can work with its declared types,
-     * an exception is thrown.
+     * Register a {@link ContextAccessor}. If there is an existing registration of another
+     * {@code ContextAccessor} that can work with its declared types, an exception is
+     * thrown.
      */
     public ContextRegistry registerContextAccessor(ContextAccessor<?, ?> accessor) {
         for (ContextAccessor<?, ?> existing : this.contextAccessors) {
-            if (existing.readableType().isAssignableFrom(accessor.readableType()) ||
-                    accessor.readableType().isAssignableFrom(existing.readableType())) {
+            if (existing.readableType().isAssignableFrom(accessor.readableType())
+                    || accessor.readableType().isAssignableFrom(existing.readableType())) {
                 throw new IllegalArgumentException(
-                        "Found an already registered accessor (" +
-                        existing.getClass().getCanonicalName() + ") reading " +
-                        existing.readableType().getCanonicalName() +
-                        " when trying to add accessor (" +
-                        accessor.getClass().getCanonicalName() + ") reading " +
-                        accessor.readableType().getCanonicalName()
-                );
+                        "Found an already registered accessor (" + existing.getClass().getCanonicalName() + ") reading "
+                                + existing.readableType().getCanonicalName() + " when trying to add accessor ("
+                                + accessor.getClass().getCanonicalName() + ") reading "
+                                + accessor.readableType().getCanonicalName());
             }
-            if (existing.writeableType().isAssignableFrom(accessor.writeableType()) ||
-                    accessor.writeableType().isAssignableFrom(existing.writeableType())) {
+            if (existing.writeableType().isAssignableFrom(accessor.writeableType())
+                    || accessor.writeableType().isAssignableFrom(existing.writeableType())) {
                 throw new IllegalArgumentException(
-                        "Found an already registered accessor (" +
-                                existing.getClass().getCanonicalName() + ") writing " +
-                                existing.writeableType().getCanonicalName() +
-                                " when trying to add accessor (" +
-                                accessor.getClass().getCanonicalName() + ") writing " +
-                                accessor.writeableType().getCanonicalName()
-                );
+                        "Found an already registered accessor (" + existing.getClass().getCanonicalName() + ") writing "
+                                + existing.writeableType().getCanonicalName() + " when trying to add accessor ("
+                                + accessor.getClass().getCanonicalName() + ") writing "
+                                + accessor.writeableType().getCanonicalName());
             }
         }
         this.contextAccessors.add(accessor);
@@ -89,8 +80,8 @@ public class ContextRegistry {
 
     /**
      * Register a {@link ThreadLocalAccessor} for the given {@link ThreadLocal}.
-     * @param key the {@link ThreadLocalAccessor#key() key} to associate with
-     * the ThreadLocal value
+     * @param key the {@link ThreadLocalAccessor#key() key} to associate with the
+     * ThreadLocal value
      * @param threadLocal the underlying {@code ThreadLocal}
      * @return the same registry instance
      * @param <V> the type of value stored in the ThreadLocal
@@ -101,16 +92,16 @@ public class ContextRegistry {
 
     /**
      * Register a {@link ThreadLocalAccessor} from callbacks.
-     * @param key the {@link ThreadLocalAccessor#key() key} to associate with
-     * the ThreadLocal value
+     * @param key the {@link ThreadLocalAccessor#key() key} to associate with the
+     * ThreadLocal value
      * @param getSupplier callback to use for getting the value
      * @param setConsumer callback to use for setting the value
      * @param resetTask callback to use for resetting the value
      * @return the same registry instance
      * @param <V> the type of value stored in the ThreadLocal
      */
-    public <V> ContextRegistry registerThreadLocalAccessor(
-            String key, Supplier<V> getSupplier, Consumer<V> setConsumer, Runnable resetTask) {
+    public <V> ContextRegistry registerThreadLocalAccessor(String key, Supplier<V> getSupplier, Consumer<V> setConsumer,
+            Runnable resetTask) {
 
         return registerThreadLocalAccessor(new ThreadLocalAccessor<V>() {
 
@@ -138,9 +129,8 @@ public class ContextRegistry {
     }
 
     /**
-     * Register a {@link ThreadLocalAccessor}. If there is an existing
-     * registration with the same {@link ThreadLocalAccessor#key() key}, it is
-     * removed first.
+     * Register a {@link ThreadLocalAccessor}. If there is an existing registration with
+     * the same {@link ThreadLocalAccessor#key() key}, it is removed first.
      * @param accessor the accessor to register
      * @return the same registry instance
      */
@@ -156,10 +146,11 @@ public class ContextRegistry {
     }
 
     /**
-     * Load {@link ContextAccessor} implementations through the
-     * {@link ServiceLoader} mechanism.
-     * <p>Note that existing registrations of the same {@code ContextAccessor}
-     * type, if any, are removed first.
+     * Load {@link ContextAccessor} implementations through the {@link ServiceLoader}
+     * mechanism.
+     * <p>
+     * Note that existing registrations of the same {@code ContextAccessor} type, if any,
+     * are removed first.
      */
     public ContextRegistry loadContextAccessors() {
         ServiceLoader.load(ContextAccessor.class).forEach(this::registerContextAccessor);
@@ -167,10 +158,11 @@ public class ContextRegistry {
     }
 
     /**
-     * Load {@link ThreadLocalAccessor} implementations through the
-     * {@link ServiceLoader} mechanism.
-     * <p>Note that existing registrations with the same
-     * {@link ThreadLocalAccessor#key() key}, if any, are removed first.
+     * Load {@link ThreadLocalAccessor} implementations through the {@link ServiceLoader}
+     * mechanism.
+     * <p>
+     * Note that existing registrations with the same {@link ThreadLocalAccessor#key()
+     * key}, if any, are removed first.
      */
     public ContextRegistry loadThreadLocalAccessors() {
         ServiceLoader.load(ThreadLocalAccessor.class).forEach(this::registerThreadLocalAccessor);
@@ -221,20 +213,18 @@ public class ContextRegistry {
 
     @Override
     public String toString() {
-        return "ContextRegistry{" +
-                "contextAccessors=" + this.contextAccessors + ", " +
-                "threadLocalAccessors=" + this.threadLocalAccessors + "}";
+        return "ContextRegistry{" + "contextAccessors=" + this.contextAccessors + ", " + "threadLocalAccessors="
+                + this.threadLocalAccessors + "}";
     }
-
 
     /**
      * Return a global {@link ContextRegistry} instance.
-     * <p><strong>Note:</strong> The global instance should be initialized on
-     * startup to ensure it has the ability to propagate to and from different
-     * types of context throughout the application. The registry itself is not
-     * intended to as a mechanism to control what gets propagated. It is in
-     * {@link ContextSnapshot} where more fine-grained decisions can be made
-     * about which context values to propagate.
+     * <p>
+     * <strong>Note:</strong> The global instance should be initialized on startup to
+     * ensure it has the ability to propagate to and from different types of context
+     * throughout the application. The registry itself is not intended to as a mechanism
+     * to control what gets propagated. It is in {@link ContextSnapshot} where more
+     * fine-grained decisions can be made about which context values to propagate.
      */
     public static ContextRegistry getInstance() {
         return instance;

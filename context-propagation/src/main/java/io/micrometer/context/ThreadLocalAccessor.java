@@ -19,8 +19,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Contract to assist with access to a {@link ThreadLocal} including the ability
- * to get, set, and reset it.
+ * Contract to assist with access to a {@link ThreadLocal} including the ability to get,
+ * set, and reset it.
  *
  * @author Rossen Stoyanchev
  * @author Marcin Grzejszczak
@@ -31,9 +31,9 @@ import java.util.function.Supplier;
 public interface ThreadLocalAccessor<V> {
 
     /**
-     * The key to associate with the ThreadLocal value. This is the key under
-     * which the value is saved within a {@link ContextSnapshot} and the key
-     * under which it is looked up.
+     * The key to associate with the ThreadLocal value. This is the key under which the
+     * value is saved within a {@link ContextSnapshot} and the key under which it is
+     * looked up.
      */
     Object key();
 

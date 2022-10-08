@@ -16,8 +16,8 @@
 package io.micrometer.context;
 
 /**
- * ThreadLocalAccessor for testing purposes with a given key and
- * {@link ThreadLocal} instance.
+ * ThreadLocalAccessor for testing purposes with a given key and {@link ThreadLocal}
+ * instance.
  *
  * @author Rossen Stoyanchev
  */
