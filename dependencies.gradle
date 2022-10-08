@@ -6,11 +6,12 @@ def VERSIONS = [
 		// test
 		'org.assertj:assertj-core:latest.release',
 		'org.awaitility:awaitility:latest.release',
-		'org.junit.jupiter:junit-jupiter:5.8.+',
-		'org.junit.platform:junit-platform-launcher:1.8.+',
-		'org.junit.vintage:junit-vintage-engine:5.8.+',
 		'org.mockito:mockito-core:latest.release',
 		'org.mockito:mockito-inline:latest.release'
+]
+
+def PLATFORM_BOMS = [
+		'org.junit:junit-bom:5.9.+' // Not using latest.release to avoid using a milestone version.
 ]
 
 subprojects {
@@ -25,6 +26,11 @@ subprojects {
 					compileOnly version
 					runtimeOnly version
 				}
+			}
+			PLATFORM_BOMS.each { bom ->
+				api platform(bom)
+				compileOnly platform(bom)
+				runtimeOnly platform(bom)
 			}
 		}
 	}
