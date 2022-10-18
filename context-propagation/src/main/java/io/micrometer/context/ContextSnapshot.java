@@ -189,7 +189,7 @@ public interface ContextSnapshot {
      * to create of {@link ContextSnapshot} first via {@link #captureAll(Object...)},
      * followed by {@link #setThreadLocals()}.
      * @param sourceContext the source context to read values from
-     * @param keys the keys of the values to read
+     * @param keys the keys of the values to read (at least one key must be passed)
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
@@ -203,7 +203,7 @@ public interface ContextSnapshot {
      * {@link ContextRegistry} instead of the global instance.
      * @param sourceContext the source context to read values from
      * @param contextRegistry the registry with the accessors to use
-     * @param keys the keys of the values to read
+     * @param keys the keys of the values to read (at least one key must be passed)
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
