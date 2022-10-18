@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.micrometer.context.ContextSnapshot.Scope;
+import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,6 +71,30 @@ public class DefaultContextSnapshotTests {
         finally {
             ObservationThreadLocalHolder.reset();
         }
+    }
+
+    @Test
+    void should_throw_an_exception_when_no_keys_are_passed() {
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+
+        Map<String, String> sourceContext = Collections.singletonMap("foo", "hello");
+
+        BDDAssertions.thenThrownBy(() -> ContextSnapshot.setThreadLocalsFrom(sourceContext, this.registry))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("You must provide at least one key when setting thread locals");
+    }
+
+    @Test
+    void should_throw_an_exception_when_no_keys_are_passed_for_version_with_no_registry() {
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+
+        Map<String, String> sourceContext = Collections.singletonMap("foo", "hello");
+
+        BDDAssertions.thenThrownBy(() -> ContextSnapshot.setThreadLocalsFrom(sourceContext))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("You must provide at least one key when setting thread locals");
     }
 
     @Test
