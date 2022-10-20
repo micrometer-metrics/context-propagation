@@ -131,6 +131,21 @@ public class ContextRegistryTests {
         assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor2, accessor3);
     }
 
+    @Test
+    void should_update_the_global_instance() {
+        ContextRegistry instance = ContextRegistry.getInstance();
+        try {
+            ContextRegistry newInstance = new ContextRegistry();
+
+            ContextRegistry.setInstance(newInstance);
+
+            assertThat(newInstance).isSameAs(ContextRegistry.getInstance());
+        }
+        finally {
+            ContextRegistry.setInstance(instance);
+        }
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static class HashMapReaderAccessor implements ContextAccessor<HashMap, Map> {
 

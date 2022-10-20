@@ -37,8 +37,7 @@ import java.util.function.Supplier;
  */
 public class ContextRegistry {
 
-    private static final ContextRegistry instance = new ContextRegistry().loadContextAccessors()
-            .loadThreadLocalAccessors();
+    private static ContextRegistry instance = new ContextRegistry().loadContextAccessors().loadThreadLocalAccessors();
 
     private final List<ContextAccessor<?, ?>> contextAccessors = new CopyOnWriteArrayList<>();
 
@@ -228,6 +227,14 @@ public class ContextRegistry {
      */
     public static ContextRegistry getInstance() {
         return instance;
+    }
+
+    /**
+     * Set a global {@link ContextRegistry} instance.
+     * @param contextRegistry context registry to set
+     */
+    public static void setInstance(ContextRegistry contextRegistry) {
+        ContextRegistry.instance = contextRegistry;
     }
 
 }
