@@ -165,12 +165,7 @@ public class ContextRegistry {
      * @return {@code true} when accessor got successfully removed
      */
     public boolean removeContextAccessor(ContextAccessor<?, ?> accessorToRemove) {
-        for (ContextAccessor<?, ?> existing : this.contextAccessors) {
-            if (existing == accessorToRemove) {
-                return this.contextAccessors.remove(existing);
-            }
-        }
-        return false;
+        return this.contextAccessors.remove(accessorToRemove);
     }
 
     /**
