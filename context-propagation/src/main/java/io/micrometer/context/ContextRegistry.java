@@ -146,6 +146,29 @@ public class ContextRegistry {
     }
 
     /**
+     * Removes a {@link ThreadLocalAccessor}.
+     * @param key under which the accessor got registered
+     * @return {@code true} when accessor got successfully removed
+     */
+    public boolean removeThreadLocalAccessor(String key) {
+        for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
+            if (existing.key().equals(key)) {
+                return this.threadLocalAccessors.remove(existing);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes a registered {@link ContextAccessor}.
+     * @param accessorToRemove accessor instance to remove
+     * @return {@code true} when accessor got successfully removed
+     */
+    public boolean removeContextAccessor(ContextAccessor<?, ?> accessorToRemove) {
+        return this.contextAccessors.remove(accessorToRemove);
+    }
+
+    /**
      * Load {@link ContextAccessor} implementations through the {@link ServiceLoader}
      * mechanism.
      * <p>

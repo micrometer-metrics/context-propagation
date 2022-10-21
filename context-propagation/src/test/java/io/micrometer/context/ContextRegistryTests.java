@@ -131,6 +131,32 @@ public class ContextRegistryTests {
         assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor2, accessor3);
     }
 
+    @Test
+    void should_remove_a_thread_local_accessor_with_a_given_key() {
+        TestThreadLocalAccessor accessor1 = new TestThreadLocalAccessor("foo", new ThreadLocal<>());
+        TestThreadLocalAccessor accessor2 = new TestThreadLocalAccessor("bar", new ThreadLocal<>());
+        this.registry.registerThreadLocalAccessor(accessor1);
+        this.registry.registerThreadLocalAccessor(accessor2);
+        assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor1, accessor2);
+
+        assertThat(this.registry.removeThreadLocalAccessor("foo")).isTrue();
+
+        assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor2);
+    }
+
+    @Test
+    void should_remove_a_context_accessor() {
+        ContextAccessor accessor1 = new TestContextAccessor();
+        ContextAccessor accessor2 = new AnotherTestContextAccessor();
+        this.registry.registerContextAccessor(accessor1);
+        this.registry.registerContextAccessor(accessor2);
+        assertThat(this.registry.getContextAccessors()).containsExactly(accessor1, accessor2);
+
+        assertThat(this.registry.removeContextAccessor(accessor2)).isTrue();
+
+        assertThat(this.registry.getContextAccessors()).containsExactly(accessor1);
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static class HashMapReaderAccessor implements ContextAccessor<HashMap, Map> {
 
