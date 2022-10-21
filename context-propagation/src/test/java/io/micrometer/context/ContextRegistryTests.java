@@ -139,7 +139,7 @@ public class ContextRegistryTests {
         this.registry.registerThreadLocalAccessor(accessor2);
         assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor1, accessor2);
 
-        this.registry.removeThreadLocalAccessor("foo");
+        assertThat(this.registry.removeThreadLocalAccessor("foo")).isTrue();
 
         assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor2);
     }
@@ -152,7 +152,7 @@ public class ContextRegistryTests {
         this.registry.registerContextAccessor(accessor2);
         assertThat(this.registry.getContextAccessors()).containsExactly(accessor1, accessor2);
 
-        this.registry.removeContextAccessor(AnotherTestContextAccessor.class);
+        assertThat(this.registry.removeContextAccessor(AnotherTestContextAccessor.class)).isTrue();
 
         assertThat(this.registry.getContextAccessors()).containsExactly(accessor1);
     }

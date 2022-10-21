@@ -148,31 +148,29 @@ public class ContextRegistry {
     /**
      * Removes a {@link ThreadLocalAccessor}.
      * @param key under which the accessor got registered
-     * @return the same registry instance
+     * @return {@code true} when accessor got successfully removed
      */
-    public ContextRegistry removeThreadLocalAccessor(String key) {
+    public boolean removeThreadLocalAccessor(String key) {
         for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
             if (existing.key().equals(key)) {
-                this.threadLocalAccessors.remove(existing);
-                break;
+                return this.threadLocalAccessors.remove(existing);
             }
         }
-        return this;
+        return false;
     }
 
     /**
      * Removes a {@link ContextAccessor} of a given type.
      * @param accessorToRemove class of {@link ContextAccessor} to remove
-     * @return the same registry instance
+     * @return {@code true} when accessor got successfully removed
      */
-    public ContextRegistry removeContextAccessor(Class<? extends ContextAccessor<?, ?>> accessorToRemove) {
+    public boolean removeContextAccessor(Class<? extends ContextAccessor<?, ?>> accessorToRemove) {
         for (ContextAccessor<?, ?> existing : this.contextAccessors) {
             if (accessorToRemove.isAssignableFrom(existing.getClass())) {
-                this.contextAccessors.remove(existing);
-                break;
+                return this.contextAccessors.remove(existing);
             }
         }
-        return this;
+        return false;
     }
 
     /**

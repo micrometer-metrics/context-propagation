@@ -19,13 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-/**
- * ThreadLocalAccessor for testing purposes with a given key and {@link ThreadLocal}
- * instance.
- *
- * @author Rossen Stoyanchev
- */
-@SuppressWarnings({ "unchecked", "rawtypes" })
 class AnotherTestContextAccessor implements ContextAccessor<Set, Set> {
 
     @Override
