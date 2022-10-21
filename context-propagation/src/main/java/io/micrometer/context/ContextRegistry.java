@@ -160,13 +160,13 @@ public class ContextRegistry {
     }
 
     /**
-     * Removes a {@link ContextAccessor} of a given type.
-     * @param accessorToRemove class of {@link ContextAccessor} to remove
+     * Removes a registered {@link ContextAccessor}.
+     * @param accessorToRemove accessor instance to remove
      * @return {@code true} when accessor got successfully removed
      */
-    public boolean removeContextAccessor(Class<? extends ContextAccessor<?, ?>> accessorToRemove) {
+    public boolean removeContextAccessor(ContextAccessor<?, ?> accessorToRemove) {
         for (ContextAccessor<?, ?> existing : this.contextAccessors) {
-            if (accessorToRemove.isAssignableFrom(existing.getClass())) {
+            if (existing == accessorToRemove) {
                 return this.contextAccessors.remove(existing);
             }
         }

@@ -152,7 +152,7 @@ public class ContextRegistryTests {
         this.registry.registerContextAccessor(accessor2);
         assertThat(this.registry.getContextAccessors()).containsExactly(accessor1, accessor2);
 
-        assertThat(this.registry.removeContextAccessor(AnotherTestContextAccessor.class)).isTrue();
+        assertThat(this.registry.removeContextAccessor(accessor2)).isTrue();
 
         assertThat(this.registry.getContextAccessors()).containsExactly(accessor1);
     }
