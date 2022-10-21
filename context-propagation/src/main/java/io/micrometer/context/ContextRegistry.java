@@ -37,7 +37,8 @@ import java.util.function.Supplier;
  */
 public class ContextRegistry {
 
-    private static ContextRegistry instance = new ContextRegistry().loadContextAccessors().loadThreadLocalAccessors();
+    private static final ContextRegistry instance = new ContextRegistry().loadContextAccessors()
+            .loadThreadLocalAccessors();
 
     private final List<ContextAccessor<?, ?>> contextAccessors = new CopyOnWriteArrayList<>();
 
@@ -145,6 +146,36 @@ public class ContextRegistry {
     }
 
     /**
+     * Removes a {@link ThreadLocalAccessor}.
+     * @param key under which the accessor got registered
+     * @return the same registry instance
+     */
+    public ContextRegistry removeThreadLocalAccessor(String key) {
+        for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
+            if (existing.key().equals(key)) {
+                this.threadLocalAccessors.remove(existing);
+                break;
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Removes a {@link ContextAccessor} of a given type.
+     * @param accessorToRemove class of {@link ContextAccessor} to remove
+     * @return the same registry instance
+     */
+    public ContextRegistry removeContextAccessor(Class<? extends ContextAccessor<?, ?>> accessorToRemove) {
+        for (ContextAccessor<?, ?> existing : this.contextAccessors) {
+            if (accessorToRemove.isAssignableFrom(existing.getClass())) {
+                this.contextAccessors.remove(existing);
+                break;
+            }
+        }
+        return this;
+    }
+
+    /**
      * Load {@link ContextAccessor} implementations through the {@link ServiceLoader}
      * mechanism.
      * <p>
@@ -227,14 +258,6 @@ public class ContextRegistry {
      */
     public static ContextRegistry getInstance() {
         return instance;
-    }
-
-    /**
-     * Set a global {@link ContextRegistry} instance.
-     * @param contextRegistry context registry to set
-     */
-    public static void setInstance(ContextRegistry contextRegistry) {
-        ContextRegistry.instance = contextRegistry;
     }
 
 }
