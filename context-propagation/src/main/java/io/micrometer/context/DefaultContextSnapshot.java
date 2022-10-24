@@ -90,6 +90,10 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         return previousValues;
     }
 
+    static Scope setAllThreadLocalsFrom(Object context, ContextRegistry registry) {
+        return ContextSnapshot.captureAll(registry, context).setThreadLocals();
+    }
+
     @SuppressWarnings("unchecked")
     static <C> Scope setThreadLocalsFrom(Object context, ContextRegistry registry, String... keys) {
         if (keys == null || keys.length == 0) {
