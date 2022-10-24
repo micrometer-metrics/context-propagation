@@ -91,6 +91,20 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
+    static <C> Scope setAllThreadLocalsFrom(Object context, ContextRegistry registry) {
+        ContextAccessor<?, ?> contextAccessor = registry.getContextAccessorForRead(context);
+        Map<Object, Object> previousValues = null;
+        for (ThreadLocalAccessor<?> threadLocalAccessor : registry.getThreadLocalAccessors()) {
+            Object key = threadLocalAccessor.key();
+            Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) context, key);
+            if (value != null) {
+                previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
+            }
+        }
+        return DefaultScope.from(previousValues, registry);
+    }
+
+    @SuppressWarnings("unchecked")
     static <C> Scope setThreadLocalsFrom(Object context, ContextRegistry registry, String... keys) {
         if (keys == null || keys.length == 0) {
             throw new IllegalArgumentException("You must provide at least one key when setting thread locals");

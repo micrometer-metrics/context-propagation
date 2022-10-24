@@ -74,6 +74,26 @@ public class DefaultContextSnapshotTests {
     }
 
     @Test
+    void should_propagate_all_single_thread_local_value() {
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+
+        String key = ObservationThreadLocalAccessor.KEY;
+        Map<String, String> sourceContext = Collections.singletonMap(key, "hello");
+
+        ObservationThreadLocalHolder.setValue("hola");
+        try {
+            try (Scope scope = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+                then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
+            }
+            then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
+        }
+        finally {
+            ObservationThreadLocalHolder.reset();
+        }
+    }
+
+    @Test
     void should_throw_an_exception_when_no_keys_are_passed() {
         this.registry.registerContextAccessor(new TestContextAccessor());
         this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());

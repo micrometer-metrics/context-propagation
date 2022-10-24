@@ -206,6 +206,31 @@ public interface ContextSnapshot {
     }
 
     /**
+     * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
+     * {@link ThreadLocal} values for which there is a value in the given source context.
+     * @param sourceContext the source context to read values from
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
+     */
+    static Scope setAllThreadLocalsFrom(Object sourceContext) {
+        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
+     * {@link ThreadLocal} values for which there is a value in the given source context.
+     * @param sourceContext the source context to read values from
+     * @param contextRegistry the registry with the accessors to use
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
+     */
+    static Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
+        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+    }
+
+    /**
      * Read the values specified by from the given source context, and if found, use them
      * to set {@link ThreadLocal} values. Essentially, a shortcut that bypasses the need
      * to create of {@link ContextSnapshot} first via {@link #captureAll(Object...)},
