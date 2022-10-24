@@ -90,8 +90,18 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         return previousValues;
     }
 
-    static Scope setAllThreadLocalsFrom(Object context, ContextRegistry registry) {
-        return ContextSnapshot.captureAll(registry, context).setThreadLocals();
+    @SuppressWarnings("unchecked")
+    static <C> Scope setAllThreadLocalsFrom(Object context, ContextRegistry registry) {
+        ContextAccessor<?, ?> contextAccessor = registry.getContextAccessorForRead(context);
+        Map<Object, Object> previousValues = null;
+        for (ThreadLocalAccessor<?> threadLocalAccessor : registry.getThreadLocalAccessors()) {
+            Object key = threadLocalAccessor.key();
+            Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) context, key);
+            if (value != null) {
+                previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
+            }
+        }
+        return DefaultScope.from(previousValues, registry);
     }
 
     @SuppressWarnings("unchecked")
