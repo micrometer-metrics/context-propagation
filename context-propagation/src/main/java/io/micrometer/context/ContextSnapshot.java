@@ -206,6 +206,105 @@ public interface ContextSnapshot {
     }
 
     /**
+     * Return a new {@code Runnable} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Runnable}.
+     * @param runnable the runnable to instrument
+     */
+    static Runnable instrument(Runnable runnable) {
+        return ContextSnapshot.instrument(runnable, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Return a new {@code Callable} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Callable}.
+     * @param callable the callable to instrument
+     * @param <T> the type of value produced by the {@code Callable}
+     */
+    static <T> Callable<T> instrument(Callable<T> callable) {
+        return ContextSnapshot.instrument(callable, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Return a new {@code Consumer} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Consumer}.
+     * @param consumer the callable to instrument
+     * @param <T> the type of value produced by the {@code Callable}
+     */
+    static <T> Consumer<T> instrument(Consumer<T> consumer) {
+        return ContextSnapshot.instrument(consumer, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Return a new {@code Executor} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of any executed, {@code Runnable}.
+     * @param executor the executor to instrument
+     */
+    static Executor instrumentExecutor(Executor executor) {
+        return ContextSnapshot.instrumentExecutor(executor, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of any executed task.
+     * @param executorService the executorService to instrument
+     */
+    static ExecutorService instrumentExecutorService(ExecutorService executorService) {
+        return ContextSnapshot.instrumentExecutorService(executorService, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Return a new {@code Runnable} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Runnable}.
+     * @param runnable the runnable to instrument
+     * @param contextRegistry the registry with the accessors to use
+     */
+    static Runnable instrument(Runnable runnable, ContextRegistry contextRegistry) {
+        return ContextSnapshot.captureAll(contextRegistry).wrap(runnable);
+    }
+
+    /**
+     * Return a new {@code Callable} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Callable}.
+     * @param callable the callable to instrument
+     * @param contextRegistry the registry with the accessors to use
+     * @param <T> the type of value produced by the {@code Callable}
+     */
+    static <T> Callable<T> instrument(Callable<T> callable, ContextRegistry contextRegistry) {
+        return ContextSnapshot.captureAll(contextRegistry).wrap(callable);
+    }
+
+    /**
+     * Return a new {@code Consumer} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of the given {@code Consumer}.
+     * @param consumer the callable to instrument
+     * @param contextRegistry the registry with the accessors to use
+     * @param <T> the type of value produced by the {@code Callable}
+     */
+    static <T> Consumer<T> instrument(Consumer<T> consumer, ContextRegistry contextRegistry) {
+        return ContextSnapshot.captureAll(contextRegistry).wrap(consumer);
+    }
+
+    /**
+     * Return a new {@code Executor} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of any executed, {@code Runnable}.
+     * @param executor the executor to instrument
+     * @param contextRegistry the registry with the accessors to use
+     */
+    static Executor instrumentExecutor(Executor executor, ContextRegistry contextRegistry) {
+        return ContextSnapshot.captureAll(contextRegistry).wrapExecutor(executor);
+    }
+
+    /**
+     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of any executed task.
+     * @param executorService the executorService to instrument
+     * @param contextRegistry the registry with the accessors to use
+     */
+    static ExecutorService instrumentExecutorService(ExecutorService executorService, ContextRegistry contextRegistry) {
+        return ContextSnapshot.captureAll(contextRegistry).wrapExecutorService(executorService);
+    }
+
+    /**
      * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
      * {@link ThreadLocal} values for which there is a value in the given source context.
      * @param sourceContext the source context to read values from

@@ -57,6 +57,13 @@ class ContextWrappingTests {
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
                 .isEqualTo("hello");
+
+        valueInNewThread.set(null);
+
+        runInNewThread(ContextSnapshot.instrument(runnable, this.registry));
+
+        then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
+                .isEqualTo("hello");
     }
 
     @Test
@@ -71,6 +78,13 @@ class ContextWrappingTests {
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
         runInNewThread(ContextSnapshot.captureAllUsing(key -> true, this.registry).wrap(callable));
+
+        then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
+                .isEqualTo("hello");
+
+        valueInNewThread.set(null);
+
+        runInNewThread(ContextSnapshot.instrument(callable, this.registry));
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
                 .isEqualTo("hello");
@@ -89,6 +103,14 @@ class ContextWrappingTests {
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
                 .isEqualTo("hello");
+
+        valueInNewThread.set(null);
+
+        runInNewThread(ContextSnapshot.instrumentExecutor(executor, this.registry), valueInNewThread);
+
+        then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
+                .isEqualTo("hello");
+
     }
 
     @Test
@@ -103,6 +125,13 @@ class ContextWrappingTests {
             runInNewThread(
                     ContextSnapshot.captureAllUsing(key -> true, this.registry).wrapExecutorService(executorService),
                     valueInNewThread,
+                    atomic -> then(atomic.get())
+                            .as("With context container the thread local information should be propagated")
+                            .isEqualTo("hello"));
+
+            valueInNewThread.set(null);
+
+            runInNewThread(ContextSnapshot.instrumentExecutorService(executorService, this.registry), valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
                             .isEqualTo("hello"));
@@ -125,6 +154,13 @@ class ContextWrappingTests {
             runInNewThread(
                     ContextSnapshot.captureAllUsing(key -> true, this.registry).wrapExecutorService(executorService),
                     valueInNewThread,
+                    atomic -> then(atomic.get())
+                            .as("With context container the thread local information should be propagated")
+                            .isEqualTo("hello"));
+
+            valueInNewThread.set(null);
+
+            runInNewThread(ContextSnapshot.instrumentExecutorService(executorService, this.registry), valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
                             .isEqualTo("hello"));
