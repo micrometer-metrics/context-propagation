@@ -101,7 +101,8 @@ class ContextWrappingTests {
                     .as("By default thread local information should not be propagated").isNull());
 
             runInNewThread(
-                    ContextSnapshot.captureAllUsing(key -> true, this.registry).wrapExecutorService(executorService),
+                    ContextSnapshot.wrapExecutorService(
+                            executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
@@ -117,13 +118,15 @@ class ContextWrappingTests {
             throws InterruptedException, ExecutionException, TimeoutException {
         ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         try {
-            ObservationThreadLocalHolder.setValue("hello");
+            ObservationThreadLocalHolder.setValue("hello at time of creation of the executor");
             AtomicReference<String> valueInNewThread = new AtomicReference<>();
             runInNewThread(executorService, valueInNewThread, atomic -> then(atomic.get())
                     .as("By default thread local information should not be propagated").isNull());
 
+            ObservationThreadLocalHolder.setValue("hello at time of creation of the executor");
             runInNewThread(
-                    ContextSnapshot.captureAllUsing(key -> true, this.registry).wrapExecutorService(executorService),
+                    ContextSnapshot.wrapExecutorService(
+                            executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
@@ -161,6 +164,9 @@ class ContextWrappingTests {
             Consumer<AtomicReference<String>> assertion)
             throws InterruptedException, ExecutionException, TimeoutException {
 
+        ObservationThreadLocalHolder.setValue("hello"); // IMPORTANT: We are setting the
+                                                        // thread local value as late as
+                                                        // possible
         executor.execute(runnable(valueInNewThread));
         Thread.sleep(5);
         assertion.accept(valueInNewThread);
