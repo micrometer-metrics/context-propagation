@@ -44,14 +44,6 @@ final class ContextPropagatingScheduledExecutorService
         super(executorService, contextSnapshot);
     }
 
-    /**
-     * Create an instance
-     * @param executorService the {@code ScheduledExecutorService} to delegate to
-     */
-    ContextPropagatingScheduledExecutorService(ScheduledExecutorService executorService) {
-        super(executorService);
-    }
-
     @Override
     public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
         return getExecutorService().schedule(getContextSnapshot().wrap(command), delay, unit);

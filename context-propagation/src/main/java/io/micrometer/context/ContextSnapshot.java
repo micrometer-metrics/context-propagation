@@ -124,48 +124,6 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from the
-     * snapshot around the invocation of any executed task.
-     * @param executorService the executorService to instrument
-     */
-    static ExecutorService wrapExecutorService(ExecutorService executorService) {
-        return new ContextPropagatingExecutorService<>(executorService);
-    }
-
-    /**
-     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from the
-     * snapshot around the invocation of any executed task.
-     * @param executorService the executorService to instrument
-     * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
-     * to retrieve {@link ContextSnapshot} when tasks are scheduled
-     */
-    static ExecutorService wrapExecutorService(ExecutorService executorService,
-            Supplier<ContextSnapshot> contextSnapshot) {
-        return new ContextPropagatingExecutorService<>(executorService, contextSnapshot);
-    }
-
-    /**
-     * Return a new {@code ScheduledExecutorService} that sets {@code ThreadLocal} values
-     * from the snapshot around the invocation of any executed task.
-     * @param scheduledExecutorService the scheduledExecutorService to instrument
-     */
-    static ScheduledExecutorService wrapScheduledExecutorService(ScheduledExecutorService scheduledExecutorService) {
-        return new ContextPropagatingScheduledExecutorService(scheduledExecutorService);
-    }
-
-    /**
-     * Return a new {@code ScheduledExecutorService} that sets {@code ThreadLocal} values
-     * from the snapshot around the invocation of any executed task.
-     * @param scheduledExecutorService the scheduledExecutorService to instrument
-     * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
-     * to retrieve {@link ContextSnapshot} when tasks are scheduled
-     */
-    static ScheduledExecutorService wrapScheduledExecutorService(ScheduledExecutorService scheduledExecutorService,
-            Supplier<ContextSnapshot> contextSnapshot) {
-        return new ContextPropagatingScheduledExecutorService(scheduledExecutorService, contextSnapshot);
-    }
-
-    /**
      * Capture values from {@link ThreadLocal} and from other context objects using all
      * accessors from the {@link ContextRegistry#getInstance() global} ContextRegistry
      * instance.
@@ -282,6 +240,30 @@ public interface ContextSnapshot {
      */
     static Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {
         return DefaultContextSnapshot.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
+    }
+
+    /**
+     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from the
+     * snapshot around the invocation of any executed task.
+     * @param executorService the executorService to instrument
+     * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
+     * to retrieve {@link ContextSnapshot} when tasks are scheduled
+     */
+    static ExecutorService wrapExecutorService(ExecutorService executorService,
+            Supplier<ContextSnapshot> contextSnapshot) {
+        return new ContextPropagatingExecutorService<>(executorService, contextSnapshot);
+    }
+
+    /**
+     * Return a new {@code ScheduledExecutorService} that sets {@code ThreadLocal} values
+     * from the snapshot around the invocation of any executed task.
+     * @param scheduledExecutorService the scheduledExecutorService to instrument
+     * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
+     * to retrieve {@link ContextSnapshot} when tasks are scheduled
+     */
+    static ScheduledExecutorService wrapScheduledExecutorService(ScheduledExecutorService scheduledExecutorService,
+            Supplier<ContextSnapshot> contextSnapshot) {
+        return new ContextPropagatingScheduledExecutorService(scheduledExecutorService, contextSnapshot);
     }
 
     /**

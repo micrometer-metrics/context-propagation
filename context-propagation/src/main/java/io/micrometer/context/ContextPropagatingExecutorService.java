@@ -41,15 +41,6 @@ class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implem
     private final Supplier<ContextSnapshot> contextSnapshot;
 
     /**
-     * Create an instance of {@link ContextPropagatingScheduledExecutorService}. Will
-     * capture all {@link ContextSnapshot} when tasks are scheduled.
-     * @param executorService the {@code ExecutorService} to delegate to
-     */
-    ContextPropagatingExecutorService(EXECUTOR executorService) {
-        this(executorService, ContextSnapshot::captureAll);
-    }
-
-    /**
      * Create an instance of {@link ContextPropagatingScheduledExecutorService}.
      * @param executorService the {@code ExecutorService} to delegate to
      * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
