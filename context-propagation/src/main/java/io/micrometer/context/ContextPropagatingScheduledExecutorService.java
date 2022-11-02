@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * Wrap and delegate to an {@link ExecutorService} in order to instrument all tasks
@@ -35,10 +36,11 @@ final class ContextPropagatingScheduledExecutorService
     /**
      * Create an instance
      * @param executorService the {@code ScheduledExecutorService} to delegate to
-     * @param contextSnapshot the {@code ContextSnapshot} with values to propagate
+     * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
+     * to retrieve {@link ContextSnapshot} when tasks are scheduled
      */
     ContextPropagatingScheduledExecutorService(ScheduledExecutorService executorService,
-            ContextSnapshot contextSnapshot) {
+            Supplier<ContextSnapshot> contextSnapshot) {
         super(executorService, contextSnapshot);
     }
 
