@@ -101,8 +101,8 @@ class ContextWrappingTests {
                     .as("By default thread local information should not be propagated").isNull());
 
             runInNewThread(
-                    ContextSnapshot.wrapExecutorService(
-                            executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
+                    ContextExecutorService
+                            .wrap(executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")
@@ -125,8 +125,8 @@ class ContextWrappingTests {
 
             ObservationThreadLocalHolder.setValue("hello at time of creation of the executor");
             runInNewThread(
-                    ContextSnapshot.wrapExecutorService(
-                            executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
+                    ContextExecutorService
+                            .wrap(executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                             .as("With context container the thread local information should be propagated")

@@ -17,11 +17,8 @@ package io.micrometer.context;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * Holds values extracted from {@link ThreadLocal} and other types of context and exposes
@@ -115,6 +112,8 @@ public interface ContextSnapshot {
      * Return a new {@code Executor} that sets {@code ThreadLocal} values from the
      * snapshot around the invocation of any executed, {@code Runnable}.
      * @param executor the executor to instrument
+     * @see ContextExecutorService
+     * @see ContextScheduledExecutorService
      */
     default Executor wrapExecutor(Executor executor) {
         return runnable -> {
@@ -240,30 +239,6 @@ public interface ContextSnapshot {
      */
     static Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {
         return DefaultContextSnapshot.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
-    }
-
-    /**
-     * Return a new {@code ExecutorService} that sets {@code ThreadLocal} values from the
-     * snapshot around the invocation of any executed task.
-     * @param executorService the executorService to instrument
-     * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
-     * to retrieve {@link ContextSnapshot} when tasks are scheduled
-     */
-    static ExecutorService wrapExecutorService(ExecutorService executorService,
-            Supplier<ContextSnapshot> contextSnapshot) {
-        return new ContextPropagatingExecutorService<>(executorService, contextSnapshot);
-    }
-
-    /**
-     * Return a new {@code ScheduledExecutorService} that sets {@code ThreadLocal} values
-     * from the snapshot around the invocation of any executed task.
-     * @param scheduledExecutorService the scheduledExecutorService to instrument
-     * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
-     * to retrieve {@link ContextSnapshot} when tasks are scheduled
-     */
-    static ScheduledExecutorService wrapScheduledExecutorService(ScheduledExecutorService scheduledExecutorService,
-            Supplier<ContextSnapshot> contextSnapshot) {
-        return new ContextPropagatingScheduledExecutorService(scheduledExecutorService, contextSnapshot);
     }
 
     /**
