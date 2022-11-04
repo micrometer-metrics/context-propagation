@@ -27,38 +27,87 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Wrap and delegate to an {@link ExecutorService} in order to instrument all tasks
- * executed through it.
+ * Wraps an {@code ExecutorService} in order to capture context via
+ * {@link ContextSnapshot} when a task is submitted, and propagate context to the task
+ * when it is executed.
  *
  * @author Marcin Grzejszczak
  * @author Rossen Stoyanchev
  * @since 1.0.0
  */
-class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implements ExecutorService {
+public class ContextExecutorService<EXECUTOR extends ExecutorService> implements ExecutorService {
 
     private final EXECUTOR executorService;
 
     private final Supplier<ContextSnapshot> contextSnapshot;
 
     /**
-     * Create an instance of {@link ContextPropagatingScheduledExecutorService}.
+     * Create an instance of {@link ContextScheduledExecutorService}.
      * @param executorService the {@code ExecutorService} to delegate to
      * @param contextSnapshot supplier of the {@link ContextSnapshot} - instruction on who
      * to retrieve {@link ContextSnapshot} when tasks are scheduled
      */
-    ContextPropagatingExecutorService(EXECUTOR executorService, Supplier<ContextSnapshot> contextSnapshot) {
+    protected ContextExecutorService(EXECUTOR executorService, Supplier<ContextSnapshot> contextSnapshot) {
         this.executorService = executorService;
         this.contextSnapshot = contextSnapshot;
     }
 
-    @Override
-    public void shutdown() {
-        this.executorService.shutdown();
+    protected EXECUTOR getExecutorService() {
+        return this.executorService;
     }
 
     @Override
-    public List<Runnable> shutdownNow() {
-        return this.executorService.shutdownNow();
+    public <T> Future<T> submit(Callable<T> task) {
+        return this.executorService.submit(capture().wrap(task));
+    }
+
+    @Override
+    public <T> Future<T> submit(Runnable task, T result) {
+        return this.executorService.submit(capture().wrap(task), result);
+    }
+
+    @Override
+    public Future<?> submit(Runnable task) {
+        return this.executorService.submit(capture().wrap(task));
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(capture()::wrap).collect(Collectors.toList());
+
+        return this.executorService.invokeAll(instrumentedTasks);
+    }
+
+    @Override
+    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+            throws InterruptedException {
+
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(capture()::wrap).collect(Collectors.toList());
+
+        return this.executorService.invokeAll(instrumentedTasks, timeout, unit);
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(capture()::wrap).collect(Collectors.toList());
+
+        return this.executorService.invokeAny(instrumentedTasks);
+    }
+
+    @Override
+    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException {
+
+        List<Callable<T>> instrumentedTasks = tasks.stream().map(capture()::wrap).collect(Collectors.toList());
+
+        return this.executorService.invokeAny(instrumentedTasks, timeout, unit);
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        this.executorService.execute(capture().wrap(command));
     }
 
     @Override
@@ -72,74 +121,42 @@ class ContextPropagatingExecutorService<EXECUTOR extends ExecutorService> implem
     }
 
     @Override
+    public void shutdown() {
+        this.executorService.shutdown();
+    }
+
+    @Override
+    public List<Runnable> shutdownNow() {
+        return this.executorService.shutdownNow();
+    }
+
+    @Override
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
         return this.executorService.awaitTermination(timeout, unit);
     }
 
-    @Override
-    public <T> Future<T> submit(Callable<T> task) {
-        return this.executorService.submit(getContextSnapshot().wrap(task));
-    }
-
-    @Override
-    public <T> Future<T> submit(Runnable task, T result) {
-        return this.executorService.submit(getContextSnapshot().wrap(task), result);
-    }
-
-    @Override
-    public Future<?> submit(Runnable task) {
-        return this.executorService.submit(getContextSnapshot().wrap(task));
-    }
-
-    @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-
-        List<Callable<T>> instrumentedTasks = tasks.stream().map(getContextSnapshot()::wrap)
-                .collect(Collectors.toList());
-
-        return this.executorService.invokeAll(instrumentedTasks);
-    }
-
-    @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
-            throws InterruptedException {
-
-        List<Callable<T>> instrumentedTasks = tasks.stream().map(getContextSnapshot()::wrap)
-                .collect(Collectors.toList());
-
-        return this.executorService.invokeAll(instrumentedTasks, timeout, unit);
-    }
-
-    @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-
-        List<Callable<T>> instrumentedTasks = tasks.stream().map(getContextSnapshot()::wrap)
-                .collect(Collectors.toList());
-
-        return this.executorService.invokeAny(instrumentedTasks);
-    }
-
-    @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
-            throws InterruptedException, ExecutionException, TimeoutException {
-
-        List<Callable<T>> instrumentedTasks = tasks.stream().map(getContextSnapshot()::wrap)
-                .collect(Collectors.toList());
-
-        return this.executorService.invokeAny(instrumentedTasks, timeout, unit);
-    }
-
-    @Override
-    public void execute(Runnable command) {
-        this.executorService.execute(getContextSnapshot().wrap(command));
-    }
-
-    ContextSnapshot getContextSnapshot() {
+    protected ContextSnapshot capture() {
         return this.contextSnapshot.get();
     }
 
-    EXECUTOR getExecutorService() {
-        return this.executorService;
+    /**
+     * Wrap the given {@code ExecutorService} in order to propagate context to any
+     * executed task through the given {@link ContextSnapshot} supplier.
+     * @param service the executorService to wrap
+     * @param snapshotSupplier supplier for capturing a {@link ContextSnapshot} at the
+     * point when tasks are scheduled
+     */
+    public static ExecutorService wrap(ExecutorService service, Supplier<ContextSnapshot> snapshotSupplier) {
+        return new ContextExecutorService<>(service, snapshotSupplier);
+    }
+
+    /**
+     * Variant of {@link #wrap(ExecutorService, Supplier)} that uses
+     * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
+     * @param service the executorService to wrap
+     */
+    public static ExecutorService wrap(ExecutorService service) {
+        return new ContextExecutorService<>(service, ContextSnapshot::captureAll);
     }
 
 }
