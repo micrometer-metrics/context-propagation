@@ -53,7 +53,7 @@ Snapshots are published to `repo.spring.io` for every successful build on the `m
 
 ```groovy
 repositories {
-    maven { url 'https://repo.spring.io/libs-snapshot' }
+    maven { url 'https://repo.spring.io/snapshot' }
 }
 
 dependencies {
