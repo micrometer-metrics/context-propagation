@@ -54,4 +54,12 @@ public interface ThreadLocalAccessor<V> {
      */
     void reset();
 
+    /**
+     * Remove the {@link ThreadLocal} value and set a new one
+     * @param previousValue previous value to set
+     */
+    default void restore(V previousValue) {
+        setValue(previousValue);
+    }
+
 }
