@@ -223,7 +223,6 @@ public class DefaultContextSnapshotTests {
         try (Scope __ = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
             then(fooThreadLocal.get()).isEqualTo("foo_present");
             then(barThreadLocal.get()).isEqualTo("bar_empty");
-
         }
         then(fooThreadLocal.get()).isEqualTo("foo_empty");
         then(barThreadLocal.get()).isEqualTo("bar_present");
@@ -252,6 +251,32 @@ public class DefaultContextSnapshotTests {
 
         then(fooThreadLocal.get()).isEqualTo("foo_empty");
         then(barThreadLocal.get()).isEqualTo("bar_empty");
+    }
+
+    @Test
+    void should_limit_scope_to_defined_in_source_context_but_skip_unused_keys() {
+        ThreadLocal<String> fooThreadLocal = ThreadLocal.withInitial(() -> "foo_empty");
+        ThreadLocal<String> barThreadLocal = ThreadLocal.withInitial(() -> "bar_empty");
+        ThreadLocal<String> bazThreadLocal = ThreadLocal.withInitial(() -> "baz_empty");
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal));
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("baz", bazThreadLocal));
+
+        Map<String, String> sourceContext = Collections.singletonMap("foo", "foo_present");
+        barThreadLocal.set("bar_present");
+        bazThreadLocal.set("baz_present");
+
+        try (Scope __ = ContextSnapshot.setThreadLocalsFrom(sourceContext,
+                this.registry, "foo", "bar")) {
+            then(fooThreadLocal.get()).isEqualTo("foo_present");
+            then(barThreadLocal.get()).isEqualTo("bar_empty");
+            then(bazThreadLocal.get()).isEqualTo("baz_present");
+        }
+        then(fooThreadLocal.get()).isEqualTo("foo_empty");
+        then(barThreadLocal.get()).isEqualTo("bar_present");
+        then(bazThreadLocal.get()).isEqualTo("baz_present");
     }
 
 }
