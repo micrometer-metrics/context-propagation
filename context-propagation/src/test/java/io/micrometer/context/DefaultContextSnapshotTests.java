@@ -208,4 +208,50 @@ public class DefaultContextSnapshotTests {
         barThreadLocal.remove();
     }
 
+    @Test
+    void should_limit_scope_to_defined_in_source_context() {
+        ThreadLocal<String> fooThreadLocal = ThreadLocal.withInitial(() -> "foo_empty");
+        ThreadLocal<String> barThreadLocal = ThreadLocal.withInitial(() -> "bar_empty");
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal));
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+
+        Map<String, String> sourceContext = Collections.singletonMap("foo", "foo_present");
+        barThreadLocal.set("bar_present");
+
+        try (Scope __ = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+            then(fooThreadLocal.get()).isEqualTo("foo_present");
+            then(barThreadLocal.get()).isEqualTo("bar_empty");
+
+        }
+        then(fooThreadLocal.get()).isEqualTo("foo_empty");
+        then(barThreadLocal.get()).isEqualTo("bar_present");
+    }
+
+    @Test
+    void should_limit_scope_to_defined_in_source_context_enriched_with_thread_locals() {
+        ThreadLocal<String> fooThreadLocal = ThreadLocal.withInitial(() -> "foo_empty");
+        ThreadLocal<String> barThreadLocal = ThreadLocal.withInitial(() -> "bar_empty");
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal));
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+
+        Map<String, String> sourceContext = Collections.singletonMap("foo", "foo_present");
+        barThreadLocal.set("bar_present");
+
+        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry, sourceContext);
+
+        barThreadLocal.remove();
+
+        try (Scope __ = snapshot.setThreadLocals()) {
+            then(fooThreadLocal.get()).isEqualTo("foo_present");
+            then(barThreadLocal.get()).isEqualTo("bar_present");
+        }
+
+        then(fooThreadLocal.get()).isEqualTo("foo_empty");
+        then(barThreadLocal.get()).isEqualTo("bar_empty");
+    }
+
 }

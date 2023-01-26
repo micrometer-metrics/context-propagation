@@ -73,7 +73,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         Map<Object, Object> previousValues = null;
         for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
             Object key = accessor.key();
-            if (keyPredicate.test(key) && this.containsKey(key)) {
+            if (keyPredicate.test(key)) {
                 previousValues = setThreadLocal(key, get(key), accessor, previousValues);
             }
         }
@@ -81,12 +81,17 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    private static <V> Map<Object, Object> setThreadLocal(Object key, V value, ThreadLocalAccessor<?> accessor,
-            @Nullable Map<Object, Object> previousValues) {
+    private static <V> Map<Object, Object> setThreadLocal(Object key, @Nullable V value,
+            ThreadLocalAccessor<?> accessor, @Nullable Map<Object, Object> previousValues) {
 
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
         previousValues.put(key, accessor.getValue());
-        ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        if (value != null) {
+            ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        }
+        else {
+            accessor.reset();
+        }
         return previousValues;
     }
 
@@ -97,9 +102,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         for (ThreadLocalAccessor<?> threadLocalAccessor : registry.getThreadLocalAccessors()) {
             Object key = threadLocalAccessor.key();
             Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) context, key);
-            if (value != null) {
-                previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
-            }
+            previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
         }
         return DefaultScope.from(previousValues, registry);
     }
@@ -113,11 +116,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         Map<Object, Object> previousValues = null;
         for (String key : keys) {
             Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) context, key);
-            if (value != null) {
-                for (ThreadLocalAccessor<?> threadLocalAccessor : registry.getThreadLocalAccessors()) {
-                    if (key.equals(threadLocalAccessor.key())) {
-                        previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
-                    }
+            for (ThreadLocalAccessor<?> threadLocalAccessor : registry.getThreadLocalAccessors()) {
+                if (key.equals(threadLocalAccessor.key())) {
+                    previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
                 }
             }
         }
