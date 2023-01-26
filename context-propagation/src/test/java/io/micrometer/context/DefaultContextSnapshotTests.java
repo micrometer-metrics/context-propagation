@@ -268,8 +268,7 @@ public class DefaultContextSnapshotTests {
         barThreadLocal.set("bar_present");
         bazThreadLocal.set("baz_present");
 
-        try (Scope __ = ContextSnapshot.setThreadLocalsFrom(sourceContext,
-                this.registry, "foo", "bar")) {
+        try (Scope __ = ContextSnapshot.setThreadLocalsFrom(sourceContext, this.registry, "foo", "bar")) {
             then(fooThreadLocal.get()).isEqualTo("foo_present");
             then(barThreadLocal.get()).isEqualTo("bar_empty");
             then(bazThreadLocal.get()).isEqualTo("baz_present");
