@@ -38,7 +38,7 @@ public interface ThreadLocalAccessor<V> {
     Object key();
 
     /**
-     * Return the {@link ThreadLocal} value, or {@code null} if not set.
+     * Return the current {@link ThreadLocal} value, or {@code null} if not set.
      */
     @Nullable
     V getValue();
@@ -53,5 +53,13 @@ public interface ThreadLocalAccessor<V> {
      * Remove the {@link ThreadLocal} value.
      */
     void reset();
+
+    /**
+     * Remove the current {@link ThreadLocal} value and set the previously stored one.
+     * @param previousValue previous value to set
+     */
+    default void restore(V previousValue) {
+        setValue(previousValue);
+    }
 
 }

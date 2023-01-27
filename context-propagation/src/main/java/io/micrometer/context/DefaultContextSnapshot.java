@@ -193,7 +193,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         @SuppressWarnings("unchecked")
         private <V> void resetThreadLocalValue(ThreadLocalAccessor<?> accessor, @Nullable V previousValue) {
             if (previousValue != null) {
-                ((ThreadLocalAccessor<V>) accessor).setValue(previousValue);
+                ((ThreadLocalAccessor<V>) accessor).restore(previousValue);
             }
             else {
                 accessor.reset();
