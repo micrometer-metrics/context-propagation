@@ -38,7 +38,6 @@ apply from: 'dependencies.gradle'
 
 allprojects {
 	group = 'io.micrometer'
-	version = "1.0.1-SNAPSHOT"
 	ext.'release.stage' = releaseStage ?: 'SNAPSHOT'
 
 	afterEvaluate { project -> println "I'm configuring $project.name with version $project.version" }
