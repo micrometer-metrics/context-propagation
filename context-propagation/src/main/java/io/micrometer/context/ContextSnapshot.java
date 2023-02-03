@@ -190,6 +190,11 @@ public interface ContextSnapshot {
     /**
      * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
      * {@link ThreadLocal} values for which there is a value in the given source context.
+     * All currently present {@link ThreadLocal} values, for which the
+     * {@code sourceContext} has no key defined, will be {@link ThreadLocalAccessor#reset}
+     * and restored at the end of the scope. To make a union with currently set
+     * {@link ThreadLocal} values, {@link #captureAll(Object...)} should be used and
+     * combined with {@link Scope#setThreadLocals()} instead.
      * @param sourceContext the source context to read values from
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
@@ -202,6 +207,11 @@ public interface ContextSnapshot {
     /**
      * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
      * {@link ThreadLocal} values for which there is a value in the given source context.
+     * All currently present {@link ThreadLocal} values, for which the
+     * {@code sourceContext} has no key defined, will be {@link ThreadLocalAccessor#reset}
+     * and restored at the end of the scope. To make a union with currently set
+     * {@link ThreadLocal} values, {@link #captureAll(ContextRegistry, Object...)} should
+     * be used and combined with {@link Scope#setThreadLocals()} instead.
      * @param sourceContext the source context to read values from
      * @param contextRegistry the registry with the accessors to use
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
@@ -213,10 +223,13 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Read the values specified by from the given source context, and if found, use them
-     * to set {@link ThreadLocal} values. Essentially, a shortcut that bypasses the need
-     * to create of {@link ContextSnapshot} first via {@link #captureAll(Object...)},
-     * followed by {@link #setThreadLocals()}.
+     * Read the values specified by keys from the given source context, and if found, use
+     * them to set {@link ThreadLocal} values. Currently present {@link ThreadLocal}
+     * values for provided {@code keys}, for which the {@code sourceContext} has no key
+     * defined, will be {@link ThreadLocalAccessor#reset} and restored at the end of the
+     * scope. To make a union with currently set {@link ThreadLocal} values,
+     * {@link #captureAllUsing(Predicate, ContextRegistry, Object...)} should be used and
+     * combined with {@link Scope#setThreadLocals(Predicate)} instead.
      * @param sourceContext the source context to read values from
      * @param keys the keys of the values to read (at least one key must be passed)
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
