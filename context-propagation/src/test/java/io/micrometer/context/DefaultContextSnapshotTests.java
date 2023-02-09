@@ -209,7 +209,27 @@ public class DefaultContextSnapshotTests {
     }
 
     @Test
-    void should_limit_scope_to_defined_in_source_context() {
+    void should_limit_scope_to_defined_in_source_context_when_all_accessors_considered() {
+        ThreadLocal<String> fooThreadLocal = ThreadLocal.withInitial(() -> "foo_empty");
+        ThreadLocal<String> barThreadLocal = ThreadLocal.withInitial(() -> "bar_empty");
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal));
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+
+        Map<String, String> sourceContext = Collections.singletonMap("foo", "foo_present");
+        barThreadLocal.set("bar_present");
+
+        try (Scope __ = ContextSnapshot.setThreadLocals(sourceContext, this.registry)) {
+            then(fooThreadLocal.get()).isEqualTo("foo_present");
+            then(barThreadLocal.get()).isEqualTo("bar_empty");
+        }
+        then(fooThreadLocal.get()).isEqualTo("foo_empty");
+        then(barThreadLocal.get()).isEqualTo("bar_present");
+    }
+
+    @Test
+    void should_limit_scope_to_defined_in_source_context_when_appending_source_context() {
         ThreadLocal<String> fooThreadLocal = ThreadLocal.withInitial(() -> "foo_empty");
         ThreadLocal<String> barThreadLocal = ThreadLocal.withInitial(() -> "bar_empty");
 
@@ -222,7 +242,7 @@ public class DefaultContextSnapshotTests {
 
         try (Scope __ = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
             then(fooThreadLocal.get()).isEqualTo("foo_present");
-            then(barThreadLocal.get()).isEqualTo("bar_empty");
+            then(barThreadLocal.get()).isEqualTo("bar_present");
         }
         then(fooThreadLocal.get()).isEqualTo("foo_empty");
         then(barThreadLocal.get()).isEqualTo("bar_present");
@@ -276,6 +296,28 @@ public class DefaultContextSnapshotTests {
         then(fooThreadLocal.get()).isEqualTo("foo_empty");
         then(barThreadLocal.get()).isEqualTo("bar_present");
         then(bazThreadLocal.get()).isEqualTo("baz_present");
+    }
+
+    @Test
+    void should_eliminate_thread_locals_not_present_for_empty_source_context() {
+        ThreadLocal<String> fooThreadLocal = ThreadLocal.withInitial(() -> "foo_empty");
+        ThreadLocal<String> barThreadLocal = ThreadLocal.withInitial(() -> "bar_empty");
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal));
+        this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+
+        Map<String, String> sourceContext = Collections.emptyMap();
+        barThreadLocal.set("bar_present");
+        fooThreadLocal.set("foo_present");
+
+        try (Scope __ = ContextSnapshot.setThreadLocals(sourceContext, this.registry)) {
+            then(fooThreadLocal.get()).isEqualTo("foo_empty");
+            then(barThreadLocal.get()).isEqualTo("bar_empty");
+        }
+
+        then(fooThreadLocal.get()).isEqualTo("foo_present");
+        then(barThreadLocal.get()).isEqualTo("bar_present");
     }
 
 }

@@ -60,7 +60,10 @@ public interface ContextSnapshot {
 
     /**
      * Variant of {@link #setThreadLocals()} with a predicate to select context values by
-     * key.
+     * key. All currently present {@link ThreadLocal} values, for which the
+     * {@code sourceContext} has no key defined, will be {@link ThreadLocalAccessor#reset
+     * reset} and {@link ThreadLocalAccessor#restore(Object) restored} at the end of the
+     * scope.
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
@@ -188,38 +191,62 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
-     * {@link ThreadLocal} values for which there is a value in the given source context.
-     * All currently present {@link ThreadLocal} values, for which the
-     * {@code sourceContext} has no key defined, will be {@link ThreadLocalAccessor#reset}
-     * and restored at the end of the scope. To make a union with currently set
-     * {@link ThreadLocal} values, {@link #captureAll(Object...)} should be used and
-     * combined with {@link Scope#setThreadLocals()} instead.
+     * Sets all {@link ThreadLocal} values for which there is a value in the given source
+     * context. All currently present {@link ThreadLocal} values, for which the
+     * {@code sourceContext} has no key defined are not affected by this method. Use
+     * {@link #setThreadLocals(Object)} to {@link ThreadLocalAccessor#reset() reset}
+     * {@link ThreadLocal} values not present in the provided {@code sourceContext}.
      * @param sourceContext the source context to read values from
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
+     * @see #setThreadLocals(Object)
      */
     static Scope setAllThreadLocalsFrom(Object sourceContext) {
         return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, ContextRegistry.getInstance());
     }
 
     /**
-     * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
-     * {@link ThreadLocal} values for which there is a value in the given source context.
-     * All currently present {@link ThreadLocal} values, for which the
-     * {@code sourceContext} has no key defined, will be {@link ThreadLocalAccessor#reset}
-     * and restored at the end of the scope. To make a union with currently set
-     * {@link ThreadLocal} values, {@link #captureAll(ContextRegistry, Object...)} should
-     * be used and combined with {@link Scope#setThreadLocals()} instead.
+     * Variant of {@link #setAllThreadLocalsFrom(Object)} with a specific
+     * {@link ContextRegistry} instead of the global instance.
+     * @param contextRegistry the registry with the accessors to use
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
+     * @see #setThreadLocals(Object, ContextRegistry)
+     */
+    static Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
+        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+    }
+
+    /**
+     * Sets all {@link ThreadLocal} values for which there is a value in the given source
+     * context. All currently present {@link ThreadLocal} values, for which the
+     * {@code sourceContext} has no key defined, will be {@link ThreadLocalAccessor#reset
+     * reset} and {@link ThreadLocalAccessor#restore(Object) restored} at the end of the
+     * scope.
+     * @param sourceContext the source context to read values from
+     * @return an object that can be used to reset {@link ThreadLocal} values at the end
+     * of the context scope, either removing them or restoring their previous values, if
+     * any.
+     * @since 1.0.2
+     */
+    static Scope setThreadLocals(Object sourceContext) {
+        return DefaultContextSnapshot.setThreadLocals(sourceContext, ContextRegistry.getInstance());
+    }
+
+    /**
+     * Variant of {@link #setThreadLocals(Object)} with a specific {@link ContextRegistry}
+     * instead of the global instance.
      * @param sourceContext the source context to read values from
      * @param contextRegistry the registry with the accessors to use
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
+     * @since 1.0.2
      */
-    static Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
-        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+    static Scope setThreadLocals(Object sourceContext, ContextRegistry contextRegistry) {
+        return DefaultContextSnapshot.setThreadLocals(sourceContext, contextRegistry);
     }
 
     /**
@@ -227,11 +254,16 @@ public interface ContextSnapshot {
      * them to set {@link ThreadLocal} values. Currently present {@link ThreadLocal}
      * values for provided {@code keys}, for which the {@code sourceContext} has no key
      * defined, will be {@link ThreadLocalAccessor#reset} and restored at the end of the
-     * scope. To make a union with currently set {@link ThreadLocal} values,
-     * {@link #captureAllUsing(Predicate, ContextRegistry, Object...)} should be used and
-     * combined with {@link Scope#setThreadLocals(Predicate)} instead.
+     * scope. If no keys are provided, any {@link ThreadLocal} with a registered
+     * {@link ThreadLocalAccessor} for which no mapping exists in the
+     * {@code sourceContext} is not affected. To create a union with currently set
+     * {@link ThreadLocal} values,
+     * {@link #captureAllUsing(Predicate, ContextRegistry, Object...)} can be used and
+     * combined with {@link Scope#setThreadLocals(Predicate)} to delay the
+     * {@link ThreadLocal} restoration.
      * @param sourceContext the source context to read values from
-     * @param keys the keys of the values to read (at least one key must be passed)
+     * @param keys the keys of the values to read. If empty, all mappings from
+     * {@code sourceContext} are considered.
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
@@ -245,7 +277,8 @@ public interface ContextSnapshot {
      * {@link ContextRegistry} instead of the global instance.
      * @param sourceContext the source context to read values from
      * @param contextRegistry the registry with the accessors to use
-     * @param keys the keys of the values to read (at least one key must be passed)
+     * @param keys the keys of the values to read. If empty, all mappings from
+     * {@code sourceContext} are considered.
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
