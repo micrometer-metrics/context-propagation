@@ -254,9 +254,7 @@ public interface ContextSnapshot {
      * them to set {@link ThreadLocal} values. Currently present {@link ThreadLocal}
      * values for provided {@code keys}, for which the {@code sourceContext} has no key
      * defined, will be {@link ThreadLocalAccessor#reset} and restored at the end of the
-     * scope. If no keys are provided, any {@link ThreadLocal} with a registered
-     * {@link ThreadLocalAccessor} for which no mapping exists in the
-     * {@code sourceContext} is not affected. To create a union with currently set
+     * scope. To create a union with currently set
      * {@link ThreadLocal} values,
      * {@link #captureAllUsing(Predicate, ContextRegistry, Object...)} can be used and
      * combined with {@link Scope#setThreadLocals(Predicate)} to delay the
