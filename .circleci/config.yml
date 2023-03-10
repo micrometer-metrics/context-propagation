@@ -100,11 +100,13 @@ workflows:
       - build
       - build-jdk8
       - build-jdk11
+      - build-jdk17
       - deploy:
           requires:
             - build
             - build-jdk8
             - build-jdk11
+            - build-jdk17
           filters:
             branches:
               only:
@@ -130,11 +132,18 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
+      - build-jdk17:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
       - deploy:
           requires:
             - build
             - build-jdk8
             - build-jdk11
+            - build-jdk17
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
