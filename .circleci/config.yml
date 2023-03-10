@@ -6,23 +6,29 @@ executors:
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     docker:
-      - image: cimg/openjdk:17.0.2
+      - image: cimg/openjdk:19.0.1
   circle-jdk8-executor:
     working_directory: ~/context-propagation
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     docker:
-      - image: cimg/openjdk:8.0.322
+      - image: cimg/openjdk:8.0.362
   circle-jdk11-executor:
     working_directory: ~/context-propagation
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     docker:
-      - image: cimg/openjdk:11.0.13
+      - image: cimg/openjdk:11.0.18
+  circle-jdk17-executor:
+    working_directory: ~/context-propagation
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
+    docker:
+      - image: cimg/openjdk:17.0.6
   machine-executor:
     working_directory: ~/context-propagation
     machine:
-      image: ubuntu-2004:202107-02
+      image: ubuntu-2204:2023.02.1
 
 commands:
   gradlew-build:
@@ -69,6 +75,11 @@ jobs:
 
   build-jdk11:
     executor: circle-jdk11-executor
+    steps:
+      - gradlew-build
+
+  build-jdk17:
+    executor: circle-jdk17-executor
     steps:
       - gradlew-build
 

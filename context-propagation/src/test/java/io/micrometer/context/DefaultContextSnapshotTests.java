@@ -101,8 +101,8 @@ public class DefaultContextSnapshotTests {
         Map<String, String> sourceContext = Collections.singletonMap("foo", "hello");
 
         BDDAssertions.thenThrownBy(() -> ContextSnapshot.setThreadLocalsFrom(sourceContext, this.registry))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("You must provide at least one key when setting thread locals");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("You must provide at least one key when setting thread locals");
     }
 
     @Test
@@ -113,8 +113,8 @@ public class DefaultContextSnapshotTests {
         Map<String, String> sourceContext = Collections.singletonMap("foo", "hello");
 
         BDDAssertions.thenThrownBy(() -> ContextSnapshot.setThreadLocalsFrom(sourceContext))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("You must provide at least one key when setting thread locals");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("You must provide at least one key when setting thread locals");
     }
 
     @Test
@@ -141,7 +141,7 @@ public class DefaultContextSnapshotTests {
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
 
         this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
-                .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+            .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
 
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
@@ -166,7 +166,7 @@ public class DefaultContextSnapshotTests {
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
 
         this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
-                .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+            .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
 
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
@@ -196,13 +196,13 @@ public class DefaultContextSnapshotTests {
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
 
         this.registry.registerThreadLocalAccessor(new TestThreadLocalAccessor("foo", fooThreadLocal))
-                .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
+            .registerThreadLocalAccessor(new TestThreadLocalAccessor("bar", barThreadLocal));
 
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
         assertThat(ContextSnapshot.captureAllUsing(key -> true, this.registry).toString())
-                .isEqualTo("DefaultContextSnapshot{bar=barValue, foo=fooValue}");
+            .isEqualTo("DefaultContextSnapshot{bar=barValue, foo=fooValue}");
 
         fooThreadLocal.remove();
         barThreadLocal.remove();

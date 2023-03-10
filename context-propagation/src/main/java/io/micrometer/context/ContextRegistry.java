@@ -38,17 +38,17 @@ import java.util.function.Supplier;
 public class ContextRegistry {
 
     private static final ContextRegistry instance = new ContextRegistry().loadContextAccessors()
-            .loadThreadLocalAccessors();
+        .loadThreadLocalAccessors();
 
     private final List<ContextAccessor<?, ?>> contextAccessors = new CopyOnWriteArrayList<>();
 
     private final List<ThreadLocalAccessor<?>> threadLocalAccessors = new CopyOnWriteArrayList<>();
 
     private final List<ContextAccessor<?, ?>> readOnlyContextAccessors = Collections
-            .unmodifiableList(this.contextAccessors);
+        .unmodifiableList(this.contextAccessors);
 
     private final List<ThreadLocalAccessor<?>> readOnlyThreadLocalAccessors = Collections
-            .unmodifiableList(this.threadLocalAccessors);
+        .unmodifiableList(this.threadLocalAccessors);
 
     /**
      * Register a {@link ContextAccessor}. If there is an existing registration of another
