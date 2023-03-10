@@ -44,17 +44,17 @@ public class ContextRegistryTests {
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> this.registry.registerContextAccessor(sameTypeContextAccessor));
+            .isThrownBy(() -> this.registry.registerContextAccessor(sameTypeContextAccessor));
 
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> this.registry.registerContextAccessor(childTypeWriterAccessor));
+            .isThrownBy(() -> this.registry.registerContextAccessor(childTypeWriterAccessor));
 
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> this.registry.registerContextAccessor(childTypeReaderAccessor));
+            .isThrownBy(() -> this.registry.registerContextAccessor(childTypeReaderAccessor));
 
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
     }
@@ -68,7 +68,7 @@ public class ContextRegistryTests {
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> this.registry.registerContextAccessor(readChildTypeAccessor));
+            .isThrownBy(() -> this.registry.registerContextAccessor(readChildTypeAccessor));
 
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
     }
@@ -82,7 +82,7 @@ public class ContextRegistryTests {
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> this.registry.registerContextAccessor(readParentTypeAccessor));
+            .isThrownBy(() -> this.registry.registerContextAccessor(readParentTypeAccessor));
 
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
     }
@@ -96,7 +96,7 @@ public class ContextRegistryTests {
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> this.registry.registerContextAccessor(writeChildTypeAccessor));
+            .isThrownBy(() -> this.registry.registerContextAccessor(writeChildTypeAccessor));
 
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
     }
@@ -110,7 +110,7 @@ public class ContextRegistryTests {
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> this.registry.registerContextAccessor(writeParentTypeAccessor));
+            .isThrownBy(() -> this.registry.registerContextAccessor(writeParentTypeAccessor));
 
         assertThat(this.registry.getContextAccessors()).containsExactly(contextAccessor);
     }

@@ -38,7 +38,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 class ContextWrappingTests {
 
     private final ContextRegistry registry = new ContextRegistry()
-            .registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        .registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
 
     @AfterEach
     void clear() {
@@ -56,7 +56,7 @@ class ContextWrappingTests {
         runInNewThread(ContextSnapshot.captureAllUsing(key -> true, this.registry).wrap(runnable));
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
-                .isEqualTo("hello");
+            .isEqualTo("hello");
     }
 
     @Test
@@ -73,7 +73,7 @@ class ContextWrappingTests {
         runInNewThread(ContextSnapshot.captureAllUsing(key -> true, this.registry).wrap(callable));
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
-                .isEqualTo("hello");
+            .isEqualTo("hello");
     }
 
     @Test
@@ -88,7 +88,7 @@ class ContextWrappingTests {
                 valueInNewThread);
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
-                .isEqualTo("hello");
+            .isEqualTo("hello");
     }
 
     @Test
@@ -97,16 +97,17 @@ class ContextWrappingTests {
         try {
             ObservationThreadLocalHolder.setValue("hello");
             AtomicReference<String> valueInNewThread = new AtomicReference<>();
-            runInNewThread(executorService, valueInNewThread, atomic -> then(atomic.get())
-                    .as("By default thread local information should not be propagated").isNull());
+            runInNewThread(executorService, valueInNewThread,
+                    atomic -> then(atomic.get()).as("By default thread local information should not be propagated")
+                        .isNull());
 
             runInNewThread(
                     ContextExecutorService
-                            .wrap(executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
+                        .wrap(executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
                     valueInNewThread,
                     atomic -> then(atomic.get())
-                            .as("With context container the thread local information should be propagated")
-                            .isEqualTo("hello"));
+                        .as("With context container the thread local information should be propagated")
+                        .isEqualTo("hello"));
         }
         finally {
             executorService.shutdown();
@@ -120,17 +121,18 @@ class ContextWrappingTests {
         try {
             ObservationThreadLocalHolder.setValue("hello at time of creation of the executor");
             AtomicReference<String> valueInNewThread = new AtomicReference<>();
-            runInNewThread(executorService, valueInNewThread, atomic -> then(atomic.get())
-                    .as("By default thread local information should not be propagated").isNull());
+            runInNewThread(executorService, valueInNewThread,
+                    atomic -> then(atomic.get()).as("By default thread local information should not be propagated")
+                        .isNull());
 
             ObservationThreadLocalHolder.setValue("hello at time of creation of the executor");
             runInNewThread(
                     ContextExecutorService
-                            .wrap(executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
+                        .wrap(executorService, () -> ContextSnapshot.captureAllUsing(key -> true, this.registry)),
                     valueInNewThread,
                     atomic -> then(atomic.get())
-                            .as("With context container the thread local information should be propagated")
-                            .isEqualTo("hello"));
+                        .as("With context container the thread local information should be propagated")
+                        .isEqualTo("hello"));
         }
         finally {
             executorService.shutdown();
