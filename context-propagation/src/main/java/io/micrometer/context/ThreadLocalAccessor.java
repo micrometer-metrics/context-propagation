@@ -44,6 +44,17 @@ public interface ThreadLocalAccessor<V> {
     V getValue();
 
     /**
+     * Return the {@link ThreadLocal} value, or {@code null} if not set to which we should
+     * revert after the whole processing has been finished (e.g. in imperative block of code
+     * you had value X, then you switch to reactive where you can have mulitple other values.
+     * Finally, after the reactive block has finished, you want to go back to X).
+     */
+    @Nullable
+    default V getInitialValue() {
+        return getValue();
+    }
+
+    /**
      * Set the {@link ThreadLocal} value.
      * @param value the value to set
      */
@@ -61,6 +72,15 @@ public interface ThreadLocalAccessor<V> {
      */
     default void restore(V previousValue) {
         setValue(previousValue);
+    }
+
+    /**
+     * Remove the current {@link ThreadLocal} value and set the one initially stored one.
+     * @param initialValue initial value to set
+     * @since 1.0.4
+     */
+    default void restoreInitial(V initialValue) {
+        setValue(initialValue);
     }
 
 }
