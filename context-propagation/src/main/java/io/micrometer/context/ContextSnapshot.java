@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.function.Predicate;
  * Use static factory methods on this interface to create a snapshot.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 1.0.0
  */
 public interface ContextSnapshot {
@@ -169,18 +170,45 @@ public interface ContextSnapshot {
     }
 
     /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     */
+    static ContextSnapshot captureFromMany(Object... contexts) {
+        return DefaultContextSnapshot.captureFromMany(key -> true, ContextRegistry.getInstance(), contexts);
+    }
+
+    /**
      * Create a {@link ContextSnapshot} by reading values from the given context object.
      * @param context the context to read values from
      * @param registry the registry to use
      * @return the created {@link ContextSnapshot}
      */
     static ContextSnapshot captureFrom(Object context, ContextRegistry registry) {
-        return captureFrom(context, key -> true, registry);
+        return DefaultContextSnapshot.captureFromContext(key -> true, registry, context, null);
+    }
+
+    /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param registry the registry to use
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     */
+    static ContextSnapshot captureFromMany(ContextRegistry registry, Object... contexts) {
+        return DefaultContextSnapshot.captureFromMany(key -> true, registry, contexts);
     }
 
     /**
      * Create a {@link ContextSnapshot} by reading values from the given context object.
      * @param context the context to read values from
+     * @param keyPredicate predicate for context value keys
+     * @param registry the registry to use
      * @return the created {@link ContextSnapshot}
      */
     static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {

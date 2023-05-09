@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,25 @@ public class DefaultContextSnapshotTests {
                 then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
             }
             then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
+        }
+        finally {
+            ObservationThreadLocalHolder.reset();
+        }
+    }
+
+    @Test
+    void should_override_context_values_when_many_contexts() {
+        this.registry.registerContextAccessor(new TestContextAccessor());
+
+        String key = ObservationThreadLocalAccessor.KEY;
+        Map<String, String> firstContext = Collections.singletonMap(key, "hello");
+        Map<String, String> secondContext = Collections.singletonMap(key, "override");
+        try {
+            ContextSnapshot contextSnapshot = ContextSnapshot.captureFromMany(this.registry, firstContext,
+                    secondContext);
+            contextSnapshot.wrap(() -> {
+                then(ObservationThreadLocalHolder.getValue()).isEqualTo("override");
+            });
         }
         finally {
             ObservationThreadLocalHolder.reset();
