@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.function.Predicate;
  * Default implementation of {@link ContextSnapshot}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 1.0.0
  */
 final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
@@ -149,6 +150,15 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
             }
         }
         return snapshot;
+    }
+
+    static ContextSnapshot captureFromContexts(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
+            Object... contexts) {
+        DefaultContextSnapshot snapshot = null;
+        for (Object context : contexts) {
+            snapshot = captureFromContext(keyPredicate, contextRegistry, context, snapshot);
+        }
+        return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
 
     @SuppressWarnings("unchecked")
