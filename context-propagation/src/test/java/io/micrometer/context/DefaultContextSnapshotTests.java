@@ -101,7 +101,7 @@ public class DefaultContextSnapshotTests {
         Map<String, String> firstContext = Collections.singletonMap(key, "hello");
         Map<String, String> secondContext = Collections.singletonMap(key, "override");
         try {
-            ContextSnapshot contextSnapshot = ContextSnapshot.captureFromMany(this.registry, firstContext,
+            ContextSnapshot contextSnapshot = ContextSnapshot.captureFromContext(this.registry, firstContext,
                     secondContext);
             contextSnapshot.wrap(() -> {
                 then(ObservationThreadLocalHolder.getValue()).isEqualTo("override");

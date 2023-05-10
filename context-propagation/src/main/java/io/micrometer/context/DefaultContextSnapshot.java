@@ -152,7 +152,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         return snapshot;
     }
 
-    static ContextSnapshot captureFromMany(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
+    static ContextSnapshot captureFromContexts(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
             Object... contexts) {
         DefaultContextSnapshot snapshot = null;
         for (Object context : contexts) {
