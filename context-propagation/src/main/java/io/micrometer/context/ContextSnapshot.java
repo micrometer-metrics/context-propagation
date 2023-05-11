@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.function.Predicate;
  * Use static factory methods on this interface to create a snapshot.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 1.0.0
  */
 public interface ContextSnapshot {
@@ -160,10 +161,55 @@ public interface ContextSnapshot {
     }
 
     /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     * @since 1.0.3
+     */
+    static ContextSnapshot captureFromContext(Object... contexts) {
+        return DefaultContextSnapshot.captureFromContext(key -> true, ContextRegistry.getInstance(), null, contexts);
+    }
+
+    /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param registry the registry to use
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     * @since 1.0.3
+     */
+    static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
+        return DefaultContextSnapshot.captureFromContext(key -> true, registry, null, contexts);
+    }
+
+    /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param keyPredicate predicate for context value keys
+     * @param registry the registry to use
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     * @since 1.0.3
+     */
+    static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
+            Object... contexts) {
+        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, null, contexts);
+    }
+
+    /**
      * Create a {@link ContextSnapshot} by reading values from the given context object.
      * @param context the context to read values from
      * @return the created {@link ContextSnapshot}
+     * @deprecated as of 1.0.3 in favor of {@link #captureFromContext(Object...)}
      */
+    @Deprecated
     static ContextSnapshot captureFrom(Object context) {
         return captureFrom(context, ContextRegistry.getInstance());
     }
@@ -173,18 +219,26 @@ public interface ContextSnapshot {
      * @param context the context to read values from
      * @param registry the registry to use
      * @return the created {@link ContextSnapshot}
+     * @deprecated as of 1.0.3 in favor of
+     * {@link #captureFromContext(ContextRegistry, Object...)}
      */
+    @Deprecated
     static ContextSnapshot captureFrom(Object context, ContextRegistry registry) {
-        return captureFrom(context, key -> true, registry);
+        return DefaultContextSnapshot.captureFromContext(key -> true, registry, null, context);
     }
 
     /**
      * Create a {@link ContextSnapshot} by reading values from the given context object.
      * @param context the context to read values from
+     * @param keyPredicate predicate for context value keys
+     * @param registry the registry to use
      * @return the created {@link ContextSnapshot}
+     * @deprecated as of 1.0.3 in favor of
+     * {@link #captureFromContext(Predicate, ContextRegistry, Object...)}
      */
+    @Deprecated
     static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {
-        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, context, null);
+        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, null, context);
     }
 
     /**

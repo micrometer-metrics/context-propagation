@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,13 @@ import java.util.function.Predicate;
  * Default implementation of {@link ContextSnapshot}.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 1.0.0
  */
 final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
 
-    private static final ContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry());
+    private static final DefaultContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(
+            new ContextRegistry());
 
     private final ContextRegistry contextRegistry;
 
@@ -129,7 +131,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
         DefaultContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, contextRegistry);
         for (Object context : contexts) {
-            snapshot = captureFromContext(keyPredicate, contextRegistry, context, snapshot);
+            snapshot = captureFromContext(keyPredicate, contextRegistry, snapshot, context);
         }
         return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
@@ -153,12 +155,14 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
     @SuppressWarnings("unchecked")
     static DefaultContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
-            Object context, @Nullable DefaultContextSnapshot snapshot) {
+            @Nullable DefaultContextSnapshot snapshot, Object... contexts) {
 
-        ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
-        snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
-        ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
-        return snapshot;
+        for (Object context : contexts) {
+            ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
+            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
+            ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
+        }
+        return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
 
     @Override
