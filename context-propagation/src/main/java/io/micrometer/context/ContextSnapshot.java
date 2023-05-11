@@ -161,6 +161,49 @@ public interface ContextSnapshot {
     }
 
     /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     * @since 1.0.3
+     */
+    static ContextSnapshot captureFromContext(Object... contexts) {
+        return DefaultContextSnapshot.captureFromContext(key -> true, ContextRegistry.getInstance(), null, contexts);
+    }
+
+    /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param registry the registry to use
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     * @since 1.0.3
+     */
+    static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
+        return DefaultContextSnapshot.captureFromContext(key -> true, registry, null, contexts);
+    }
+
+    /**
+     * Create a {@link ContextSnapshot} by reading values from the given context objects.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param keyPredicate predicate for context value keys
+     * @param registry the registry to use
+     * @param contexts the contexts to read values from
+     * @return the created {@link ContextSnapshot}
+     * @since 1.0.3
+     */
+    static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
+            Object... contexts) {
+        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, null, contexts);
+    }
+
+    /**
      * Create a {@link ContextSnapshot} by reading values from the given context object.
      * @param context the context to read values from
      * @return the created {@link ContextSnapshot}
@@ -169,18 +212,6 @@ public interface ContextSnapshot {
     @Deprecated
     static ContextSnapshot captureFrom(Object context) {
         return captureFrom(context, ContextRegistry.getInstance());
-    }
-
-    /**
-     * Create a {@link ContextSnapshot} by reading values from the given context objects.
-     * <p>
-     * Values captured multiple times are overridden in the snapshot by the order of
-     * contexts given as arguments.
-     * @param contexts the contexts to read values from
-     * @return the created {@link ContextSnapshot}
-     */
-    static ContextSnapshot captureFromContext(Object... contexts) {
-        return DefaultContextSnapshot.captureFromContexts(key -> true, ContextRegistry.getInstance(), contexts);
     }
 
     /**
@@ -193,20 +224,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, ContextRegistry registry) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, registry, context, null);
-    }
-
-    /**
-     * Create a {@link ContextSnapshot} by reading values from the given context objects.
-     * <p>
-     * Values captured multiple times are overridden in the snapshot by the order of
-     * contexts given as arguments.
-     * @param registry the registry to use
-     * @param contexts the contexts to read values from
-     * @return the created {@link ContextSnapshot}
-     */
-    static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
-        return DefaultContextSnapshot.captureFromContexts(key -> true, registry, contexts);
+        return DefaultContextSnapshot.captureFromContext(key -> true, registry, null, context);
     }
 
     /**
@@ -220,22 +238,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {
-        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, context, null);
-    }
-
-    /**
-     * Create a {@link ContextSnapshot} by reading values from the given context objects.
-     * <p>
-     * Values captured multiple times are overridden in the snapshot by the order of
-     * contexts given as arguments.
-     * @param keyPredicate predicate for context value keys
-     * @param registry the registry to use
-     * @param contexts the contexts to read values from
-     * @return the created {@link ContextSnapshot}
-     */
-    static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
-            Object... contexts) {
-        return DefaultContextSnapshot.captureFromContexts(keyPredicate, registry, contexts);
+        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, null, context);
     }
 
     /**

@@ -28,7 +28,8 @@ import java.util.function.Predicate;
  */
 final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
 
-    private static final ContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry());
+    private static final DefaultContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(
+            new ContextRegistry());
 
     private final ContextRegistry contextRegistry;
 
@@ -130,7 +131,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
         DefaultContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, contextRegistry);
         for (Object context : contexts) {
-            snapshot = captureFromContext(keyPredicate, contextRegistry, context, snapshot);
+            snapshot = captureFromContext(keyPredicate, contextRegistry, snapshot, context);
         }
         return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
@@ -152,23 +153,16 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         return snapshot;
     }
 
-    static ContextSnapshot captureFromContexts(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
-            Object... contexts) {
-        DefaultContextSnapshot snapshot = null;
-        for (Object context : contexts) {
-            snapshot = captureFromContext(keyPredicate, contextRegistry, context, snapshot);
-        }
-        return (snapshot != null ? snapshot : emptyContextSnapshot);
-    }
-
     @SuppressWarnings("unchecked")
     static DefaultContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
-            Object context, @Nullable DefaultContextSnapshot snapshot) {
+            @Nullable DefaultContextSnapshot snapshot, Object... contexts) {
 
-        ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
-        snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
-        ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
-        return snapshot;
+        for (Object context : contexts) {
+            ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
+            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
+            ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
+        }
+        return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
 
     @Override
