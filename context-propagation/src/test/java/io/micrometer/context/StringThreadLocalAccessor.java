@@ -18,9 +18,9 @@ package io.micrometer.context;
 /**
  * Example {@link ThreadLocalAccessor} implementation.
  */
-public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<String> {
+public class StringThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
-    public static final String KEY = "micrometer.observation";
+    public static final String KEY = "string.threadlocal";
 
     @Override
     public Object key() {
@@ -29,17 +29,17 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Strin
 
     @Override
     public String getValue() {
-        return ObservationThreadLocalHolder.getValue();
+        return StringThreadLocalHolder.getValue();
     }
 
     @Override
     public void setValue(String value) {
-        ObservationThreadLocalHolder.setValue(value);
+        StringThreadLocalHolder.setValue(value);
     }
 
     @Override
     public void reset() {
-        ObservationThreadLocalHolder.reset();
+        StringThreadLocalHolder.reset();
     }
 
 }

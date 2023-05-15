@@ -39,17 +39,17 @@ public interface ThreadLocalAccessor<V> {
     Object key();
 
     /**
-     * Return the current {@link ThreadLocal} value, or {@code null} if not set.
-     * This method is called in two scenarios:
+     * Return the current {@link ThreadLocal} value, or {@code null} if not set. This
+     * method is called in two scenarios:
      * <ul>
      * <li>When capturing a {@link ContextSnapshot}. A {@code null} value would not end up
      * in the snapshot and would mean the snapshot is missing a mapping for this
      * accessor's {@link #key()}.</li>
      * <li>When setting {@link ThreadLocal} values from a {@link ContextSnapshot} or a
      * Context object (operated upon by {@link ContextAccessor}) to check for existing
-     * values: {@code null} means the {@link ThreadLocal} is not set and upon closing
-     * a {@link io.micrometer.context.ContextSnapshot.Scope}, the {@link #restore()}
-     * variant with no argument would be called.</li>
+     * values: {@code null} means the {@link ThreadLocal} is not set and upon closing a
+     * {@link io.micrometer.context.ContextSnapshot.Scope}, the {@link #restore()} variant
+     * with no argument would be called.</li>
      * </ul>
      */
     @Nullable
@@ -62,13 +62,13 @@ public interface ThreadLocalAccessor<V> {
     void setValue(V value);
 
     /**
-     * Set the {@link ThreadLocal} value to what the implementation considers as a
-     * missing value. In trivial cases it can be {@code null}, representing what calling
+     * Set the {@link ThreadLocal} value to what the implementation considers as a missing
+     * value. In trivial cases it can be {@code null}, representing what calling
      * {@link ThreadLocal#remove()} would store in the thread-local storage, but it can
-     * also be any object the implementation chooses.
-     * This method can be called when setting {@link ThreadLocal} values in case of
-     * missing mapping for a {@link #key()} from a {@link ContextSnapshot}, or
-     * a Context object (operated upon by {@link ContextAccessor}).
+     * also be any object the implementation chooses. This method can be called when
+     * setting {@link ThreadLocal} values in case of missing mapping for a {@link #key()}
+     * from a {@link ContextSnapshot}, or a Context object (operated upon by
+     * {@link ContextAccessor}).
      * @since 1.0.3
      */
     default void setValue() {
@@ -76,9 +76,9 @@ public interface ThreadLocalAccessor<V> {
     }
 
     /**
-     * Remove the {@link ThreadLocal} value when setting {@link ThreadLocal} values
-     * in case of missing mapping for a {@link #key()} from a {@link ContextSnapshot},
-     * or a Context object (operated upon by {@link ContextAccessor}).
+     * Remove the {@link ThreadLocal} value when setting {@link ThreadLocal} values in
+     * case of missing mapping for a {@link #key()} from a {@link ContextSnapshot}, or a
+     * Context object (operated upon by {@link ContextAccessor}).
      * @deprecated To be replaced by calls to {@link #setValue()}.
      */
     @Deprecated
@@ -94,8 +94,8 @@ public interface ThreadLocalAccessor<V> {
     }
 
     /**
-     * Remove the current {@link ThreadLocal} value when restoring values after
-     * a {@link io.micrometer.context.ContextSnapshot.Scope} closes but there was no
+     * Remove the current {@link ThreadLocal} value when restoring values after a
+     * {@link io.micrometer.context.ContextSnapshot.Scope} closes but there was no
      * {@link ThreadLocal} value present prior to the closed scope.
      * @see #getValue()
      * @since 1.0.3
