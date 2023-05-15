@@ -50,9 +50,13 @@ public interface ThreadLocalAccessor<V> {
     void setValue(V value);
 
     /**
-     * Remove the {@link ThreadLocal} value.
+     * Call this instead of {@link #setValue(Object)} with {@code null} in order to remove
+     * the {@link ThreadLocal}.
+     * @since 1.0.3
      */
-    void reset();
+    default void resetToSetValue() {
+        reset();
+    }
 
     /**
      * Remove the current {@link ThreadLocal} value and set the previously stored one.
@@ -62,5 +66,19 @@ public interface ThreadLocalAccessor<V> {
     default void restore(V previousValue) {
         setValue(previousValue);
     }
+
+    /**
+     * Call this instead of {@link #restore(Object)} with {@code null} in order to remove
+     * the {@link ThreadLocal}.
+     * @since 1.0.3
+     */
+    default void resetToRestore() {
+        reset();
+    }
+
+    /**
+     * Remove the {@link ThreadLocal} value.
+     */
+    void reset();
 
 }

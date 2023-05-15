@@ -83,12 +83,17 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    private static <V> Map<Object, Object> setThreadLocal(Object key, V value, ThreadLocalAccessor<?> accessor,
-            @Nullable Map<Object, Object> previousValues) {
+    private static <V> Map<Object, Object> setThreadLocal(Object key, @Nullable V value,
+            ThreadLocalAccessor<?> accessor, @Nullable Map<Object, Object> previousValues) {
 
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
         previousValues.put(key, accessor.getValue());
-        ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        if (value != null) {
+            ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        }
+        else {
+            accessor.resetToSetValue();
+        }
         return previousValues;
     }
 
@@ -200,7 +205,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
                 ((ThreadLocalAccessor<V>) accessor).restore(previousValue);
             }
             else {
-                accessor.reset();
+                accessor.resetToRestore();
             }
         }
 
