@@ -16,6 +16,7 @@
 package io.micrometer.context;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.micrometer.context.ContextSnapshot.Scope;
@@ -51,6 +52,25 @@ public class DefaultContextSnapshotTests {
         finally {
             ObservationThreadLocalHolder.reset();
         }
+    }
+
+    @Test
+    void test_null_value_in_source_context() {
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+
+        String key = ObservationThreadLocalAccessor.KEY;
+
+        String emptyValue = ObservationThreadLocalHolder.getValue();
+        Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
+
+        ContextSnapshot snapshot =
+            ContextSnapshot.captureAll(this.registry, sourceContext);
+
+        try (Scope scope = snapshot.setThreadLocals()) {
+            assertThat(ObservationThreadLocalHolder.getValue()).isEqualTo(emptyValue);
+        }
+        assertThat(ObservationThreadLocalHolder.getValue()).isEqualTo(emptyValue);
     }
 
     @Test
