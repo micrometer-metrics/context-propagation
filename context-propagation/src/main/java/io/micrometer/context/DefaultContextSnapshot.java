@@ -24,6 +24,7 @@ import java.util.function.Predicate;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Dariusz Jędrzejczyk
  * @since 1.0.0
  */
 final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
@@ -92,7 +93,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
             ((ThreadLocalAccessor<V>) accessor).setValue(value);
         }
         else {
-            accessor.resetToSetValue();
+            accessor.reset();
         }
         return previousValues;
     }
@@ -201,12 +202,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
         @SuppressWarnings("unchecked")
         private <V> void resetThreadLocalValue(ThreadLocalAccessor<?> accessor, @Nullable V previousValue) {
-            if (previousValue != null) {
-                ((ThreadLocalAccessor<V>) accessor).restore(previousValue);
-            }
-            else {
-                accessor.resetToRestore();
-            }
+            ((ThreadLocalAccessor<V>) accessor).restore(previousValue);
         }
 
         public static Scope from(@Nullable Map<Object, Object> previousValues, ContextRegistry registry) {

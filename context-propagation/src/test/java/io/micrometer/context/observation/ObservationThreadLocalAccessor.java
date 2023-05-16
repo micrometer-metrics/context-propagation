@@ -45,11 +45,6 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Obser
     }
 
     @Override
-    public void resetToSetValue() {
-        new NullObservation().openScope();
-    }
-
-    @Override
     public void restore(Observation value) {
         Scope scope = ObservationScopeThreadLocalHolder.getValue();
         if (scope == null) {
@@ -58,7 +53,7 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Obser
             assert false : msg;
         }
         Scope previousObservationScope = scope.getPreviousObservationScope();
-        if (previousObservationScope == null || value != previousObservationScope.getCurrentObservation()) {
+        if ((previousObservationScope != null && previousObservationScope.getCurrentObservation() != null) || value != null) {
             Observation previousObservation = previousObservationScope != null
                     ? previousObservationScope.getCurrentObservation() : null;
             String msg = "Observation <" + value
@@ -68,20 +63,12 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Obser
             log.log(Level.WARNING, msg);
             assert false : msg;
         }
-        reset();
-    }
-
-    @Override
-    public void resetToRestore() {
-        reset();
+        scope.close();
     }
 
     @Override
     public void reset() {
-        Scope scope = ObservationScopeThreadLocalHolder.getValue();
-        if (scope != null) {
-            scope.close();
-        }
+        new NullObservation().openScope();
     }
 
 }

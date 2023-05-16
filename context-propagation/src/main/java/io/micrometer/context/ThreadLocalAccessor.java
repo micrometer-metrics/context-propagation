@@ -24,6 +24,7 @@ import java.util.function.Supplier;
  *
  * @author Rossen Stoyanchev
  * @author Marcin Grzejszczak
+ * @author Dariusz Jędrzejczyk
  * @since 1.0.0
  * @see ContextRegistry#registerThreadLocalAccessor(ThreadLocalAccessor)
  * @see ContextRegistry#registerThreadLocalAccessor(String, Supplier, Consumer, Runnable)
@@ -50,30 +51,17 @@ public interface ThreadLocalAccessor<V> {
     void setValue(V value);
 
     /**
-     * Call this instead of {@link #setValue(Object)} with {@code null} in order to remove
-     * the {@link ThreadLocal}.
-     * @since 1.0.3
-     */
-    default void resetToSetValue() {
-        reset();
-    }
-
-    /**
-     * Remove the current {@link ThreadLocal} value and set the previously stored one.
+     * Remove the current {@link ThreadLocal} value and set the previously stored one
+     * if argument is non-null.
      * @param previousValue previous value to set
      * @since 1.0.1
      */
-    default void restore(V previousValue) {
-        setValue(previousValue);
-    }
-
-    /**
-     * Call this instead of {@link #restore(Object)} with {@code null} in order to remove
-     * the {@link ThreadLocal}.
-     * @since 1.0.3
-     */
-    default void resetToRestore() {
-        reset();
+    default void restore(@Nullable V previousValue) {
+        if (previousValue == null) {
+            reset();
+        } else {
+            setValue(previousValue);
+        }
     }
 
     /**
