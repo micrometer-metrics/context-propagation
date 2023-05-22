@@ -129,7 +129,9 @@ public interface ContextSnapshot {
      * instance.
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
+     * @deprecated As of 1.0.4, use {@link Factory#captureAll(Object...)} // TODO: improve
      */
+    @Deprecated
     static ContextSnapshot captureAll(Object... contexts) {
         return captureAll(ContextRegistry.getInstance(), contexts);
     }
@@ -142,6 +144,7 @@ public interface ContextSnapshot {
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
+    @Deprecated
     static ContextSnapshot captureAll(ContextRegistry registry, Object... contexts) {
         return captureAllUsing(key -> true, registry, contexts);
     }
@@ -154,10 +157,10 @@ public interface ContextSnapshot {
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
+    @Deprecated
     static ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry registry,
             Object... contexts) {
-
-        return DefaultContextSnapshot.captureAll(registry, keyPredicate, contexts);
+        return DefaultContextSnapshotFactory.INSTANCE.captureAllUsing(keyPredicate, registry, contexts);
     }
 
     /**
@@ -169,8 +172,9 @@ public interface ContextSnapshot {
      * @return the created {@link ContextSnapshot}
      * @since 1.0.3
      */
+    @Deprecated
     static ContextSnapshot captureFromContext(Object... contexts) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, ContextRegistry.getInstance(), null, contexts);
+        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(contexts);
     }
 
     /**
@@ -183,8 +187,9 @@ public interface ContextSnapshot {
      * @return the created {@link ContextSnapshot}
      * @since 1.0.3
      */
+    @Deprecated
     static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, registry, null, contexts);
+        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(registry, contexts);
     }
 
     /**
@@ -198,9 +203,10 @@ public interface ContextSnapshot {
      * @return the created {@link ContextSnapshot}
      * @since 1.0.3
      */
+    @Deprecated
     static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
             Object... contexts) {
-        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, null, contexts);
+        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(keyPredicate, registry, contexts);
     }
 
     /**
@@ -224,7 +230,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, ContextRegistry registry) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, registry, null, context);
+        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(key -> true, registry, null, context);
     }
 
     /**
@@ -238,7 +244,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {
-        return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, null, context);
+        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(keyPredicate, registry, null, context);
     }
 
     /**
@@ -249,8 +255,9 @@ public interface ContextSnapshot {
      * of the context scope, either removing them or restoring their previous values, if
      * any.
      */
+    @Deprecated
     static Scope setAllThreadLocalsFrom(Object sourceContext) {
-        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, ContextRegistry.getInstance());
+        return DefaultContextSnapshotFactory.INSTANCE.setAllThreadLocalsFrom(sourceContext, ContextRegistry.getInstance());
     }
 
     /**
@@ -262,8 +269,9 @@ public interface ContextSnapshot {
      * of the context scope, either removing them or restoring their previous values, if
      * any.
      */
+    @Deprecated
     static Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
-        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+        return DefaultContextSnapshotFactory.INSTANCE.setAllThreadLocalsFrom(sourceContext, contextRegistry);
     }
 
     /**
@@ -277,6 +285,7 @@ public interface ContextSnapshot {
      * of the context scope, either removing them or restoring their previous values, if
      * any.
      */
+    @Deprecated
     static Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
         return setThreadLocalsFrom(sourceContext, ContextRegistry.getInstance(), keys);
     }
@@ -291,8 +300,9 @@ public interface ContextSnapshot {
      * of the context scope, either removing them or restoring their previous values, if
      * any.
      */
+    @Deprecated
     static Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {
-        return DefaultContextSnapshot.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
+        return DefaultContextSnapshotFactory.INSTANCE.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
     }
 
     /**
@@ -307,6 +317,130 @@ public interface ContextSnapshot {
         @Override
         void close();
 
+    }
+
+    /**
+     * @since 1.0.4
+     */
+    interface Factory {
+
+        /**
+         * Capture values from {@link ThreadLocal} and from other context objects using all
+         * accessors from the {@link ContextRegistry#getInstance() global} ContextRegistry
+         * instance.
+         * @param contexts one more context objects to extract values from
+         * @return a snapshot with saved context values
+         */
+        default ContextSnapshot captureAll(Object... contexts) {
+            return captureAll(ContextRegistry.getInstance(), contexts);
+        }
+
+        /**
+         * Capture values from {@link ThreadLocal} and from other context objects using all
+         * accessors from the {@link ContextRegistry#getInstance() global} ContextRegistry
+         * instance.
+         * @param registry the registry to use
+         * @param contexts one more context objects to extract values from
+         * @return a snapshot with saved context values
+         */
+        default ContextSnapshot captureAll(ContextRegistry registry, Object... contexts) {
+            return captureAllUsing(key -> true, registry, contexts);
+        }
+
+        /**
+         * Variant of {@link #captureAll(Object...)} with a predicate to filter context keys
+         * and with a specific {@link ContextRegistry} instance.
+         * @param keyPredicate predicate for context value keys
+         * @param registry the registry with the accessors to use
+         * @param contexts one more context objects to extract values from
+         * @return a snapshot with saved context values
+         */
+        ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate,
+            ContextRegistry registry, Object... contexts);
+
+        /**
+         * Create a {@link ContextSnapshot} by reading values from the given context objects.
+         * <p>
+         * Values captured multiple times are overridden in the snapshot by the order of
+         * contexts given as arguments.
+         * @param contexts the contexts to read values from
+         * @return the created {@link ContextSnapshot}
+         */
+        ContextSnapshot captureFromContext(Object... contexts);
+
+        /**
+         * Create a {@link ContextSnapshot} by reading values from the given context objects.
+         * <p>
+         * Values captured multiple times are overridden in the snapshot by the order of
+         * contexts given as arguments.
+         * @param registry the registry to use
+         * @param contexts the contexts to read values from
+         * @return the created {@link ContextSnapshot}
+         * @since 1.0.3
+         */
+        ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts);
+
+        /**
+         * Create a {@link ContextSnapshot} by reading values from the given context objects.
+         * <p>
+         * Values captured multiple times are overridden in the snapshot by the order of
+         * contexts given as arguments.
+         * @param keyPredicate predicate for context value keys
+         * @param registry the registry to use
+         * @param contexts the contexts to read values from
+         * @return the created {@link ContextSnapshot}
+         */
+        ContextSnapshot captureFromContext(Predicate<Object> keyPredicate,
+            ContextRegistry registry, Object... contexts);
+
+        /**
+         * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
+         * {@link ThreadLocal} values for which there is a value in the given source context.
+         * @param sourceContext the source context to read values from
+         * @return an object that can be used to reset {@link ThreadLocal} values at the end
+         * of the context scope, either removing them or restoring their previous values, if
+         * any.
+         */
+        Scope setAllThreadLocalsFrom(Object sourceContext);
+
+        /**
+         * Variant of {@link #setThreadLocalsFrom(Object, String...)} that sets all
+         * {@link ThreadLocal} values for which there is a value in the given source context.
+         * @param sourceContext the source context to read values from
+         * @param contextRegistry the registry with the accessors to use
+         * @return an object that can be used to reset {@link ThreadLocal} values at the end
+         * of the context scope, either removing them or restoring their previous values, if
+         * any.
+         */
+        Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry);
+
+        /**
+         * Read the values specified by from the given source context, and if found, use them
+         * to set {@link ThreadLocal} values. Essentially, a shortcut that bypasses the need
+         * to create of {@link ContextSnapshot} first via {@link #captureAll(Object...)},
+         * followed by {@link #setThreadLocals()}.
+         * @param sourceContext the source context to read values from
+         * @param keys the keys of the values to read (at least one key must be passed)
+         * @return an object that can be used to reset {@link ThreadLocal} values at the end
+         * of the context scope, either removing them or restoring their previous values, if
+         * any.
+         */
+        default Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
+            return setThreadLocalsFrom(sourceContext, ContextRegistry.getInstance(), keys);
+        }
+
+        /**
+         * Variant of {@link #setThreadLocalsFrom(Object, String...)} with a specific
+         * {@link ContextRegistry} instead of the global instance.
+         * @param sourceContext the source context to read values from
+         * @param contextRegistry the registry with the accessors to use
+         * @param keys the keys of the values to read (at least one key must be passed)
+         * @return an object that can be used to reset {@link ThreadLocal} values at the end
+         * of the context scope, either removing them or restoring their previous values, if
+         * any.
+         */
+        Scope setThreadLocalsFrom(Object sourceContext,
+            ContextRegistry contextRegistry, String... keys);
     }
 
 }

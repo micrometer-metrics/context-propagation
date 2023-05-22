@@ -1,39 +1,18 @@
-/**
- * Copyright 2023 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package io.micrometer.context;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-/**
- * Default implementation of {@link ContextSnapshot}.
- *
- * @author Rossen Stoyanchev
- * @author Brian Clozel
- * @since 1.0.0
- */
-final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
+public class ClearingContextSnapshot extends HashMap<Object, Object>
+    implements ContextSnapshot {
 
-    private static final DefaultContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(
-            new ContextRegistry());
+    private static final ClearingContextSnapshot emptyContextSnapshot = new ClearingContextSnapshot(
+        new ContextRegistry());
 
     private final ContextRegistry contextRegistry;
 
-    DefaultContextSnapshot(ContextRegistry contextRegistry) {
+    ClearingContextSnapshot(ContextRegistry contextRegistry) {
         this.contextRegistry = contextRegistry;
     }
 
@@ -83,12 +62,19 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    private static <V> Map<Object, Object> setThreadLocal(Object key, V value, ThreadLocalAccessor<?> accessor,
-            @Nullable Map<Object, Object> previousValues) {
+    private static <V> Map<Object, Object> setThreadLocal(Object key, @Nullable V value,
+        ThreadLocalAccessor<?> accessor,
+        @Nullable Map<Object, Object> previousValues) {
 
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
         previousValues.put(key, accessor.getValue());
-        ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        if (value != null) {
+            ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        }
+        else {
+            accessor.reset();
+        }
+
         return previousValues;
     }
 
@@ -99,9 +85,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         for (ThreadLocalAccessor<?> threadLocalAccessor : registry.getThreadLocalAccessors()) {
             Object key = threadLocalAccessor.key();
             Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) context, key);
-            if (value != null) {
-                previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
-            }
+            previousValues = setThreadLocal(key, value, threadLocalAccessor, previousValues);
         }
         return DefaultScope.from(previousValues, registry);
     }
@@ -127,9 +111,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     static ContextSnapshot captureAll(ContextRegistry contextRegistry, Predicate<Object> keyPredicate,
-            Object... contexts) {
+        Object... contexts) {
 
-        DefaultContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, contextRegistry);
+        ClearingContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, contextRegistry);
         for (Object context : contexts) {
             snapshot = captureFromContext(keyPredicate, contextRegistry, snapshot, context);
         }
@@ -137,15 +121,15 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @Nullable
-    private static DefaultContextSnapshot captureFromThreadLocals(Predicate<Object> keyPredicate,
-            ContextRegistry contextRegistry) {
+    private static ClearingContextSnapshot captureFromThreadLocals(Predicate<Object> keyPredicate,
+        ContextRegistry contextRegistry) {
 
-        DefaultContextSnapshot snapshot = null;
+        ClearingContextSnapshot snapshot = null;
         for (ThreadLocalAccessor<?> accessor : contextRegistry.getThreadLocalAccessors()) {
             if (keyPredicate.test(accessor.key())) {
                 Object value = accessor.getValue();
                 if (value != null) {
-                    snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
+                    snapshot = (snapshot != null ? snapshot : new ClearingContextSnapshot(contextRegistry));
                     snapshot.put(accessor.key(), value);
                 }
             }
@@ -154,12 +138,13 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    static DefaultContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
-            @Nullable DefaultContextSnapshot snapshot, Object... contexts) {
+    static ClearingContextSnapshot captureFromContext(Predicate<Object> keyPredicate,
+        ContextRegistry contextRegistry,
+        @Nullable ClearingContextSnapshot snapshot, Object... contexts) {
 
         for (Object context : contexts) {
             ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
-            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
+            snapshot = (snapshot != null ? snapshot : new ClearingContextSnapshot(contextRegistry));
             ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
         }
         return (snapshot != null ? snapshot : emptyContextSnapshot);
@@ -167,7 +152,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
     @Override
     public String toString() {
-        return "DefaultContextSnapshot" + super.toString();
+        return "ClearingContextSnapshot" + super.toString();
     }
 
 }
