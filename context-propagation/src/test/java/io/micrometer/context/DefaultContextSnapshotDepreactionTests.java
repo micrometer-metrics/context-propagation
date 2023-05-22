@@ -30,6 +30,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("deprecation")
 public class DefaultContextSnapshotDepreactionTests {
 
     private final ContextRegistry registry = new ContextRegistry();

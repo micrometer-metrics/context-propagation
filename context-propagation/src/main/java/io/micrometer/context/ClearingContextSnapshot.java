@@ -164,6 +164,11 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
         }
 
         @Override
+        public ContextSnapshot captureAll(Object... contexts) {
+            return captureAll(defaultRegistry, contexts);
+        }
+
+        @Override
         public ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate,
             ContextRegistry registry,
             Object... contexts) {
@@ -200,6 +205,11 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
         public Scope setAllThreadLocalsFrom(Object sourceContext,
             ContextRegistry contextRegistry) {
             return ClearingContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+        }
+
+        @Override
+        public Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
+            return setThreadLocalsFrom(sourceContext, defaultRegistry, keys);
         }
 
         @Override

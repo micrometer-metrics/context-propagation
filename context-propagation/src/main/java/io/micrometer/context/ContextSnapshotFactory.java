@@ -15,9 +15,7 @@ public interface ContextSnapshotFactory {
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
      */
-    default ContextSnapshot captureAll(Object... contexts) {
-        return captureAll(ContextRegistry.getInstance(), contexts);
-    }
+    ContextSnapshot captureAll(Object... contexts);
 
     /**
      * Capture values from {@link ThreadLocal} and from other context objects using all
@@ -120,10 +118,7 @@ public interface ContextSnapshotFactory {
      * of the context scope, either removing them or restoring their previous values, if
      * any.
      */
-    default ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext,
-        String... keys) {
-        return setThreadLocalsFrom(sourceContext, ContextRegistry.getInstance(), keys);
-    }
+    ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys);
 
     /**
      * Variant of {@link #setThreadLocalsFrom(Object, String...)} with a specific
@@ -142,8 +137,8 @@ public interface ContextSnapshotFactory {
 
     class Builder {
 
-        boolean clearWhenMissing = false;
-        ContextRegistry defaultRegistry = ContextRegistry.getInstance();
+        private boolean clearWhenMissing = false;
+        private ContextRegistry defaultRegistry = ContextRegistry.getInstance();
 
         public Builder() {
 

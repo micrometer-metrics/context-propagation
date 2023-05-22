@@ -14,6 +14,11 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
     }
 
     @Override
+    public ContextSnapshot captureAll(Object... contexts) {
+        return captureAll(defaultRegistry, contexts);
+    }
+
+    @Override
     public ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry registry,
         Object... contexts) {
         return DefaultContextSnapshot.captureAll(registry, keyPredicate, contexts);
@@ -44,6 +49,11 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
     public ContextSnapshot.Scope setAllThreadLocalsFrom(Object sourceContext,
         ContextRegistry contextRegistry) {
         return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+    }
+
+    @Override
+    public ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
+        return setThreadLocalsFrom(sourceContext, defaultRegistry, keys);
     }
 
     @Override
