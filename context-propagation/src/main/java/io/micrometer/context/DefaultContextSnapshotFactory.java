@@ -2,13 +2,15 @@ package io.micrometer.context;
 
 import java.util.function.Predicate;
 
-public class DefaultContextSnapshotFactory implements ContextSnapshot.Factory {
+public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
+
+    private final ContextRegistry defaultRegistry;
 
     public static final DefaultContextSnapshotFactory INSTANCE =
-        new DefaultContextSnapshotFactory();
+        new DefaultContextSnapshotFactory(ContextRegistry.getInstance());
 
-    private DefaultContextSnapshotFactory() {
-        // no-op
+    public DefaultContextSnapshotFactory(ContextRegistry contextRegistry) {
+        this.defaultRegistry = contextRegistry;
     }
 
     @Override
@@ -19,7 +21,8 @@ public class DefaultContextSnapshotFactory implements ContextSnapshot.Factory {
 
     @Override
     public ContextSnapshot captureFromContext(Object... contexts) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, ContextRegistry.getInstance(), null, contexts);
+        return DefaultContextSnapshot.captureFromContext(key -> true, defaultRegistry, null,
+            contexts);
     }
     @Override
     public ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
@@ -34,7 +37,7 @@ public class DefaultContextSnapshotFactory implements ContextSnapshot.Factory {
 
     @Override
     public ContextSnapshot.Scope setAllThreadLocalsFrom(Object sourceContext) {
-        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, ContextRegistry.getInstance());
+        return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, defaultRegistry);
     }
 
     @Override

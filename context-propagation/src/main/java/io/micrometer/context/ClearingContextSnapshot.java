@@ -155,4 +155,59 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
         return "ClearingContextSnapshot" + super.toString();
     }
 
+    static class Factory implements ContextSnapshotFactory {
+
+        private final ContextRegistry defaultRegistry;
+
+        public Factory(ContextRegistry defaultRegistry) {
+            this.defaultRegistry = defaultRegistry;
+        }
+
+        @Override
+        public ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate,
+            ContextRegistry registry,
+            Object... contexts) {
+            return ClearingContextSnapshot.captureAll(registry, keyPredicate, contexts);
+        }
+
+        @Override
+        public ContextSnapshot captureFromContext(Object... contexts) {
+            return ClearingContextSnapshot.captureFromContext(key -> true,
+                defaultRegistry, null, contexts);
+        }
+
+        @Override
+        public ContextSnapshot captureFromContext(ContextRegistry registry,
+            Object... contexts) {
+            return ClearingContextSnapshot.captureFromContext(key -> true, registry,
+                null, contexts);
+        }
+
+        @Override
+        public ContextSnapshot captureFromContext(Predicate<Object> keyPredicate,
+            ContextRegistry registry,
+            Object... contexts) {
+            return ClearingContextSnapshot.captureFromContext(keyPredicate, registry,
+                null, contexts);
+        }
+
+        @Override
+        public Scope setAllThreadLocalsFrom(Object sourceContext) {
+            return ClearingContextSnapshot.setAllThreadLocalsFrom(sourceContext, defaultRegistry);
+        }
+
+        @Override
+        public Scope setAllThreadLocalsFrom(Object sourceContext,
+            ContextRegistry contextRegistry) {
+            return ClearingContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+        }
+
+        @Override
+        public Scope setThreadLocalsFrom(Object sourceContext,
+            ContextRegistry contextRegistry,
+            String... keys) {
+            return ClearingContextSnapshot.setThreadLocalsFrom(sourceContext,
+                contextRegistry, keys);
+        }
+    }
 }
