@@ -84,7 +84,8 @@ public interface ThreadLocalAccessor<V> {
      */
     @Deprecated
     default void reset() {
-
+        throw new IllegalStateException(this.getClass().getName() + "#reset() should "
+                + "not be called. Please implement #setValue() method when removing the " + "#reset() implementation.");
     }
 
     /**
