@@ -50,7 +50,7 @@ class TestThreadLocalAccessor implements ThreadLocalAccessor<String> {
     }
 
     @Override
-    public void reset() {
+    public void setValue() {
         this.threadLocal.remove();
     }
 

@@ -45,7 +45,7 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Obser
     }
 
     @Override
-    public void resetToSetValue() {
+    public void setValue() {
         new NullObservation().openScope();
     }
 
@@ -68,16 +68,15 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Obser
             log.log(Level.WARNING, msg);
             assert false : msg;
         }
-        reset();
+        close();
     }
 
     @Override
-    public void resetToRestore() {
-        reset();
+    public void restore() {
+        close();
     }
 
-    @Override
-    public void reset() {
+    private void close() {
         Scope scope = ObservationScopeThreadLocalHolder.getValue();
         if (scope != null) {
             scope.close();

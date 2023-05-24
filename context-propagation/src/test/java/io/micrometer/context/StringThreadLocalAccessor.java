@@ -38,7 +38,7 @@ public class StringThreadLocalAccessor implements ThreadLocalAccessor<String> {
     }
 
     @Override
-    public void reset() {
+    public void setValue() {
         StringThreadLocalHolder.reset();
     }
 
