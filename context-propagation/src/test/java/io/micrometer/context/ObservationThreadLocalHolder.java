@@ -19,14 +19,11 @@ public class ObservationThreadLocalHolder {
 
     private static final ThreadLocal<String> holder = new ThreadLocal<>();
 
-    public static void resetValue() {
-        holder.remove();
-    }
-
     public static void setValue(String value) {
         holder.set(value);
     }
 
+    @Nullable
     public static String getValue() {
         return holder.get();
     }

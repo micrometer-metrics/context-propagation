@@ -17,6 +17,7 @@ package io.micrometer.context;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -76,7 +77,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
             Object key = accessor.key();
             if (keyPredicate.test(key) && this.containsKey(key)) {
-                previousValues = setThreadLocal(key, get(key), accessor, previousValues);
+                Object value = get(key);
+                assert value != null : "snapshot contains disallowed null mapping for key: " + key;
+                previousValues = setThreadLocal(key, value, accessor, previousValues);
             }
         }
         return DefaultScope.from(previousValues, this.contextRegistry);
@@ -161,6 +164,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
             ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
             snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry));
             ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
+        }
+        if (snapshot != null) {
+            snapshot.values().removeIf(Objects::isNull);
         }
         return (snapshot != null ? snapshot : emptyContextSnapshot);
     }
