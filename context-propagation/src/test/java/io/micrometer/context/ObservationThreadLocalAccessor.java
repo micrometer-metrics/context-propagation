@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import java.util.Objects;
+
 /**
  * Example {@link ThreadLocalAccessor} implementation.
  */
@@ -34,12 +36,23 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Strin
 
     @Override
     public void setValue(String value) {
+        // ThreadLocalAccessor API is @NonNullApi by default
+        // so we don't expect null here
+        Objects.requireNonNull(value);
         ObservationThreadLocalHolder.setValue(value);
     }
 
     @Override
     public void reset() {
         ObservationThreadLocalHolder.reset();
+    }
+
+    @Override
+    public void restore(String previousValue) {
+        // ThreadLocalAccessor API is @NonNullApi by default
+        // so we don't expect null here
+        Objects.requireNonNull(previousValue);
+        setValue(previousValue);
     }
 
 }
