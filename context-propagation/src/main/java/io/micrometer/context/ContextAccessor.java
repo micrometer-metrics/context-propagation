@@ -42,6 +42,10 @@ public interface ContextAccessor<READ, WRITE> {
      * @param sourceContext the context to read from; the context type should be
      * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
      * {@link #readableType()}.
+     * <p>
+     * When an {@link ContextAccessor} is used to populate a {@link ContextSnapshot}, the
+     * snapshot implementations are required to filter out {@code null} mappings, so it is
+     * not required to implement special handling in the accessor.
      * @param keyPredicate a predicate to decide which keys to read
      * @param readValues a map where to put read values
      */
@@ -53,7 +57,7 @@ public interface ContextAccessor<READ, WRITE> {
      * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
      * {@link #readableType()}.
      * @param key the key to use to look up the context value
-     * @return the value, if any
+     * @return the value, if present
      */
     @Nullable
     <T> T readValue(READ sourceContext, Object key);
@@ -65,7 +69,7 @@ public interface ContextAccessor<READ, WRITE> {
 
     /**
      * Write values from a {@link Map} to a target context.
-     * @param valuesToWrite the values to write to the target context
+     * @param valuesToWrite the values to write to the target context.
      * @param targetContext the context to write to; the context type should be
      * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
      * {@link #writeableType()}.

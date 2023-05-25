@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import java.util.Objects;
+
 /**
  * ThreadLocalAccessor for testing purposes with a given key and {@link ThreadLocal}
  * instance.
@@ -46,6 +48,9 @@ class TestThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
     @Override
     public void setValue(String value) {
+        // ThreadLocalAccessor API is @NonNullApi by default
+        // so we don't expect null here
+        Objects.requireNonNull(value);
         this.threadLocal.set(value);
     }
 
