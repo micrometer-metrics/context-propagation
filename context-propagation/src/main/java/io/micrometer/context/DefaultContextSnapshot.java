@@ -77,7 +77,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
             Object key = accessor.key();
             if (keyPredicate.test(key) && this.containsKey(key)) {
-                previousValues = setThreadLocal(key, get(key), accessor, previousValues);
+                Object value = get(key);
+                assert value != null : "snapshot contains disallowed null mapping for key: " + key;
+                previousValues = setThreadLocal(key, value, accessor, previousValues);
             }
         }
         return DefaultScope.from(previousValues, this.contextRegistry);

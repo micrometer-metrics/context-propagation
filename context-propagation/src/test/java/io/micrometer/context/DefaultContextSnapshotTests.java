@@ -16,6 +16,7 @@
 package io.micrometer.context;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.micrometer.context.ContextSnapshot.Scope;
@@ -23,6 +24,7 @@ import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -51,24 +53,6 @@ public class DefaultContextSnapshotTests {
         finally {
             ObservationThreadLocalHolder.reset();
         }
-    }
-
-    @Test
-    void test_null_value_in_source_context() {
-        this.registry.registerContextAccessor(new TestContextAccessor());
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
-
-        String key = ObservationThreadLocalAccessor.KEY;
-
-        String emptyValue = ObservationThreadLocalHolder.getValue();
-        Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
-
-        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry, sourceContext);
-
-        try (Scope scope = snapshot.setThreadLocals()) {
-            assertThat(ObservationThreadLocalHolder.getValue()).isEqualTo(emptyValue);
-        }
-        assertThat(ObservationThreadLocalHolder.getValue()).isEqualTo(emptyValue);
     }
 
     @Test
@@ -225,6 +209,53 @@ public class DefaultContextSnapshotTests {
 
         then(fooThreadLocal.get()).isNull();
         then(barThreadLocal.get()).isNull();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_ignore_null_value_in_source_context() {
+        String key = "foo";
+        ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
+        TestThreadLocalAccessor fooThreadLocalAccessor = new TestThreadLocalAccessor(key, fooThreadLocal);
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(fooThreadLocalAccessor);
+
+        // We capture null from an uninitialized ThreadLocal:
+        String emptyValue = fooThreadLocalAccessor.getValue();
+        Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
+
+        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry, sourceContext);
+
+        HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
+        assertThat(snapshotStorage).isEmpty();
+
+        try (Scope scope = snapshot.setThreadLocals()) {
+            assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+        }
+        assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_fail_assertion_if_null_value_makes_it_into_snapshot() {
+        ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
+        TestThreadLocalAccessor fooThreadLocalAccessor =
+            new TestThreadLocalAccessor("foo", fooThreadLocal);
+        this.registry.registerThreadLocalAccessor(fooThreadLocalAccessor);
+
+        fooThreadLocal.set("present");
+
+        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry);
+        fooThreadLocal.remove();
+
+        HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
+        // Imitating a broken implementation that let mapping to null into the storage:
+        snapshotStorage.put("foo", null);
+
+        assertThatExceptionOfType(AssertionError.class)
+            .isThrownBy(snapshot::setThreadLocals)
+            .withMessage("snapshot contains disallowed null mapping for key: foo");
     }
 
     @Test
