@@ -27,7 +27,7 @@ import java.util.function.Predicate;
  * Implementations are disallowed to read {@code null} values into the given storage. This
  * requirement comes from the nature of {@link ThreadLocal}: if a value was not set, or
  * it's value is {@code null}, there is no way of distinguishing one from the other. In
- * such a case, the {@link ContextSnapshot} simply doesn't contain a capture fpr the
+ * such a case, the {@link ContextSnapshot} simply doesn't contain a capture for the
  * particular {@link ThreadLocal}. Due to this limitation, {@link ContextAccessor} should
  * not operate on {@code null} values. On the writing side, the implementations are safe
  * to assume the provided mappings do not contain mapping to {@code null}.
