@@ -62,13 +62,10 @@ public interface ThreadLocalAccessor<V> {
     void setValue(V value);
 
     /**
-     * Set the {@link ThreadLocal} value to what the implementation considers as a missing
-     * value. In trivial cases it can be {@code null}, representing what calling
-     * {@link ThreadLocal#remove()} would store in the thread-local storage, but it can
-     * also be any object the implementation chooses. This method can be called when
-     * setting {@link ThreadLocal} values in case of missing mapping for a {@link #key()}
-     * from a {@link ContextSnapshot}, or a Context object (operated upon by
-     * {@link ContextAccessor}).
+     * Called instead of {@link #setValue(Object)} in order to remove the current
+     * {@link ThreadLocal} value at the start of a
+     * {@link io.micrometer.context.ContextSnapshot.Scope}.
+     *
      * @since 1.0.3
      */
     default void setValue() {
