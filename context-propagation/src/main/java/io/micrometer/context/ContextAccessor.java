@@ -24,14 +24,13 @@ import java.util.function.Predicate;
  * to write values to it from a {@link Map}.
  *
  * <p>
- * Implementations are disallowed to read {@code null} values into the given storage.
- * This requirement comes from the nature of {@link ThreadLocal}: if a
- * value was not set, or it's value is {@code null}, there is no way of
- * distinguishing one from the other. In such a case, the {@link ContextSnapshot}
- * simply doesn't contain a capture fpr the particular {@link ThreadLocal}. Due to this
- * limitation, {@link ContextAccessor} should not operate on {@code null} values.
- * On the writing side, the implementations are safe to assume the provided mappings do
- * not contain mapping to {@code null}.
+ * Implementations are disallowed to read {@code null} values into the given storage. This
+ * requirement comes from the nature of {@link ThreadLocal}: if a value was not set, or
+ * it's value is {@code null}, there is no way of distinguishing one from the other. In
+ * such a case, the {@link ContextSnapshot} simply doesn't contain a capture fpr the
+ * particular {@link ThreadLocal}. Due to this limitation, {@link ContextAccessor} should
+ * not operate on {@code null} values. On the writing side, the implementations are safe
+ * to assume the provided mappings do not contain mapping to {@code null}.
  *
  * @param <READ> type of context for reading
  * @param <WRITE> type of context for writing
@@ -77,8 +76,8 @@ public interface ContextAccessor<READ, WRITE> {
 
     /**
      * Write values from a {@link Map} to a target context.
-     * @param valuesToWrite the values to write to the target context. Implementations
-     *                      can assume there is no mapping to {@code null}.
+     * @param valuesToWrite the values to write to the target context. Implementations can
+     * assume there is no mapping to {@code null}.
      * @param targetContext the context to write to; the context type should be
      * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
      * {@link #writeableType()}.

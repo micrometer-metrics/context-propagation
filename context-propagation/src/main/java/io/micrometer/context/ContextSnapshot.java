@@ -25,14 +25,13 @@ import java.util.function.Predicate;
  * methods to propagate those values.
  *
  * <p>
- * Implementations are disallowed to store {@code null} values. If a
- * {@link ThreadLocal} is not set, or it's value is {@code null}, there is no way of
- * distinguishing one from the other. In such a case, the {@link ContextSnapshot}
- * simply doesn't contain a capture fpr the particular {@link ThreadLocal}. Due to this
- * limitation, other types of context accessed via {@link ContextAccessor} should not
- * operate on {@code null} values. Implementations should still make an effort and
- * prevent storing {@code null} in the snapshot in case a {@link ContextAccessor}
- * doesn't comply with this requirement.
+ * Implementations are disallowed to store {@code null} values. If a {@link ThreadLocal}
+ * is not set, or it's value is {@code null}, there is no way of distinguishing one from
+ * the other. In such a case, the {@link ContextSnapshot} simply doesn't contain a capture
+ * fpr the particular {@link ThreadLocal}. Due to this limitation, other types of context
+ * accessed via {@link ContextAccessor} should not operate on {@code null} values.
+ * Implementations should still make an effort and prevent storing {@code null} in the
+ * snapshot in case a {@link ContextAccessor} doesn't comply with this requirement.
  *
  * <p>
  * Use static factory methods on this interface to create a snapshot.
