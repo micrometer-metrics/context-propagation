@@ -31,7 +31,8 @@ import java.util.function.Predicate;
  * the other. In such a case, the {@link ContextSnapshot} simply must not contain a
  * capture for the particular {@link ThreadLocal}. Implementations should filter out any
  * {@code null} values after reading into the storage also obtained by calling
- * {@link ContextAccessor#readValues(Object, Predicate, Map)}.
+ * {@link ContextAccessor#readValues(Object, Predicate, Map)}, and should likewise ignore
+ * {@code null} values from {@link ContextAccessor#readValue(Object, Object)}.
  *
  * <p>
  * Use static factory methods on this interface to create a snapshot.
