@@ -267,8 +267,7 @@ public class DefaultContextSnapshotTests {
     @SuppressWarnings("unchecked")
     void should_fail_assertion_if_null_value_makes_it_into_snapshot() {
         ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
-        TestThreadLocalAccessor fooThreadLocalAccessor =
-            new TestThreadLocalAccessor("foo", fooThreadLocal);
+        TestThreadLocalAccessor fooThreadLocalAccessor = new TestThreadLocalAccessor("foo", fooThreadLocal);
         this.registry.registerThreadLocalAccessor(fooThreadLocalAccessor);
 
         fooThreadLocal.set("present");
@@ -280,8 +279,7 @@ public class DefaultContextSnapshotTests {
         // Imitating a broken implementation that let mapping to null into the storage:
         snapshotStorage.put("foo", null);
 
-        assertThatExceptionOfType(AssertionError.class)
-            .isThrownBy(snapshot::setThreadLocals)
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(snapshot::setThreadLocals)
             .withMessage("snapshot contains disallowed null mapping for key: foo");
     }
 
