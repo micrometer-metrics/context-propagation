@@ -23,15 +23,6 @@ import java.util.function.Predicate;
  * Reactor {@code Context}, including the ability to read values from it a {@link Map} and
  * to write values to it from a {@link Map}.
  *
- * <p>
- * Implementations are disallowed to read {@code null} values into the given storage. This
- * requirement comes from the nature of {@link ThreadLocal}: if a value was not set, or
- * it's value is {@code null}, there is no way of distinguishing one from the other. In
- * such a case, the {@link ContextSnapshot} simply doesn't contain a capture for the
- * particular {@link ThreadLocal}. Due to this limitation, {@link ContextAccessor} should
- * not operate on {@code null} values. On the writing side, the implementations are safe
- * to assume the provided mappings do not contain mapping to {@code null}.
- *
  * @param <READ> type of context for reading
  * @param <WRITE> type of context for writing
  * @author Marcin Grzejszczak
@@ -52,7 +43,9 @@ public interface ContextAccessor<READ, WRITE> {
      * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
      * {@link #readableType()}.
      * <p>
-     * It is forbidden to store {@code} values in the provided {@link Map}.
+     * When an {@link ContextAccessor} is used to populate a {@link ContextSnapshot}, the
+     * snapshot implementations are required to filter out {@code null} mappings, so it is
+     * not required to implement special handling in the accessor.
      * @param keyPredicate a predicate to decide which keys to read
      * @param readValues a map where to put read values
      */
@@ -64,7 +57,7 @@ public interface ContextAccessor<READ, WRITE> {
      * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
      * {@link #readableType()}.
      * @param key the key to use to look up the context value
-     * @return the value, if present, or {@code null} when not
+     * @return the value, if present
      */
     @Nullable
     <T> T readValue(READ sourceContext, Object key);
@@ -76,8 +69,7 @@ public interface ContextAccessor<READ, WRITE> {
 
     /**
      * Write values from a {@link Map} to a target context.
-     * @param valuesToWrite the values to write to the target context. Implementations can
-     * assume there is no mapping to {@code null}.
+     * @param valuesToWrite the values to write to the target context.
      * @param targetContext the context to write to; the context type should be
      * {@link Class#isAssignableFrom(Class) assignable} from the type returned by
      * {@link #writeableType()}.

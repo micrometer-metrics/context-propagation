@@ -38,13 +38,16 @@ public interface ThreadLocalAccessor<V> {
     Object key();
 
     /**
-     * Return the current {@link ThreadLocal} value, or {@code null} if not set.
+     * Return the current {@link ThreadLocal} value.
      */
     @Nullable
     V getValue();
 
     /**
      * Set the {@link ThreadLocal} value.
+     * <p>
+     * The argument will not be {@code null} when called from {@link ContextSnapshot}
+     * implementations, which are disallowed to store mappings to {@code null}.
      * @param value the value to set
      */
     void setValue(V value);
@@ -56,6 +59,9 @@ public interface ThreadLocalAccessor<V> {
 
     /**
      * Remove the current {@link ThreadLocal} value and set the previously stored one.
+     * <p>
+     * The argument will not be {@code null} when called from {@link ContextSnapshot}
+     * implementations, which are disallowed to store mappings to {@code null}.
      * @param previousValue previous value to set
      * @since 1.0.1
      */
