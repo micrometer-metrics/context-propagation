@@ -16,13 +16,18 @@
 package io.micrometer.context;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import io.micrometer.context.ContextSnapshot.Scope;
+import io.micrometer.context.observation.Observation;
+import io.micrometer.context.observation.ObservationThreadLocalAccessor;
+import io.micrometer.context.observation.ObservationScopeThreadLocalHolder;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.BDDAssertions.then;
 
 /**
@@ -41,60 +46,60 @@ public class DefaultContextSnapshotTests {
 
     @Test
     void should_propagate_thread_local() {
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
-        ObservationThreadLocalHolder.setValue("hello");
+        StringThreadLocalHolder.setValue("hello");
         ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> true, this.registry);
 
-        ObservationThreadLocalHolder.setValue("hola");
+        StringThreadLocalHolder.setValue("hola");
         try {
             try (Scope scope = snapshot.setThreadLocals()) {
-                then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
+                then(StringThreadLocalHolder.getValue()).isEqualTo("hello");
             }
-            then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
+            then(StringThreadLocalHolder.getValue()).isEqualTo("hola");
         }
         finally {
-            ObservationThreadLocalHolder.reset();
+            StringThreadLocalHolder.reset();
         }
     }
 
     @Test
     void should_propagate_single_thread_local_value() {
         this.registry.registerContextAccessor(new TestContextAccessor());
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
-        String key = ObservationThreadLocalAccessor.KEY;
+        String key = StringThreadLocalAccessor.KEY;
         Map<String, String> sourceContext = Collections.singletonMap(key, "hello");
 
-        ObservationThreadLocalHolder.setValue("hola");
+        StringThreadLocalHolder.setValue("hola");
         try {
             try (Scope scope = snapshotFactory.setThreadLocalsFrom(sourceContext, this.registry, key)) {
-                then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
+                then(StringThreadLocalHolder.getValue()).isEqualTo("hello");
             }
-            then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
+            then(StringThreadLocalHolder.getValue()).isEqualTo("hola");
         }
         finally {
-            ObservationThreadLocalHolder.reset();
+            StringThreadLocalHolder.reset();
         }
     }
 
     @Test
     void should_propagate_all_single_thread_local_value() {
         this.registry.registerContextAccessor(new TestContextAccessor());
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
-        String key = ObservationThreadLocalAccessor.KEY;
+        String key = StringThreadLocalAccessor.KEY;
         Map<String, String> sourceContext = Collections.singletonMap(key, "hello");
 
-        ObservationThreadLocalHolder.setValue("hola");
+        StringThreadLocalHolder.setValue("hola");
         try {
             try (Scope scope = snapshotFactory.setAllThreadLocalsFrom(sourceContext, this.registry)) {
-                then(ObservationThreadLocalHolder.getValue()).isEqualTo("hello");
+                then(StringThreadLocalHolder.getValue()).isEqualTo("hello");
             }
-            then(ObservationThreadLocalHolder.getValue()).isEqualTo("hola");
+            then(StringThreadLocalHolder.getValue()).isEqualTo("hola");
         }
         finally {
-            ObservationThreadLocalHolder.reset();
+            StringThreadLocalHolder.reset();
         }
     }
 
@@ -102,25 +107,25 @@ public class DefaultContextSnapshotTests {
     void should_override_context_values_when_many_contexts() {
         this.registry.registerContextAccessor(new TestContextAccessor());
 
-        String key = ObservationThreadLocalAccessor.KEY;
+        String key = StringThreadLocalAccessor.KEY;
         Map<String, String> firstContext = Collections.singletonMap(key, "hello");
         Map<String, String> secondContext = Collections.singletonMap(key, "override");
         try {
             ContextSnapshot contextSnapshot = snapshotFactory.captureFromContext(this.registry, firstContext,
                     secondContext);
             contextSnapshot.wrap(() -> {
-                then(ObservationThreadLocalHolder.getValue()).isEqualTo("override");
+                then(StringThreadLocalHolder.getValue()).isEqualTo("override");
             });
         }
         finally {
-            ObservationThreadLocalHolder.reset();
+            StringThreadLocalHolder.reset();
         }
     }
 
     @Test
     void should_throw_an_exception_when_no_keys_are_passed() {
         this.registry.registerContextAccessor(new TestContextAccessor());
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
         Map<String, String> sourceContext = Collections.singletonMap("foo", "hello");
 
@@ -132,31 +137,13 @@ public class DefaultContextSnapshotTests {
     @Test
     void should_throw_an_exception_when_no_keys_are_passed_for_version_with_no_registry() {
         this.registry.registerContextAccessor(new TestContextAccessor());
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
         Map<String, String> sourceContext = Collections.singletonMap("foo", "hello");
 
         BDDAssertions.thenThrownBy(() -> snapshotFactory.setThreadLocalsFrom(sourceContext))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("You must provide at least one key when setting thread locals");
-    }
-
-    @Test
-    void should_not_fail_on_empty_thread_local() {
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
-
-        then(ObservationThreadLocalHolder.getValue()).isNull();
-
-        ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> true, this.registry);
-
-        ObservationThreadLocalHolder.reset();
-        then(ObservationThreadLocalHolder.getValue()).isNull();
-
-        try (Scope scope = snapshot.setThreadLocals()) {
-            then(ObservationThreadLocalHolder.getValue()).isNull();
-        }
-
-        then(ObservationThreadLocalHolder.getValue()).isNull();
     }
 
     @Test
@@ -215,6 +202,95 @@ public class DefaultContextSnapshotTests {
     }
 
     @Test
+    void should_not_fail_on_empty_thread_local() {
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
+
+        then(StringThreadLocalHolder.getValue()).isNull();
+
+        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry);
+
+        StringThreadLocalHolder.reset();
+        then(StringThreadLocalHolder.getValue()).isNull();
+
+        try (Scope scope = snapshot.setThreadLocals()) {
+            then(StringThreadLocalHolder.getValue()).isNull();
+        }
+
+        then(StringThreadLocalHolder.getValue()).isNull();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_ignore_null_value_in_source_context() {
+        String key = "foo";
+        ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
+        TestThreadLocalAccessor fooThreadLocalAccessor = new TestThreadLocalAccessor(key, fooThreadLocal);
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(fooThreadLocalAccessor);
+
+        // We capture null from an uninitialized ThreadLocal:
+        String emptyValue = fooThreadLocalAccessor.getValue();
+        Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
+
+        ContextSnapshot snapshot = ContextSnapshot.captureFromContext(this.registry, sourceContext);
+
+        HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
+        assertThat(snapshotStorage).isEmpty();
+
+        try (Scope scope = snapshot.setThreadLocals()) {
+            assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+        }
+        assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+    }
+
+    @Test
+    void should_ignore_null_mapping_in_source_context_when_skipping_intermediate_snapshot() {
+        String key = "foo";
+        ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
+        TestThreadLocalAccessor fooThreadLocalAccessor = new TestThreadLocalAccessor(key, fooThreadLocal);
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(fooThreadLocalAccessor);
+
+        // We capture null from an uninitialized ThreadLocal:
+        String emptyValue = fooThreadLocalAccessor.getValue();
+        Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
+
+        // Validate setting all values
+        try (Scope scope = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+            assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+        }
+        assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+
+        // Validate setting a subset of values
+        try (Scope scope = ContextSnapshot.setThreadLocalsFrom(sourceContext, this.registry, key)) {
+            assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+        }
+        assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_fail_assertion_if_null_value_makes_it_into_snapshot() {
+        ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
+        TestThreadLocalAccessor fooThreadLocalAccessor = new TestThreadLocalAccessor("foo", fooThreadLocal);
+        this.registry.registerThreadLocalAccessor(fooThreadLocalAccessor);
+
+        fooThreadLocal.set("present");
+
+        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry);
+        fooThreadLocal.remove();
+
+        HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
+        // Imitating a broken implementation that let mapping to null into the storage:
+        snapshotStorage.put("foo", null);
+
+        assertThatExceptionOfType(AssertionError.class).isThrownBy(snapshot::setThreadLocals)
+            .withMessage("snapshot contains disallowed null mapping for key: foo");
+    }
+
+    @Test
     void toString_should_include_values() {
         ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();
@@ -230,6 +306,33 @@ public class DefaultContextSnapshotTests {
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
+    }
+
+    @Test
+    void should_work_with_scope_based_thread_local_accessor() {
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+
+        String key = ObservationThreadLocalAccessor.KEY;
+        Observation observation = new Observation();
+        Map<String, Observation> sourceContext = Collections.singletonMap(key, observation);
+
+        then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isNull();
+        try (Scope scope1 = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+            then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
+            try (Scope scope2 = ContextSnapshot.setAllThreadLocalsFrom(Collections.emptyMap(), this.registry)) {
+                then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
+                // TODO: This should work like this in the future
+                // then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're
+                // resetting the observation").isNull();
+                // then(ObservationScopeThreadLocalHolder.getValue()).as("This is the
+                // 'null' scope").isNotNull();
+            }
+            then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're back to previous observation")
+                .isSameAs(observation);
+        }
+        then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("There was no observation at the beginning")
+            .isNull();
     }
 
 }

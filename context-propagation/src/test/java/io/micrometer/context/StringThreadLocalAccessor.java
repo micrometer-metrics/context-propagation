@@ -18,32 +18,20 @@ package io.micrometer.context;
 import java.util.Objects;
 
 /**
- * ThreadLocalAccessor for testing purposes with a given key and {@link ThreadLocal}
- * instance.
- *
- * @author Rossen Stoyanchev
+ * Example {@link ThreadLocalAccessor} implementation.
  */
-class TestThreadLocalAccessor implements ThreadLocalAccessor<String> {
+public class StringThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
-    private final String key;
-
-    // Normally this wouldn't be a field in the accessor but ok for testing purposes
-    private final ThreadLocal<String> threadLocal;
-
-    TestThreadLocalAccessor(String key, ThreadLocal<String> threadLocal) {
-        this.key = key;
-        this.threadLocal = threadLocal;
-    }
+    public static final String KEY = "string.threadlocal";
 
     @Override
     public Object key() {
-        return this.key;
+        return KEY;
     }
 
-    @Nullable
     @Override
     public String getValue() {
-        return this.threadLocal.get();
+        return StringThreadLocalHolder.getValue();
     }
 
     @Override
@@ -51,12 +39,20 @@ class TestThreadLocalAccessor implements ThreadLocalAccessor<String> {
         // ThreadLocalAccessor API is @NonNullApi by default
         // so we don't expect null here
         Objects.requireNonNull(value);
-        this.threadLocal.set(value);
+        StringThreadLocalHolder.setValue(value);
     }
 
     @Override
     public void setValue() {
-        this.threadLocal.remove();
+        StringThreadLocalHolder.reset();
+    }
+
+    @Override
+    public void restore(String previousValue) {
+        // ThreadLocalAccessor API is @NonNullApi by default
+        // so we don't expect null here
+        Objects.requireNonNull(previousValue);
+        setValue(previousValue);
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package io.micrometer.context;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -23,6 +24,15 @@ import java.util.function.Predicate;
 /**
  * Holds values extracted from {@link ThreadLocal} and other types of context and exposes
  * methods to propagate those values.
+ *
+ * <p>
+ * Implementations are disallowed to store {@code null} values. If a {@link ThreadLocal}
+ * is not set, or it's value is {@code null}, there is no way of distinguishing one from
+ * the other. In such a case, the {@link ContextSnapshot} simply must not contain a
+ * capture for the particular {@link ThreadLocal}. Implementations should filter out any
+ * {@code null} values after reading into the storage also obtained by calling
+ * {@link ContextAccessor#readValues(Object, Predicate, Map)}, and should likewise ignore
+ * {@code null} values from {@link ContextAccessor#readValue(Object, Object)}.
  *
  * <p>
  * Use static factory methods on this interface to create a snapshot.
