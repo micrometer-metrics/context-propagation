@@ -19,8 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Contract to assist with access to a {@link ThreadLocal} including the ability to get,
- * set, and reset it.
+ * Contract to assist with setting and clearing a {@link ThreadLocal}.
  *
  * @author Rossen Stoyanchev
  * @author Marcin Grzejszczak
@@ -32,35 +31,38 @@ import java.util.function.Supplier;
 public interface ThreadLocalAccessor<V> {
 
     /**
-     * The key to associate with the ThreadLocal value. This is the key under which the
-     * value is saved within a {@link ContextSnapshot} and the key under which it is
-     * looked up.
+     * The key to associate with the ThreadLocal value when saved within a
+     * {@link ContextSnapshot}.
      */
     Object key();
 
     /**
-     * Return the current {@link ThreadLocal} value, or {@code null} if not set. This
-     * method is called in two scenarios:
+     * Return the current {@link ThreadLocal} value.
+     * <p>
+     * This method is called in two scenarios:
      * <ul>
-     * <li>When capturing a {@link ContextSnapshot}. A {@code null} value would not end up
-     * in the snapshot and would mean the snapshot is missing a mapping for this
-     * accessor's {@link #key()}.</li>
-     * <li>When setting {@link ThreadLocal} values from a {@link ContextSnapshot} or a
-     * Context object (operated upon by {@link ContextAccessor}) to check for existing
-     * values: {@code null} means the {@link ThreadLocal} is not set and upon closing a
+     * <li>When capturing a {@link ContextSnapshot}. A {@code null} value is ignored and
+     * the {@link #key()} will not be present in the snapshot.</li>
+     * <li>When setting {@link ThreadLocal} values from a {@link ContextSnapshot} or from
+     * a Context object (through a {@link ContextAccessor}) to save existing values in
+     * order to {@link #restore(Object)} them at the end of the scope. A {@code null}
+     * value means the {@link ThreadLocal} should not be set and upon closing a
      * {@link io.micrometer.context.ContextSnapshot.Scope}, the {@link #restore()} variant
-     * with no argument would be called.</li>
+     * is called.</li>
      * </ul>
      */
     @Nullable
     V getValue();
 
     /**
-     * Set the {@link ThreadLocal} value.
+     * Set the {@link ThreadLocal} at the start of a
+     * {@link io.micrometer.context.ContextSnapshot.Scope} to a value obtained from a
+     * {@link ContextSnapshot} or from a different type of context (through a
+     * {@link ContextAccessor}).
      * <p>
-     * The argument will not be {@code null} when called from {@link ContextSnapshot}
-     * implementations, which are disallowed to store mappings to {@code null}.
-     * @param value the value to set
+     * @param value the value to set, never {@code null} when called from a
+     * {@link ContextSnapshot} implementation, which is not allowed to store mappings to
+     * {@code null}.
      */
     void setValue(V value);
 
@@ -90,11 +92,13 @@ public interface ThreadLocalAccessor<V> {
     }
 
     /**
-     * Remove the current {@link ThreadLocal} value and set the previously stored one.
+     * Restore the {@link ThreadLocal} at the end of a
+     * {@link io.micrometer.context.ContextSnapshot.Scope} to the previous value it had
+     * before the start of the scope.
      * <p>
-     * The argument will not be {@code null} when called from {@link ContextSnapshot}
-     * implementations, which are disallowed to store mappings to {@code null}.
-     * @param previousValue previous value to set
+     * @param previousValue previous value to set, never {@code null} when called from a
+     * {@link ContextSnapshot} * implementation, which is not allowed to store mappings to
+     * {@code null}.
      * @since 1.0.1
      */
     default void restore(V previousValue) {
@@ -102,9 +106,8 @@ public interface ThreadLocalAccessor<V> {
     }
 
     /**
-     * Remove the current {@link ThreadLocal} value when restoring values after a
-     * {@link io.micrometer.context.ContextSnapshot.Scope} closes but there was no
-     * {@link ThreadLocal} value present prior to the closed scope.
+     * Called instead of {@link #restore(Object)} when there was no {@link ThreadLocal}
+     * value existing at the start of the scope.
      * @see #getValue()
      * @since 1.0.3
      */
