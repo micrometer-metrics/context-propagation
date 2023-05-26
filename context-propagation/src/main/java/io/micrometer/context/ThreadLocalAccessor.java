@@ -24,6 +24,7 @@ import java.util.function.Supplier;
  *
  * @author Rossen Stoyanchev
  * @author Marcin Grzejszczak
+ * @author Dariusz Jędrzejczyk
  * @since 1.0.0
  * @see ContextRegistry#registerThreadLocalAccessor(ThreadLocalAccessor)
  * @see ContextRegistry#registerThreadLocalAccessor(String, Supplier, Consumer, Runnable)
@@ -38,7 +39,18 @@ public interface ThreadLocalAccessor<V> {
     Object key();
 
     /**
-     * Return the current {@link ThreadLocal} value.
+     * Return the current {@link ThreadLocal} value, or {@code null} if not set. This
+     * method is called in two scenarios:
+     * <ul>
+     * <li>When capturing a {@link ContextSnapshot}. A {@code null} value would not end up
+     * in the snapshot and would mean the snapshot is missing a mapping for this
+     * accessor's {@link #key()}.</li>
+     * <li>When setting {@link ThreadLocal} values from a {@link ContextSnapshot} or a
+     * Context object (operated upon by {@link ContextAccessor}) to check for existing
+     * values: {@code null} means the {@link ThreadLocal} is not set and upon closing a
+     * {@link io.micrometer.context.ContextSnapshot.Scope}, the {@link #restore()} variant
+     * with no argument would be called.</li>
+     * </ul>
      */
     @Nullable
     V getValue();
@@ -53,9 +65,29 @@ public interface ThreadLocalAccessor<V> {
     void setValue(V value);
 
     /**
-     * Remove the {@link ThreadLocal} value.
+     * Called instead of {@link #setValue(Object)} in order to remove the current
+     * {@link ThreadLocal} value at the start of a
+     * {@link io.micrometer.context.ContextSnapshot.Scope}.
+     *
+     * @since 1.0.3
      */
-    void reset();
+    default void setValue() {
+        reset();
+    }
+
+    /**
+     * Remove the {@link ThreadLocal} value when setting {@link ThreadLocal} values in
+     * case of missing mapping for a {@link #key()} from a {@link ContextSnapshot}, or a
+     * Context object (operated upon by {@link ContextAccessor}).
+     * @deprecated To be replaced by calls to {@link #setValue()} (and/or
+     * {@link #restore()}), which needs to be implemented when this implementation is
+     * removed.
+     */
+    @Deprecated
+    default void reset() {
+        throw new IllegalStateException(this.getClass().getName() + "#reset() should "
+                + "not be called. Please implement #setValue() method when removing the " + "#reset() implementation.");
+    }
 
     /**
      * Remove the current {@link ThreadLocal} value and set the previously stored one.
@@ -67,6 +99,17 @@ public interface ThreadLocalAccessor<V> {
      */
     default void restore(V previousValue) {
         setValue(previousValue);
+    }
+
+    /**
+     * Remove the current {@link ThreadLocal} value when restoring values after a
+     * {@link io.micrometer.context.ContextSnapshot.Scope} closes but there was no
+     * {@link ThreadLocal} value present prior to the closed scope.
+     * @see #getValue()
+     * @since 1.0.3
+     */
+    default void restore() {
+        setValue();
     }
 
 }
