@@ -1,5 +1,5 @@
 /**
- * Copyright 2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context;
+package io.micrometer.context.observation;
 
-public class ObservationThreadLocalHolder {
+class NullObservation extends Observation {
 
-    private static final ThreadLocal<String> holder = new ThreadLocal<>();
-
-    public static void setValue(String value) {
-        holder.set(value);
-    }
-
-    @Nullable
-    public static String getValue() {
-        return holder.get();
-    }
-
-    public static void reset() {
-        holder.remove();
+    Scope openScope() {
+        return new RevertingScope(null);
     }
 
 }

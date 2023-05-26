@@ -25,6 +25,7 @@ import java.util.function.Predicate;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Dariusz Jędrzejczyk
  * @since 1.0.0
  */
 final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
@@ -206,7 +207,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
                 ((ThreadLocalAccessor<V>) accessor).restore(previousValue);
             }
             else {
-                accessor.reset();
+                accessor.restore();
             }
         }
 
