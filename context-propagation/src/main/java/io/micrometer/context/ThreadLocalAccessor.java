@@ -79,8 +79,9 @@ public interface ThreadLocalAccessor<V> {
      * Remove the {@link ThreadLocal} value when setting {@link ThreadLocal} values in
      * case of missing mapping for a {@link #key()} from a {@link ContextSnapshot}, or a
      * Context object (operated upon by {@link ContextAccessor}).
-     * @deprecated To be replaced by calls to {@link #setValue()}, which needs to be
-     * implemented when this implementation is removed.
+     * @deprecated To be replaced by calls to {@link #setValue()} (and/or
+     * {@link #restore()}), which needs to be implemented when this implementation is
+     * removed.
      */
     @Deprecated
     default void reset() {
