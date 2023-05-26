@@ -37,7 +37,7 @@ public interface ThreadLocalAccessor<V> {
     Object key();
 
     /**
-     * Return the current {@link ThreadLocal} value, or {@code null} if not set.
+     * Return the current {@link ThreadLocal} value.
      * <p>
      * This method is called in two scenarios:
      * <ul>
@@ -46,7 +46,7 @@ public interface ThreadLocalAccessor<V> {
      * <li>When setting {@link ThreadLocal} values from a {@link ContextSnapshot} or from
      * a Context object (through a {@link ContextAccessor}) to save existing values in
      * order to {@link #restore(Object)} them at the end of the scope. A {@code null}
-     * value means the {@link ThreadLocal} is not set and upon closing a
+     * value means the {@link ThreadLocal} should not be set and upon closing a
      * {@link io.micrometer.context.ContextSnapshot.Scope}, the {@link #restore()} variant
      * is called.</li>
      * </ul>
@@ -107,7 +107,7 @@ public interface ThreadLocalAccessor<V> {
 
     /**
      * Called instead of {@link #restore(Object)} when there was no {@link ThreadLocal}
-     * value existing value at the start of the scope.
+     * value existing at the start of the scope.
      * @see #getValue()
      * @since 1.0.3
      */
