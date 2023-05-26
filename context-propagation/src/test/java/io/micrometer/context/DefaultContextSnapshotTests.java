@@ -41,7 +41,7 @@ public class DefaultContextSnapshotTests {
 
     private final ContextSnapshotFactory snapshotFactory = new ContextSnapshotFactory.Builder()
         .defaultRegistry(registry)
-        .clearWhenMissing(false)
+        .clearMissing(false)
         .build();
 
     @Test
@@ -49,7 +49,7 @@ public class DefaultContextSnapshotTests {
         this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
         StringThreadLocalHolder.setValue("hello");
-        ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> true, this.registry);
+        ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> true);
 
         StringThreadLocalHolder.setValue("hola");
         try {
@@ -73,7 +73,7 @@ public class DefaultContextSnapshotTests {
 
         StringThreadLocalHolder.setValue("hola");
         try {
-            try (Scope scope = snapshotFactory.setThreadLocalsFrom(sourceContext, this.registry, key)) {
+            try (Scope scope = snapshotFactory.setThreadLocalsFrom(sourceContext, key)) {
                 then(StringThreadLocalHolder.getValue()).isEqualTo("hello");
             }
             then(StringThreadLocalHolder.getValue()).isEqualTo("hola");
@@ -93,7 +93,7 @@ public class DefaultContextSnapshotTests {
 
         StringThreadLocalHolder.setValue("hola");
         try {
-            try (Scope scope = snapshotFactory.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+            try (Scope scope = snapshotFactory.setAllThreadLocalsFrom(sourceContext)) {
                 then(StringThreadLocalHolder.getValue()).isEqualTo("hello");
             }
             then(StringThreadLocalHolder.getValue()).isEqualTo("hola");
@@ -111,8 +111,7 @@ public class DefaultContextSnapshotTests {
         Map<String, String> firstContext = Collections.singletonMap(key, "hello");
         Map<String, String> secondContext = Collections.singletonMap(key, "override");
         try {
-            ContextSnapshot contextSnapshot = snapshotFactory.captureFromContext(this.registry, firstContext,
-                    secondContext);
+            ContextSnapshot contextSnapshot = snapshotFactory.captureFromContext(firstContext, secondContext);
             contextSnapshot.wrap(() -> {
                 then(StringThreadLocalHolder.getValue()).isEqualTo("override");
             });
@@ -129,7 +128,7 @@ public class DefaultContextSnapshotTests {
 
         Map<String, String> sourceContext = Collections.singletonMap("foo", "hello");
 
-        BDDAssertions.thenThrownBy(() -> snapshotFactory.setThreadLocalsFrom(sourceContext, this.registry))
+        BDDAssertions.thenThrownBy(() -> snapshotFactory.setThreadLocalsFrom(sourceContext))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("You must provide at least one key when setting thread locals");
     }
@@ -157,7 +156,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> key.equals("foo"), this.registry);
+        ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> key.equals("foo"));
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -182,7 +181,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> true, this.registry);
+        ContextSnapshot snapshot = snapshotFactory.captureAllUsing(key -> true);
 
         fooThreadLocal.remove();
         barThreadLocal.remove();
@@ -207,7 +206,7 @@ public class DefaultContextSnapshotTests {
 
         then(StringThreadLocalHolder.getValue()).isNull();
 
-        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry);
+        ContextSnapshot snapshot = snapshotFactory.captureAll();
 
         StringThreadLocalHolder.reset();
         then(StringThreadLocalHolder.getValue()).isNull();
@@ -233,7 +232,7 @@ public class DefaultContextSnapshotTests {
         String emptyValue = fooThreadLocalAccessor.getValue();
         Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
 
-        ContextSnapshot snapshot = ContextSnapshot.captureFromContext(this.registry, sourceContext);
+        ContextSnapshot snapshot = snapshotFactory.captureFromContext(sourceContext);
 
         HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
         assertThat(snapshotStorage).isEmpty();
@@ -258,13 +257,13 @@ public class DefaultContextSnapshotTests {
         Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
 
         // Validate setting all values
-        try (Scope scope = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+        try (Scope scope = snapshotFactory.setAllThreadLocalsFrom(sourceContext)) {
             assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
         }
         assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
 
         // Validate setting a subset of values
-        try (Scope scope = ContextSnapshot.setThreadLocalsFrom(sourceContext, this.registry, key)) {
+        try (Scope scope = snapshotFactory.setThreadLocalsFrom(sourceContext, key)) {
             assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
         }
         assertThat(fooThreadLocalAccessor.getValue()).isEqualTo(emptyValue);
@@ -279,7 +278,7 @@ public class DefaultContextSnapshotTests {
 
         fooThreadLocal.set("present");
 
-        ContextSnapshot snapshot = ContextSnapshot.captureAll(this.registry);
+        ContextSnapshot snapshot = snapshotFactory.captureAll();
         fooThreadLocal.remove();
 
         HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
@@ -301,7 +300,7 @@ public class DefaultContextSnapshotTests {
         fooThreadLocal.set("fooValue");
         barThreadLocal.set("barValue");
 
-        assertThat(snapshotFactory.captureAllUsing(key -> true, this.registry).toString())
+        assertThat(snapshotFactory.captureAllUsing(key -> true).toString())
             .isEqualTo("DefaultContextSnapshot{bar=barValue, foo=fooValue}");
 
         fooThreadLocal.remove();
@@ -318,9 +317,9 @@ public class DefaultContextSnapshotTests {
         Map<String, Observation> sourceContext = Collections.singletonMap(key, observation);
 
         then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isNull();
-        try (Scope scope1 = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+        try (Scope scope1 = snapshotFactory.setAllThreadLocalsFrom(sourceContext)) {
             then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
-            try (Scope scope2 = ContextSnapshot.setAllThreadLocalsFrom(Collections.emptyMap(), this.registry)) {
+            try (Scope scope2 = snapshotFactory.setAllThreadLocalsFrom(Collections.emptyMap())) {
                 then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
                 // TODO: This should work like this in the future
                 // then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're

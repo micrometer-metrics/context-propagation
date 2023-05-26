@@ -42,7 +42,7 @@ class ContextWrappingTests {
 
     private final ContextSnapshotFactory defaultSnapshotFactory = new ContextSnapshotFactory.Builder()
         .defaultRegistry(registry)
-        .clearWhenMissing(false)
+        .clearMissing(false)
         .build();
 
     @AfterEach

@@ -171,7 +171,7 @@ public interface ContextSnapshot {
     @Deprecated
     static ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry registry,
             Object... contexts) {
-        return DefaultContextSnapshotFactory.INSTANCE.captureAllUsing(keyPredicate, registry, contexts);
+        return DefaultContextSnapshot.captureAll(registry, keyPredicate, false, contexts);
     }
 
     /**
@@ -200,7 +200,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
-        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(registry, contexts);
+        return DefaultContextSnapshot.captureFromContext(key -> true, false, registry, null, contexts);
     }
 
     /**
@@ -217,7 +217,7 @@ public interface ContextSnapshot {
     @Deprecated
     static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
             Object... contexts) {
-        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(keyPredicate, registry, contexts);
+        return DefaultContextSnapshot.captureFromContext(keyPredicate, false, registry, null, contexts);
     }
 
     /**
@@ -241,7 +241,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, ContextRegistry registry) {
-        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(key -> true, registry, null, context);
+        return DefaultContextSnapshot.captureFromContext(key -> true, false, registry, null, context);
     }
 
     /**
@@ -255,7 +255,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {
-        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(keyPredicate, registry, null, context);
+        return DefaultContextSnapshot.captureFromContext(keyPredicate, false, registry, null, context);
     }
 
     /**
@@ -268,8 +268,8 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static Scope setAllThreadLocalsFrom(Object sourceContext) {
-        return DefaultContextSnapshotFactory.INSTANCE.setAllThreadLocalsFrom(sourceContext,
-                ContextRegistry.getInstance());
+        return DefaultContextSnapshotFactory.setAllThreadLocalsFrom(sourceContext, ContextRegistry.getInstance(),
+                false);
     }
 
     /**
@@ -283,7 +283,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
-        return DefaultContextSnapshotFactory.INSTANCE.setAllThreadLocalsFrom(sourceContext, contextRegistry);
+        return DefaultContextSnapshotFactory.setAllThreadLocalsFrom(sourceContext, contextRegistry, false);
     }
 
     /**
@@ -314,7 +314,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {
-        return DefaultContextSnapshotFactory.INSTANCE.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
+        return DefaultContextSnapshotFactory.setThreadLocalsFrom(sourceContext, contextRegistry, false, keys);
     }
 
     /**
