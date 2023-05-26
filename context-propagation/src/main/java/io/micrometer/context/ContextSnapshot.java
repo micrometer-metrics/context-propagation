@@ -139,7 +139,8 @@ public interface ContextSnapshot {
      * instance.
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
-     * @deprecated As of 1.0.4, use {@link ContextSnapshotFactory#captureAll(Object...)} // TODO: improve
+     * @deprecated As of 1.0.4, use {@link ContextSnapshotFactory#captureAll(Object...)}
+     * // TODO: improve
      */
     @Deprecated
     static ContextSnapshot captureAll(Object... contexts) {
@@ -267,7 +268,8 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static Scope setAllThreadLocalsFrom(Object sourceContext) {
-        return DefaultContextSnapshotFactory.INSTANCE.setAllThreadLocalsFrom(sourceContext, ContextRegistry.getInstance());
+        return DefaultContextSnapshotFactory.INSTANCE.setAllThreadLocalsFrom(sourceContext,
+                ContextRegistry.getInstance());
     }
 
     /**

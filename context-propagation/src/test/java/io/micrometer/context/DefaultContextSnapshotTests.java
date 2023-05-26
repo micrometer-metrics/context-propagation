@@ -37,12 +37,12 @@ import static org.assertj.core.api.BDDAssertions.then;
  */
 public class DefaultContextSnapshotTests {
 
-    private final ContextRegistry        registry        = new ContextRegistry();
-    private final ContextSnapshotFactory snapshotFactory =
-        new ContextSnapshotFactory.Builder()
-            .defaultRegistry(registry)
-            .clearWhenMissing(false)
-            .build();
+    private final ContextRegistry registry = new ContextRegistry();
+
+    private final ContextSnapshotFactory snapshotFactory = new ContextSnapshotFactory.Builder()
+        .defaultRegistry(registry)
+        .clearWhenMissing(false)
+        .build();
 
     @Test
     void should_propagate_thread_local() {

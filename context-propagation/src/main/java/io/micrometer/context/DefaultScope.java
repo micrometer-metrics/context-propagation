@@ -11,8 +11,7 @@ class DefaultScope implements ContextSnapshot.Scope {
 
     private final ContextRegistry contextRegistry;
 
-    private DefaultScope(Map<Object, Object> previousValues,
-        ContextRegistry contextRegistry) {
+    private DefaultScope(Map<Object, Object> previousValues, ContextRegistry contextRegistry) {
         this.previousValues = previousValues;
         this.contextRegistry = contextRegistry;
     }
@@ -28,21 +27,18 @@ class DefaultScope implements ContextSnapshot.Scope {
     }
 
     @SuppressWarnings("unchecked")
-    private <V> void resetThreadLocalValue(ThreadLocalAccessor<?> accessor,
-        @Nullable V previousValue) {
+    private <V> void resetThreadLocalValue(ThreadLocalAccessor<?> accessor, @Nullable V previousValue) {
         if (previousValue != null) {
             ((ThreadLocalAccessor<V>) accessor).restore(previousValue);
         }
         else {
-            accessor.reset();
+            accessor.restore();
         }
     }
 
-    public static ContextSnapshot.Scope from(@Nullable Map<Object, Object> previousValues,
-        ContextRegistry registry) {
-        return (previousValues != null ? new DefaultScope(previousValues, registry) :
-            () -> {
-            });
+    public static ContextSnapshot.Scope from(@Nullable Map<Object, Object> previousValues, ContextRegistry registry) {
+        return (previousValues != null ? new DefaultScope(previousValues, registry) : () -> {
+        });
     }
 
 }

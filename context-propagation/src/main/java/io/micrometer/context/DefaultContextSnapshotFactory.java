@@ -6,8 +6,8 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
 
     private final ContextRegistry defaultRegistry;
 
-    public static final DefaultContextSnapshotFactory INSTANCE =
-        new DefaultContextSnapshotFactory(ContextRegistry.getInstance());
+    public static final DefaultContextSnapshotFactory INSTANCE = new DefaultContextSnapshotFactory(
+            ContextRegistry.getInstance());
 
     public DefaultContextSnapshotFactory(ContextRegistry contextRegistry) {
         this.defaultRegistry = contextRegistry;
@@ -20,15 +20,15 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
 
     @Override
     public ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry registry,
-        Object... contexts) {
+            Object... contexts) {
         return DefaultContextSnapshot.captureAll(registry, keyPredicate, contexts);
     }
 
     @Override
     public ContextSnapshot captureFromContext(Object... contexts) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, defaultRegistry, null,
-            contexts);
+        return DefaultContextSnapshot.captureFromContext(key -> true, defaultRegistry, null, contexts);
     }
+
     @Override
     public ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
         return DefaultContextSnapshot.captureFromContext(key -> true, registry, null, contexts);
@@ -36,7 +36,7 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
 
     @Override
     public ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
-        Object... contexts) {
+            Object... contexts) {
         return DefaultContextSnapshot.captureFromContext(keyPredicate, registry, null, contexts);
     }
 
@@ -46,8 +46,7 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
     }
 
     @Override
-    public ContextSnapshot.Scope setAllThreadLocalsFrom(Object sourceContext,
-        ContextRegistry contextRegistry) {
+    public ContextSnapshot.Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
         return DefaultContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
     }
 
@@ -57,8 +56,9 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
     }
 
     @Override
-    public ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext,
-        ContextRegistry contextRegistry, String... keys) {
+    public ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry,
+            String... keys) {
         return DefaultContextSnapshot.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
     }
+
 }

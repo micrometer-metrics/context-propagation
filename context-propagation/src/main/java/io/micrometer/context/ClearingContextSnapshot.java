@@ -4,11 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class ClearingContextSnapshot extends HashMap<Object, Object>
-    implements ContextSnapshot {
+public class ClearingContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
 
     private static final ClearingContextSnapshot emptyContextSnapshot = new ClearingContextSnapshot(
-        new ContextRegistry());
+            new ContextRegistry());
 
     private final ContextRegistry contextRegistry;
 
@@ -63,8 +62,7 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
 
     @SuppressWarnings("unchecked")
     private static <V> Map<Object, Object> setThreadLocal(Object key, @Nullable V value,
-        ThreadLocalAccessor<?> accessor,
-        @Nullable Map<Object, Object> previousValues) {
+            ThreadLocalAccessor<?> accessor, @Nullable Map<Object, Object> previousValues) {
 
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
         previousValues.put(key, accessor.getValue());
@@ -111,7 +109,7 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
     }
 
     static ContextSnapshot captureAll(ContextRegistry contextRegistry, Predicate<Object> keyPredicate,
-        Object... contexts) {
+            Object... contexts) {
 
         ClearingContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, contextRegistry);
         for (Object context : contexts) {
@@ -122,7 +120,7 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
 
     @Nullable
     private static ClearingContextSnapshot captureFromThreadLocals(Predicate<Object> keyPredicate,
-        ContextRegistry contextRegistry) {
+            ContextRegistry contextRegistry) {
 
         ClearingContextSnapshot snapshot = null;
         for (ThreadLocalAccessor<?> accessor : contextRegistry.getThreadLocalAccessors()) {
@@ -138,9 +136,8 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
     }
 
     @SuppressWarnings("unchecked")
-    static ClearingContextSnapshot captureFromContext(Predicate<Object> keyPredicate,
-        ContextRegistry contextRegistry,
-        @Nullable ClearingContextSnapshot snapshot, Object... contexts) {
+    static ClearingContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry contextRegistry,
+            @Nullable ClearingContextSnapshot snapshot, Object... contexts) {
 
         for (Object context : contexts) {
             ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
@@ -169,31 +166,25 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
         }
 
         @Override
-        public ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate,
-            ContextRegistry registry,
-            Object... contexts) {
+        public ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry registry,
+                Object... contexts) {
             return ClearingContextSnapshot.captureAll(registry, keyPredicate, contexts);
         }
 
         @Override
         public ContextSnapshot captureFromContext(Object... contexts) {
-            return ClearingContextSnapshot.captureFromContext(key -> true,
-                defaultRegistry, null, contexts);
+            return ClearingContextSnapshot.captureFromContext(key -> true, defaultRegistry, null, contexts);
         }
 
         @Override
-        public ContextSnapshot captureFromContext(ContextRegistry registry,
-            Object... contexts) {
-            return ClearingContextSnapshot.captureFromContext(key -> true, registry,
-                null, contexts);
+        public ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
+            return ClearingContextSnapshot.captureFromContext(key -> true, registry, null, contexts);
         }
 
         @Override
-        public ContextSnapshot captureFromContext(Predicate<Object> keyPredicate,
-            ContextRegistry registry,
-            Object... contexts) {
-            return ClearingContextSnapshot.captureFromContext(keyPredicate, registry,
-                null, contexts);
+        public ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
+                Object... contexts) {
+            return ClearingContextSnapshot.captureFromContext(keyPredicate, registry, null, contexts);
         }
 
         @Override
@@ -202,8 +193,7 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
         }
 
         @Override
-        public Scope setAllThreadLocalsFrom(Object sourceContext,
-            ContextRegistry contextRegistry) {
+        public Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
             return ClearingContextSnapshot.setAllThreadLocalsFrom(sourceContext, contextRegistry);
         }
 
@@ -213,11 +203,10 @@ public class ClearingContextSnapshot extends HashMap<Object, Object>
         }
 
         @Override
-        public Scope setThreadLocalsFrom(Object sourceContext,
-            ContextRegistry contextRegistry,
-            String... keys) {
-            return ClearingContextSnapshot.setThreadLocalsFrom(sourceContext,
-                contextRegistry, keys);
+        public Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {
+            return ClearingContextSnapshot.setThreadLocalsFrom(sourceContext, contextRegistry, keys);
         }
+
     }
+
 }

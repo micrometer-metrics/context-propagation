@@ -40,11 +40,10 @@ class ContextWrappingTests {
     private final ContextRegistry registry = new ContextRegistry()
         .registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
-    private final ContextSnapshotFactory defaultSnapshotFactory =
-        new ContextSnapshotFactory.Builder()
-            .defaultRegistry(registry)
-            .clearWhenMissing(false)
-            .build();
+    private final ContextSnapshotFactory defaultSnapshotFactory = new ContextSnapshotFactory.Builder()
+        .defaultRegistry(registry)
+        .clearWhenMissing(false)
+        .build();
 
     @AfterEach
     void clear() {
@@ -90,8 +89,7 @@ class ContextWrappingTests {
         runInNewThread(executor, valueInNewThread);
         then(valueInNewThread.get()).as("By default thread local information should not be propagated").isNull();
 
-        runInNewThread(defaultSnapshotFactory.captureAll().wrapExecutor(executor),
-                valueInNewThread);
+        runInNewThread(defaultSnapshotFactory.captureAll().wrapExecutor(executor), valueInNewThread);
 
         then(valueInNewThread.get()).as("With context container the thread local information should be propagated")
             .isEqualTo("hello");
@@ -107,8 +105,7 @@ class ContextWrappingTests {
                     atomic -> then(atomic.get()).as("By default thread local information should not be propagated")
                         .isNull());
 
-            runInNewThread(
-                    ContextExecutorService.wrap(executorService, defaultSnapshotFactory::captureAll),
+            runInNewThread(ContextExecutorService.wrap(executorService, defaultSnapshotFactory::captureAll),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                         .as("With context container the thread local information should be propagated")
@@ -131,8 +128,7 @@ class ContextWrappingTests {
                         .isNull());
 
             StringThreadLocalHolder.setValue("hello at time of creation of the executor");
-            runInNewThread(
-                    ContextExecutorService.wrap(executorService, defaultSnapshotFactory::captureAll),
+            runInNewThread(ContextExecutorService.wrap(executorService, defaultSnapshotFactory::captureAll),
                     valueInNewThread,
                     atomic -> then(atomic.get())
                         .as("With context container the thread local information should be propagated")
