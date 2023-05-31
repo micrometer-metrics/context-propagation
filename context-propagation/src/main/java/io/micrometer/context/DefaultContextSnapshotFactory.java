@@ -25,37 +25,36 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
 
     private final boolean clearMissing;
 
-    public static final DefaultContextSnapshotFactory INSTANCE = new DefaultContextSnapshotFactory(
-            ContextRegistry.getInstance(), false);
+    private final Predicate<Object> keyPredicate;
 
-    public DefaultContextSnapshotFactory(ContextRegistry contextRegistry, boolean clearMissing) {
+    public static final DefaultContextSnapshotFactory INSTANCE = new DefaultContextSnapshotFactory(
+            ContextRegistry.getInstance(), false, key -> true);
+
+    public DefaultContextSnapshotFactory(ContextRegistry contextRegistry, boolean clearMissing,
+            Predicate<Object> predicate) {
         this.defaultRegistry = contextRegistry;
         this.clearMissing = clearMissing;
+        this.keyPredicate = predicate;
     }
 
     @Override
     public ContextSnapshot captureAll(Object... contexts) {
-        return DefaultContextSnapshot.captureAll(defaultRegistry, key -> true, clearMissing, contexts);
-    }
-
-    @Override
-    public ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, Object... contexts) {
         return DefaultContextSnapshot.captureAll(defaultRegistry, keyPredicate, clearMissing, contexts);
     }
 
     @Override
     public ContextSnapshot captureFromContext(Object... contexts) {
-        return captureFromContext(key -> true, contexts);
-    }
-
-    @Override
-    public ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, Object... contexts) {
         return DefaultContextSnapshot.captureFromContext(keyPredicate, clearMissing, defaultRegistry, null, contexts);
     }
 
     @Override
-    public <C> ContextSnapshot.Scope setAllThreadLocalsFrom(Object sourceContext) {
-        return setAllThreadLocalsFrom(sourceContext, defaultRegistry, clearMissing);
+    public <C> ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
+        if (keys == null || keys.length == 0) {
+            return setAllThreadLocalsFrom(sourceContext, defaultRegistry, clearMissing);
+        }
+        else {
+            return setThreadLocalsFrom(sourceContext, defaultRegistry, clearMissing, keys);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -74,11 +73,6 @@ public class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
             }
         }
         return DefaultContextSnapshot.DefaultScope.from(previousValues, contextRegistry);
-    }
-
-    @Override
-    public <C> ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
-        return setThreadLocalsFrom(sourceContext, defaultRegistry, clearMissing, keys);
     }
 
     @SuppressWarnings("unchecked")
