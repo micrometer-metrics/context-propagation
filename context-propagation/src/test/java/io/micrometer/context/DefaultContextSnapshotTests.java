@@ -38,8 +38,8 @@ public class DefaultContextSnapshotTests {
 
     private final ContextRegistry registry = new ContextRegistry();
 
-    private final ContextSnapshotFactory snapshotFactory = new ContextSnapshotFactory.Builder()
-        .defaultRegistry(registry)
+    private final ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
+        .contextRegistry(registry)
         .clearMissing(false)
         .build();
 
@@ -122,10 +122,10 @@ public class DefaultContextSnapshotTests {
 
     @Test
     void should_filter_thread_locals_on_capture() {
-        ContextSnapshotFactory snapshotFactory = new ContextSnapshotFactory.Builder()
-            .keyPredicate(key -> key.equals("foo"))
+        ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
+            .captureKeyPredicate(key -> key.equals("foo"))
             .clearMissing(false)
-            .defaultRegistry(registry)
+            .contextRegistry(registry)
             .build();
         ThreadLocal<String> fooThreadLocal = new ThreadLocal<>();
         ThreadLocal<String> barThreadLocal = new ThreadLocal<>();

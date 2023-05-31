@@ -55,36 +55,19 @@ public interface ContextSnapshotFactory {
      */
     <C> ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys);
 
-    class Builder {
+    static Builder builder() {
+        return new DefaultContextSnapshotFactory.Builder();
+    }
 
-        private boolean clearMissing = false;
+    interface Builder {
 
-        private ContextRegistry defaultRegistry = ContextRegistry.getInstance();
+        ContextSnapshotFactory build();
 
-        private Predicate<Object> keyPredicate = key -> true;
+        Builder clearMissing(boolean shouldClear);
 
-        public Builder() {
+        Builder contextRegistry(ContextRegistry contextRegistry);
 
-        }
-
-        public ContextSnapshotFactory build() {
-            return new DefaultContextSnapshotFactory(defaultRegistry, clearMissing, keyPredicate);
-        }
-
-        public Builder clearMissing(boolean shouldClear) {
-            this.clearMissing = shouldClear;
-            return this;
-        }
-
-        public Builder defaultRegistry(ContextRegistry contextRegistry) {
-            this.defaultRegistry = contextRegistry;
-            return this;
-        }
-
-        public Builder keyPredicate(Predicate<Object> keyPredicate) {
-            this.keyPredicate = keyPredicate;
-            return this;
-        }
+        Builder captureKeyPredicate(Predicate<Object> captureKeyPredicate);
 
     }
 

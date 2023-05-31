@@ -155,4 +155,40 @@ class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
         return DefaultContextSnapshot.DefaultScope.from(previousValues, contextRegistry);
     }
 
+    static final class Builder implements ContextSnapshotFactory.Builder {
+
+        private boolean clearMissing = false;
+
+        private ContextRegistry contextRegistry = ContextRegistry.getInstance();
+
+        private Predicate<Object> captureKeyPredicate = key -> true;
+
+        public Builder() {
+        }
+
+        @Override
+        public ContextSnapshotFactory build() {
+            return new DefaultContextSnapshotFactory(contextRegistry, clearMissing, captureKeyPredicate);
+        }
+
+        @Override
+        public ContextSnapshotFactory.Builder clearMissing(boolean shouldClear) {
+            this.clearMissing = shouldClear;
+            return this;
+        }
+
+        @Override
+        public ContextSnapshotFactory.Builder contextRegistry(ContextRegistry contextRegistry) {
+            this.contextRegistry = contextRegistry;
+            return this;
+        }
+
+        @Override
+        public ContextSnapshotFactory.Builder captureKeyPredicate(Predicate<Object> captureKeyPredicate) {
+            this.captureKeyPredicate = captureKeyPredicate;
+            return this;
+        }
+
+    }
+
 }

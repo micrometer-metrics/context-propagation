@@ -40,8 +40,8 @@ class ContextWrappingTests {
     private final ContextRegistry registry = new ContextRegistry()
         .registerThreadLocalAccessor(new StringThreadLocalAccessor());
 
-    private final ContextSnapshotFactory defaultSnapshotFactory = new ContextSnapshotFactory.Builder()
-        .defaultRegistry(registry)
+    private final ContextSnapshotFactory defaultSnapshotFactory = ContextSnapshotFactory.builder()
+        .contextRegistry(registry)
         .clearMissing(false)
         .build();
 
