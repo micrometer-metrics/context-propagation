@@ -17,7 +17,6 @@ package io.micrometer.context;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
@@ -29,12 +28,6 @@ import java.util.function.Predicate;
  * @since 1.0.0
  */
 final class DefaultContextSnapshot extends HashMap<Object, Object> implements ContextSnapshot {
-
-    private static final DefaultContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry(),
-            false);
-
-    private static final DefaultContextSnapshot clearingEmptyContextSnapshot = new DefaultContextSnapshot(
-            new ContextRegistry(), true);
 
     private final ContextRegistry contextRegistry;
 
@@ -114,49 +107,6 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         previousValues.put(key, accessor.getValue());
         ((ThreadLocalAccessor<V>) accessor).setValue(value);
         return previousValues;
-    }
-
-    static ContextSnapshot captureAll(ContextRegistry contextRegistry, Predicate<Object> keyPredicate,
-            boolean clearMissing, Object... contexts) {
-
-        DefaultContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, clearMissing, contextRegistry);
-        for (Object context : contexts) {
-            snapshot = captureFromContext(keyPredicate, clearMissing, contextRegistry, snapshot, context);
-        }
-        return (snapshot != null ? snapshot : (clearMissing ? clearingEmptyContextSnapshot : emptyContextSnapshot));
-    }
-
-    @Nullable
-    private static DefaultContextSnapshot captureFromThreadLocals(Predicate<Object> keyPredicate, boolean clearMissing,
-            ContextRegistry contextRegistry) {
-
-        DefaultContextSnapshot snapshot = null;
-        for (ThreadLocalAccessor<?> accessor : contextRegistry.getThreadLocalAccessors()) {
-            if (keyPredicate.test(accessor.key())) {
-                Object value = accessor.getValue();
-                if (value != null) {
-                    snapshot = (snapshot != null ? snapshot
-                            : new DefaultContextSnapshot(contextRegistry, clearMissing));
-                    snapshot.put(accessor.key(), value);
-                }
-            }
-        }
-        return snapshot;
-    }
-
-    @SuppressWarnings("unchecked")
-    static DefaultContextSnapshot captureFromContext(Predicate<Object> keyPredicate, boolean clearMissing,
-            ContextRegistry contextRegistry, @Nullable DefaultContextSnapshot snapshot, Object... contexts) {
-
-        for (Object context : contexts) {
-            ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
-            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry, clearMissing));
-            ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
-        }
-        if (snapshot != null) {
-            snapshot.values().removeIf(Objects::isNull);
-        }
-        return (snapshot != null ? snapshot : (clearMissing ? clearingEmptyContextSnapshot : emptyContextSnapshot));
     }
 
     @Override

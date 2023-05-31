@@ -171,7 +171,7 @@ public interface ContextSnapshot {
     @Deprecated
     static ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry registry,
             Object... contexts) {
-        return DefaultContextSnapshot.captureAll(registry, keyPredicate, false, contexts);
+        return DefaultContextSnapshotFactory.captureAll(registry, keyPredicate, false, contexts);
     }
 
     /**
@@ -185,7 +185,8 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFromContext(Object... contexts) {
-        return DefaultContextSnapshotFactory.INSTANCE.captureFromContext(contexts);
+        return DefaultContextSnapshotFactory.captureFromContext(key -> true, false, ContextRegistry.getInstance(), null,
+                contexts);
     }
 
     /**
@@ -200,7 +201,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, false, registry, null, contexts);
+        return DefaultContextSnapshotFactory.captureFromContext(key -> true, false, registry, null, contexts);
     }
 
     /**
@@ -217,7 +218,7 @@ public interface ContextSnapshot {
     @Deprecated
     static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
             Object... contexts) {
-        return DefaultContextSnapshot.captureFromContext(keyPredicate, false, registry, null, contexts);
+        return DefaultContextSnapshotFactory.captureFromContext(keyPredicate, false, registry, null, contexts);
     }
 
     /**
@@ -241,7 +242,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, ContextRegistry registry) {
-        return DefaultContextSnapshot.captureFromContext(key -> true, false, registry, null, context);
+        return DefaultContextSnapshotFactory.captureFromContext(key -> true, false, registry, null, context);
     }
 
     /**
@@ -255,7 +256,7 @@ public interface ContextSnapshot {
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {
-        return DefaultContextSnapshot.captureFromContext(keyPredicate, false, registry, null, context);
+        return DefaultContextSnapshotFactory.captureFromContext(keyPredicate, false, registry, null, context);
     }
 
     /**

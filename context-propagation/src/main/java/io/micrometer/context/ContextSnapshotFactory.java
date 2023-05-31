@@ -39,7 +39,7 @@ public interface ContextSnapshotFactory {
      * @param contexts the contexts to read values from
      * @return the created {@link ContextSnapshot}
      */
-    ContextSnapshot captureFromContext(Object... contexts);
+    ContextSnapshot captureFrom(Object... contexts);
 
     /**
      * Read the values specified by from the given source context, and if found, use them

@@ -110,7 +110,7 @@ public class DefaultContextSnapshotTests {
         Map<String, String> firstContext = Collections.singletonMap(key, "hello");
         Map<String, String> secondContext = Collections.singletonMap(key, "override");
         try {
-            ContextSnapshot contextSnapshot = snapshotFactory.captureFromContext(firstContext, secondContext);
+            ContextSnapshot contextSnapshot = snapshotFactory.captureFrom(firstContext, secondContext);
             contextSnapshot.wrap(() -> {
                 then(StringThreadLocalHolder.getValue()).isEqualTo("override");
             });
@@ -212,7 +212,7 @@ public class DefaultContextSnapshotTests {
         String emptyValue = fooThreadLocalAccessor.getValue();
         Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
 
-        ContextSnapshot snapshot = snapshotFactory.captureFromContext(sourceContext);
+        ContextSnapshot snapshot = snapshotFactory.captureFrom(sourceContext);
 
         HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
         assertThat(snapshotStorage).isEmpty();
