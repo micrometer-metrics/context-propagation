@@ -18,7 +18,6 @@ package io.micrometer.context;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -32,9 +31,6 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
     private static final DefaultContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry(),
             false);
 
-    private static final Function<ContextRegistry, DefaultContextSnapshot> clearingEmptySnapshot = contextRegistry -> new DefaultContextSnapshot(
-            contextRegistry, true);
-
     private final ContextRegistry contextRegistry;
 
     private final boolean clearMissing;
@@ -46,6 +42,10 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
         this.contextRegistry = contextRegistry;
         this.clearMissing = clearMissing;
         this.captureKeyPredicate = captureKeyPredicate;
+    }
+
+    private static DefaultContextSnapshot clearingEmptySnapshot(ContextRegistry contextRegistry) {
+        return new DefaultContextSnapshot(contextRegistry, true);
     }
 
     @Override
@@ -61,7 +61,7 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
             snapshot = captureFromContext(keyPredicate, clearMissing, contextRegistry, snapshot, context);
         }
         return (snapshot != null ? snapshot
-                : (clearMissing ? clearingEmptySnapshot.apply(contextRegistry) : emptyContextSnapshot));
+                : (clearMissing ? clearingEmptySnapshot(contextRegistry) : emptyContextSnapshot));
     }
 
     @Nullable
@@ -100,7 +100,7 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
             snapshot.values().removeIf(Objects::isNull);
         }
         return (snapshot != null ? snapshot
-                : (clearMissing ? clearingEmptySnapshot.apply(contextRegistry) : emptyContextSnapshot));
+                : (clearMissing ? clearingEmptySnapshot(contextRegistry) : emptyContextSnapshot));
     }
 
     @Override

@@ -101,7 +101,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    static <V> Map<Object, Object> clearThreadLocal(Object key, ThreadLocalAccessor<?> accessor,
+    static Map<Object, Object> clearThreadLocal(Object key, ThreadLocalAccessor<?> accessor,
             @Nullable Map<Object, Object> previousValues) {
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
         previousValues.put(key, accessor.getValue());
