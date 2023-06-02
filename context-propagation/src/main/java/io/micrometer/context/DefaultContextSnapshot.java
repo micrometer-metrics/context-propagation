@@ -91,21 +91,21 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     }
 
     @SuppressWarnings("unchecked")
-    static <V> Map<Object, Object> clearThreadLocal(Object key, ThreadLocalAccessor<?> accessor,
-            @Nullable Map<Object, Object> previousValues) {
-        previousValues = (previousValues != null ? previousValues : new HashMap<>());
-        previousValues.put(key, accessor.getValue());
-        accessor.setValue();
-        return previousValues;
-    }
-
-    @SuppressWarnings("unchecked")
     static <V> Map<Object, Object> setThreadLocal(Object key, V value, ThreadLocalAccessor<?> accessor,
             @Nullable Map<Object, Object> previousValues) {
 
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
         previousValues.put(key, accessor.getValue());
         ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        return previousValues;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <V> Map<Object, Object> clearThreadLocal(Object key, ThreadLocalAccessor<?> accessor,
+            @Nullable Map<Object, Object> previousValues) {
+        previousValues = (previousValues != null ? previousValues : new HashMap<>());
+        previousValues.put(key, accessor.getValue());
+        accessor.setValue();
         return previousValues;
     }
 

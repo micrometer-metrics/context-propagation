@@ -47,43 +47,12 @@ class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
         return captureAll(contextRegistry, captureKeyPredicate, clearMissing, contexts);
     }
 
-    @Override
-    public ContextSnapshot captureFrom(Object... contexts) {
-        return captureFromContext(captureKeyPredicate, clearMissing, contextRegistry, null, contexts);
-    }
-
-    @Override
-    public <C> ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
-        if (keys == null || keys.length == 0) {
-            return setAllThreadLocalsFrom(sourceContext, contextRegistry, clearMissing);
-        }
-        else {
-            return setThreadLocalsFrom(sourceContext, contextRegistry, clearMissing, keys);
-        }
-    }
-
     static ContextSnapshot captureAll(ContextRegistry contextRegistry, Predicate<Object> keyPredicate,
             boolean clearMissing, Object... contexts) {
 
         DefaultContextSnapshot snapshot = captureFromThreadLocals(keyPredicate, clearMissing, contextRegistry);
         for (Object context : contexts) {
             snapshot = captureFromContext(keyPredicate, clearMissing, contextRegistry, snapshot, context);
-        }
-        return (snapshot != null ? snapshot
-                : (clearMissing ? clearingEmptySnapshot.apply(contextRegistry) : emptyContextSnapshot));
-    }
-
-    @SuppressWarnings("unchecked")
-    static DefaultContextSnapshot captureFromContext(Predicate<Object> keyPredicate, boolean clearMissing,
-            ContextRegistry contextRegistry, @Nullable DefaultContextSnapshot snapshot, Object... contexts) {
-
-        for (Object context : contexts) {
-            ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
-            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry, clearMissing));
-            ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
-        }
-        if (snapshot != null) {
-            snapshot.values().removeIf(Objects::isNull);
         }
         return (snapshot != null ? snapshot
                 : (clearMissing ? clearingEmptySnapshot.apply(contextRegistry) : emptyContextSnapshot));
@@ -105,6 +74,37 @@ class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
             }
         }
         return snapshot;
+    }
+
+    @Override
+    public ContextSnapshot captureFrom(Object... contexts) {
+        return captureFromContext(captureKeyPredicate, clearMissing, contextRegistry, null, contexts);
+    }
+
+    @SuppressWarnings("unchecked")
+    static DefaultContextSnapshot captureFromContext(Predicate<Object> keyPredicate, boolean clearMissing,
+            ContextRegistry contextRegistry, @Nullable DefaultContextSnapshot snapshot, Object... contexts) {
+
+        for (Object context : contexts) {
+            ContextAccessor<?, ?> accessor = contextRegistry.getContextAccessorForRead(context);
+            snapshot = (snapshot != null ? snapshot : new DefaultContextSnapshot(contextRegistry, clearMissing));
+            ((ContextAccessor<Object, ?>) accessor).readValues(context, keyPredicate, snapshot);
+        }
+        if (snapshot != null) {
+            snapshot.values().removeIf(Objects::isNull);
+        }
+        return (snapshot != null ? snapshot
+                : (clearMissing ? clearingEmptySnapshot.apply(contextRegistry) : emptyContextSnapshot));
+    }
+
+    @Override
+    public <C> ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
+        if (keys == null || keys.length == 0) {
+            return setAllThreadLocalsFrom(sourceContext, contextRegistry, clearMissing);
+        }
+        else {
+            return setThreadLocalsFrom(sourceContext, contextRegistry, clearMissing, keys);
+        }
     }
 
     @SuppressWarnings("unchecked")
