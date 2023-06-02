@@ -23,7 +23,7 @@ import java.util.function.Predicate;
  * {@link ContextRegistry}.
  *
  * @author Dariusz Jędrzejczyk
- * @since 1.0.4
+ * @since 1.0.3
  */
 public interface ContextSnapshotFactory {
 

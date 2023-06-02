@@ -100,25 +100,6 @@ public class DefaultContextSnapshotDepreactionTests {
     }
 
     @Test
-    void should_override_context_values_when_many_contexts() {
-        this.registry.registerContextAccessor(new TestContextAccessor());
-
-        String key = StringThreadLocalAccessor.KEY;
-        Map<String, String> firstContext = Collections.singletonMap(key, "hello");
-        Map<String, String> secondContext = Collections.singletonMap(key, "override");
-        try {
-            ContextSnapshot contextSnapshot = ContextSnapshot.captureFromContext(this.registry, firstContext,
-                    secondContext);
-            contextSnapshot.wrap(() -> {
-                then(StringThreadLocalHolder.getValue()).isEqualTo("override");
-            });
-        }
-        finally {
-            StringThreadLocalHolder.reset();
-        }
-    }
-
-    @Test
     void should_throw_an_exception_when_no_keys_are_passed() {
         this.registry.registerContextAccessor(new TestContextAccessor());
         this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
@@ -229,7 +210,7 @@ public class DefaultContextSnapshotDepreactionTests {
         String emptyValue = fooThreadLocalAccessor.getValue();
         Map<String, String> sourceContext = Collections.singletonMap(key, emptyValue);
 
-        ContextSnapshot snapshot = ContextSnapshot.captureFromContext(this.registry, sourceContext);
+        ContextSnapshot snapshot = ContextSnapshot.captureFrom(sourceContext, this.registry);
 
         HashMap<Object, Object> snapshotStorage = (HashMap<Object, Object>) snapshot;
         assertThat(snapshotStorage).isEmpty();

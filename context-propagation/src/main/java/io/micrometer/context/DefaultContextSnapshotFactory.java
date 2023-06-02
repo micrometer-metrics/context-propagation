@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  * Default implementation of {@link ContextSnapshotFactory}.
  *
  * @author Dariusz Jędrzejczyk
- * @since 1.0.4
+ * @since 1.0.3
  */
 final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
 

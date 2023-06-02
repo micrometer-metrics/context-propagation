@@ -187,62 +187,6 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Create a {@link ContextSnapshot} by reading values from the given context objects.
-     * <p>
-     * Values captured multiple times are overridden in the snapshot by the order of
-     * contexts given as arguments.
-     * @param contexts the contexts to read values from
-     * @return the created {@link ContextSnapshot}
-     * @since 1.0.3
-     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
-     * obtained via a {@link ContextSnapshotFactory#builder()}.
-     */
-    @Deprecated
-    static ContextSnapshot captureFromContext(Object... contexts) {
-        return DefaultContextSnapshotFactory.captureFromContext(key -> true, false, ContextRegistry.getInstance(), null,
-                contexts);
-    }
-
-    /**
-     * Create a {@link ContextSnapshot} by reading values from the given context objects.
-     * <p>
-     * Values captured multiple times are overridden in the snapshot by the order of
-     * contexts given as arguments.
-     * @param registry the registry to use
-     * @param contexts the contexts to read values from
-     * @return the created {@link ContextSnapshot}
-     * @since 1.0.3
-     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
-     * obtained via a {@link ContextSnapshotFactory#builder()} combined with
-     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
-     */
-    @Deprecated
-    static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
-        return DefaultContextSnapshotFactory.captureFromContext(key -> true, false, registry, null, contexts);
-    }
-
-    /**
-     * Create a {@link ContextSnapshot} by reading values from the given context objects.
-     * <p>
-     * Values captured multiple times are overridden in the snapshot by the order of
-     * contexts given as arguments.
-     * @param keyPredicate predicate for context value keys
-     * @param registry the registry to use
-     * @param contexts the contexts to read values from
-     * @return the created {@link ContextSnapshot}
-     * @since 1.0.3
-     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
-     * obtained via a {@link ContextSnapshotFactory#builder()} and configure
-     * {@link ContextSnapshotFactory.Builder#captureKeyPredicate(Predicate)} and
-     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
-     */
-    @Deprecated
-    static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
-            Object... contexts) {
-        return DefaultContextSnapshotFactory.captureFromContext(keyPredicate, false, registry, null, contexts);
-    }
-
-    /**
      * Create a {@link ContextSnapshot} by reading values from the given context object.
      * @param context the context to read values from
      * @return the created {@link ContextSnapshot}

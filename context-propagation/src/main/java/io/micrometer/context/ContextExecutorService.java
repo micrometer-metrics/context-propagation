@@ -157,7 +157,7 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
      * @param clearMissing whether to {@link ThreadLocalAccessor#setValue() clear}
      * {@link ThreadLocal} values not captured upon task submission
      * @return wrapped instance
-     * @since 1.0.4
+     * @since 1.0.3
      */
     public static ExecutorService wrap(ExecutorService service, boolean clearMissing) {
         return new ContextExecutorService<>(service, () -> DefaultContextSnapshotFactory

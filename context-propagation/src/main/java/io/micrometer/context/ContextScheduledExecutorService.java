@@ -82,7 +82,7 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
      * @param clearMissing whether to {@link ThreadLocalAccessor#setValue() clear}
      * {@link ThreadLocal} values not captured upon task submission
      * @return wrapped instance
-     * @since 1.0.4
+     * @since 1.0.3
      */
     public static ScheduledExecutorService wrap(ScheduledExecutorService service, boolean clearMissing) {
         return new ContextScheduledExecutorService(service, () -> DefaultContextSnapshotFactory
