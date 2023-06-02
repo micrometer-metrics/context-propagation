@@ -18,6 +18,7 @@ package io.micrometer.context;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
@@ -25,8 +26,8 @@ class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
     private static final DefaultContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry(),
             false);
 
-    private static final DefaultContextSnapshot clearingEmptyContextSnapshot = new DefaultContextSnapshot(
-            new ContextRegistry(), true);
+    private static final Function<ContextRegistry, DefaultContextSnapshot> clearingEmptySnapshot = contextRegistry -> new DefaultContextSnapshot(
+            contextRegistry, true);
 
     private final ContextRegistry contextRegistry;
 
@@ -68,7 +69,8 @@ class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
         for (Object context : contexts) {
             snapshot = captureFromContext(keyPredicate, clearMissing, contextRegistry, snapshot, context);
         }
-        return (snapshot != null ? snapshot : (clearMissing ? clearingEmptyContextSnapshot : emptyContextSnapshot));
+        return (snapshot != null ? snapshot
+                : (clearMissing ? clearingEmptySnapshot.apply(contextRegistry) : emptyContextSnapshot));
     }
 
     @SuppressWarnings("unchecked")
@@ -83,7 +85,8 @@ class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
         if (snapshot != null) {
             snapshot.values().removeIf(Objects::isNull);
         }
-        return (snapshot != null ? snapshot : (clearMissing ? clearingEmptyContextSnapshot : emptyContextSnapshot));
+        return (snapshot != null ? snapshot
+                : (clearMissing ? clearingEmptySnapshot.apply(contextRegistry) : emptyContextSnapshot));
     }
 
     @Nullable
