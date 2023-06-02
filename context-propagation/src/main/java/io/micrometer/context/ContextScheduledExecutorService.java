@@ -79,7 +79,10 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
      * Wrap the given {@code ScheduledExecutorService} in order to propagate context to
      * any executed task through the given {@link ContextSnapshot} supplier.
      * @param service the executorService to wrap
-     * @param clearMissing TODO
+     * @param clearMissing whether to {@link ThreadLocalAccessor#setValue() clear}
+     * {@link ThreadLocal} values not captured upon task submission
+     * @return wrapped instance
+     * @since 1.0.4
      */
     public static ScheduledExecutorService wrap(ScheduledExecutorService service, boolean clearMissing) {
         return new ContextScheduledExecutorService(service, () -> DefaultContextSnapshotFactory
@@ -90,7 +93,7 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
      * Variant of {@link #wrap(ScheduledExecutorService, Supplier)} that uses
      * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
      * @param service the executorService to wrap
-     * @deprecated Use {@link #wrap(ScheduledExecutorService, boolean)}
+     * @deprecated use {@link #wrap(ScheduledExecutorService, boolean)}
      */
     @Deprecated
     public static ScheduledExecutorService wrap(ScheduledExecutorService service) {

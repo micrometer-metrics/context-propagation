@@ -18,15 +18,22 @@ package io.micrometer.context;
 import java.util.function.Predicate;
 
 /**
+ * Factory for creating {@link ContextSnapshot} objects and restoring {@link ThreadLocal}
+ * values using a context object for which a {@link ContextAccessor} exists in the
+ * {@link ContextRegistry}.
+ *
+ * @author Dariusz Jędrzejczyk
  * @since 1.0.4
  */
 public interface ContextSnapshotFactory {
 
     /**
      * Capture values from {@link ThreadLocal} and from other context objects using all
-     * accessors from the {@link ContextRegistry#getInstance() global} ContextRegistry
-     * instance.
-     * @param contexts one more context objects to extract values from
+     * accessors from a {@link ContextRegistry} instance.
+     * <p>
+     * Values captured multiple times are overridden in the snapshot by the order of
+     * contexts given as arguments.
+     * @param contexts context objects to extract values from
      * @return a snapshot with saved context values
      */
     ContextSnapshot captureAll(Object... contexts);
@@ -42,31 +49,63 @@ public interface ContextSnapshotFactory {
     ContextSnapshot captureFrom(Object... contexts);
 
     /**
-     * Read the values specified by from the given source context, and if found, use them
-     * to set {@link ThreadLocal} values. Essentially, a shortcut that bypasses the need
-     * to create of {@link ContextSnapshot} first via {@link #captureAll(Object...)},
-     * followed by {@link ContextSnapshot#setThreadLocals()}.
+     * Read the values specified by keys from the given source context, and if found, use
+     * them to set {@link ThreadLocal} values. If no keys are provided, all keys are used.
+     * Essentially, a shortcut that bypasses the need to create of {@link ContextSnapshot}
+     * first via {@link #captureFrom(Object...)}, followed by
+     * {@link ContextSnapshot#setThreadLocals()}.
      * @param sourceContext the source context to read values from
      * @param keys the keys of the values to read. If none provided, all keys are
      * considered.
+     * @param <C> the type of the target context
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
      */
     <C> ContextSnapshot.Scope setThreadLocalsFrom(Object sourceContext, String... keys);
 
+    /**
+     * Creates a builder for configuring the factory.
+     * @return an instance that provides defaults, that can be configured to provide to
+     * the created {@link ContextSnapshotFactory}.
+     */
     static Builder builder() {
         return new DefaultContextSnapshotFactory.Builder();
     }
 
+    /**
+     * Builder for {@link ContextSnapshotFactory} instances.
+     */
     interface Builder {
 
+        /**
+         * Creates a new instance of {@link ContextSnapshotFactory}.
+         * @return an instance configured by the values set on the builder
+         */
         ContextSnapshotFactory build();
 
+        /**
+         * Instructs the factory what to do about {@link ThreadLocal} values which are not
+         * specified in the context object upon which it operates.
+         * @param shouldClear if {@code true}, values not present in the context object or
+         * snapshot will be cleared and later restored
+         * @return this builder instance
+         */
         Builder clearMissing(boolean shouldClear);
 
+        /**
+         * Configures the {@link ContextRegistry} to use by the created factory.
+         * @param contextRegistry the registry to use
+         * @return this builder instance
+         */
         Builder contextRegistry(ContextRegistry contextRegistry);
 
+        /**
+         * Instructs the factory to use the given predicate to select matching keys when
+         * capturing {@link ThreadLocal} values
+         * @param captureKeyPredicate predicate used to select matching keys
+         * @return this builder instance
+         */
         Builder captureKeyPredicate(Predicate<Object> captureKeyPredicate);
 
     }

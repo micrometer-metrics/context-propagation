@@ -24,7 +24,9 @@ import java.util.function.Predicate;
 /**
  * Holds values extracted from {@link ThreadLocal} and other types of context and exposes
  * methods to propagate those values.
- *
+ * <p>
+ * Use {@link ContextSnapshotFactory#builder()} to configure a factory to work with
+ * snapshots.
  * <p>
  * Implementations are disallowed to store {@code null} values. If a {@link ThreadLocal}
  * is not set, or it's value is {@code null}, there is no way of distinguishing one from
@@ -34,11 +36,9 @@ import java.util.function.Predicate;
  * {@link ContextAccessor#readValues(Object, Predicate, Map)}, and should likewise ignore
  * {@code null} values from {@link ContextAccessor#readValue(Object, Object)}.
  *
- * <p>
- * Use static factory methods on this interface to create a snapshot.
- *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Dariusz Jędrzejczyk
  * @since 1.0.0
  */
 public interface ContextSnapshot {
@@ -72,6 +72,7 @@ public interface ContextSnapshot {
     /**
      * Variant of {@link #setThreadLocals()} with a predicate to select context values by
      * key.
+     * @param keyPredicate selects keys for use when setting {@link ThreadLocal} values
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
@@ -82,6 +83,7 @@ public interface ContextSnapshot {
      * Return a new {@code Runnable} that sets {@code ThreadLocal} values from the
      * snapshot around the invocation of the given {@code Runnable}.
      * @param runnable the runnable to instrument
+     * @return wrapped instance
      */
     default Runnable wrap(Runnable runnable) {
         return () -> {
@@ -96,6 +98,7 @@ public interface ContextSnapshot {
      * snapshot around the invocation of the given {@code Callable}.
      * @param callable the callable to instrument
      * @param <T> the type of value produced by the {@code Callable}
+     * @return wrapped instance
      */
     default <T> Callable<T> wrap(Callable<T> callable) {
         return () -> {
@@ -110,6 +113,7 @@ public interface ContextSnapshot {
      * snapshot around the invocation of the given {@code Consumer}.
      * @param consumer the callable to instrument
      * @param <T> the type of value produced by the {@code Callable}
+     * @return wrapped instance
      */
     default <T> Consumer<T> wrap(Consumer<T> consumer) {
         return value -> {
@@ -123,6 +127,7 @@ public interface ContextSnapshot {
      * Return a new {@code Executor} that sets {@code ThreadLocal} values from the
      * snapshot around the invocation of any executed, {@code Runnable}.
      * @param executor the executor to instrument
+     * @return wrapped instance
      * @see ContextExecutorService
      * @see ContextScheduledExecutorService
      */
@@ -139,8 +144,8 @@ public interface ContextSnapshot {
      * instance.
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
-     * @deprecated As of 1.0.4, use {@link ContextSnapshotFactory#captureAll(Object...)}
-     * // TODO: improve
+     * @deprecated use {@link ContextSnapshotFactory#captureAll(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()}.
      */
     @Deprecated
     static ContextSnapshot captureAll(Object... contexts) {
@@ -154,6 +159,9 @@ public interface ContextSnapshot {
      * @param registry the registry to use
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
+     * @deprecated use {@link ContextSnapshotFactory#captureAll(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()} combined with
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static ContextSnapshot captureAll(ContextRegistry registry, Object... contexts) {
@@ -167,6 +175,10 @@ public interface ContextSnapshot {
      * @param registry the registry with the accessors to use
      * @param contexts one more context objects to extract values from
      * @return a snapshot with saved context values
+     * @deprecated use {@link ContextSnapshotFactory#captureAll(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()} and configure
+     * {@link ContextSnapshotFactory.Builder#captureKeyPredicate(Predicate)} and
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static ContextSnapshot captureAllUsing(Predicate<Object> keyPredicate, ContextRegistry registry,
@@ -182,6 +194,8 @@ public interface ContextSnapshot {
      * @param contexts the contexts to read values from
      * @return the created {@link ContextSnapshot}
      * @since 1.0.3
+     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()}.
      */
     @Deprecated
     static ContextSnapshot captureFromContext(Object... contexts) {
@@ -198,6 +212,9 @@ public interface ContextSnapshot {
      * @param contexts the contexts to read values from
      * @return the created {@link ContextSnapshot}
      * @since 1.0.3
+     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()} combined with
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static ContextSnapshot captureFromContext(ContextRegistry registry, Object... contexts) {
@@ -214,6 +231,10 @@ public interface ContextSnapshot {
      * @param contexts the contexts to read values from
      * @return the created {@link ContextSnapshot}
      * @since 1.0.3
+     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()} and configure
+     * {@link ContextSnapshotFactory.Builder#captureKeyPredicate(Predicate)} and
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static ContextSnapshot captureFromContext(Predicate<Object> keyPredicate, ContextRegistry registry,
@@ -225,7 +246,8 @@ public interface ContextSnapshot {
      * Create a {@link ContextSnapshot} by reading values from the given context object.
      * @param context the context to read values from
      * @return the created {@link ContextSnapshot}
-     * @deprecated as of 1.0.3 in favor of {@link #captureFromContext(Object...)}
+     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()}.
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context) {
@@ -237,8 +259,9 @@ public interface ContextSnapshot {
      * @param context the context to read values from
      * @param registry the registry to use
      * @return the created {@link ContextSnapshot}
-     * @deprecated as of 1.0.3 in favor of
-     * {@link #captureFromContext(ContextRegistry, Object...)}
+     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()} combined with
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, ContextRegistry registry) {
@@ -251,8 +274,10 @@ public interface ContextSnapshot {
      * @param keyPredicate predicate for context value keys
      * @param registry the registry to use
      * @return the created {@link ContextSnapshot}
-     * @deprecated as of 1.0.3 in favor of
-     * {@link #captureFromContext(Predicate, ContextRegistry, Object...)}
+     * @deprecated use {@link ContextSnapshotFactory#captureFrom(Object...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()} and configure
+     * {@link ContextSnapshotFactory.Builder#captureKeyPredicate(Predicate)} and
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static ContextSnapshot captureFrom(Object context, Predicate<Object> keyPredicate, ContextRegistry registry) {
@@ -266,6 +291,9 @@ public interface ContextSnapshot {
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
+     * @deprecated use
+     * {@link ContextSnapshotFactory#setThreadLocalsFrom(Object, String...)} with no keys
+     * on a factory obtained via a {@link ContextSnapshotFactory#builder()}.
      */
     @Deprecated
     static Scope setAllThreadLocalsFrom(Object sourceContext) {
@@ -281,6 +309,10 @@ public interface ContextSnapshot {
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
+     * @deprecated use
+     * {@link ContextSnapshotFactory#setThreadLocalsFrom(Object, String...)} with no keys
+     * on a factory obtained via a {@link ContextSnapshotFactory#builder()} combined with
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static Scope setAllThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry) {
@@ -297,6 +329,9 @@ public interface ContextSnapshot {
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
+     * @deprecated use
+     * {@link ContextSnapshotFactory#setThreadLocalsFrom(Object, String...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()}.
      */
     @Deprecated
     static Scope setThreadLocalsFrom(Object sourceContext, String... keys) {
@@ -312,6 +347,10 @@ public interface ContextSnapshot {
      * @return an object that can be used to reset {@link ThreadLocal} values at the end
      * of the context scope, either removing them or restoring their previous values, if
      * any.
+     * @deprecated use
+     * {@link ContextSnapshotFactory#setThreadLocalsFrom(Object, String...)} on a factory
+     * obtained via a {@link ContextSnapshotFactory#builder()} combined with
+     * {@link ContextSnapshotFactory.Builder#contextRegistry(ContextRegistry)}.
      */
     @Deprecated
     static Scope setThreadLocalsFrom(Object sourceContext, ContextRegistry contextRegistry, String... keys) {

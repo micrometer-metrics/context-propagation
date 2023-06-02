@@ -21,7 +21,13 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
+/**
+ * Default implementation of {@link ContextSnapshotFactory}.
+ *
+ * @author Dariusz Jędrzejczyk
+ * @since 1.0.4
+ */
+final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
 
     private static final DefaultContextSnapshot emptyContextSnapshot = new DefaultContextSnapshot(new ContextRegistry(),
             false);
