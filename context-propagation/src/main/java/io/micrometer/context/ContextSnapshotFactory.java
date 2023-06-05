@@ -85,10 +85,11 @@ public interface ContextSnapshotFactory {
         ContextSnapshotFactory build();
 
         /**
-         * Instructs the factory what to do about {@link ThreadLocal} values which are not
-         * specified in the context object upon which it operates.
+         * Determines whether to clear existing {@link ThreadLocal} values at the start of
+         * a scope, if there are no corresponding values in the source
+         * {@link ContextSnapshot} or context object.
          * @param shouldClear if {@code true}, values not present in the context object or
-         * snapshot will be cleared and later restored
+         * snapshot will be cleared at the start of a scope and later restored
          * @return this builder instance
          */
         Builder clearMissing(boolean shouldClear);
