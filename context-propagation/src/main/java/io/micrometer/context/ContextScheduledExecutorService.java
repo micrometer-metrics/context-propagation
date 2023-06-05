@@ -79,9 +79,12 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
      * Variant of {@link #wrap(ScheduledExecutorService, Supplier)} that uses
      * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
      * @param service the executorService to wrap
+     * @deprecated use {@link #wrap(ScheduledExecutorService, Supplier)}
      */
+    @Deprecated
     public static ScheduledExecutorService wrap(ScheduledExecutorService service) {
-        return new ContextScheduledExecutorService(service, ContextSnapshot::captureAll);
+        return wrap(service,
+                () -> DefaultContextSnapshotFactory.captureAll(ContextRegistry.getInstance(), key -> true, false));
     }
 
 }

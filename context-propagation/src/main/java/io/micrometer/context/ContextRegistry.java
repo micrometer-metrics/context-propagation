@@ -122,7 +122,7 @@ public class ContextRegistry {
             }
 
             @Override
-            public void reset() {
+            public void setValue() {
                 resetTask.run();
             }
         });
