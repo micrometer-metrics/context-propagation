@@ -151,28 +151,15 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
     }
 
     /**
-     * Wrap the given {@code ExecutorService} in order to propagate context to any
-     * executed task through the given {@link ContextSnapshot} supplier.
-     * @param service the executorService to wrap
-     * @param clearMissing whether to {@link ThreadLocalAccessor#setValue() clear}
-     * {@link ThreadLocal} values not captured upon task submission
-     * @return wrapped instance
-     * @since 1.0.3
-     */
-    public static ExecutorService wrap(ExecutorService service, boolean clearMissing) {
-        return new ContextExecutorService<>(service, () -> DefaultContextSnapshotFactory
-            .captureAll(ContextRegistry.getInstance(), key -> true, clearMissing));
-    }
-
-    /**
      * Variant of {@link #wrap(ExecutorService, Supplier)} that uses
      * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
      * @param service the executorService to wrap
-     * @deprecated use {@link #wrap(ExecutorService, boolean)}
+     * @deprecated use {@link #wrap(ExecutorService, Supplier)}
      */
     @Deprecated
     public static ExecutorService wrap(ExecutorService service) {
-        return wrap(service, false);
+        return wrap(service,
+                () -> DefaultContextSnapshotFactory.captureAll(ContextRegistry.getInstance(), key -> true, false));
     }
 
 }

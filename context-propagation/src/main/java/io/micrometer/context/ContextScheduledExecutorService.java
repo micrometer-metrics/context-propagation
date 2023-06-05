@@ -76,28 +76,15 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
     }
 
     /**
-     * Wrap the given {@code ScheduledExecutorService} in order to propagate context to
-     * any executed task through the given {@link ContextSnapshot} supplier.
-     * @param service the executorService to wrap
-     * @param clearMissing whether to {@link ThreadLocalAccessor#setValue() clear}
-     * {@link ThreadLocal} values not captured upon task submission
-     * @return wrapped instance
-     * @since 1.0.3
-     */
-    public static ScheduledExecutorService wrap(ScheduledExecutorService service, boolean clearMissing) {
-        return new ContextScheduledExecutorService(service, () -> DefaultContextSnapshotFactory
-            .captureAll(ContextRegistry.getInstance(), key -> true, clearMissing));
-    }
-
-    /**
      * Variant of {@link #wrap(ScheduledExecutorService, Supplier)} that uses
      * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
      * @param service the executorService to wrap
-     * @deprecated use {@link #wrap(ScheduledExecutorService, boolean)}
+     * @deprecated use {@link #wrap(ScheduledExecutorService, Supplier)}
      */
     @Deprecated
     public static ScheduledExecutorService wrap(ScheduledExecutorService service) {
-        return wrap(service, false);
+        return wrap(service,
+                () -> DefaultContextSnapshotFactory.captureAll(ContextRegistry.getInstance(), key -> true, false));
     }
 
 }
