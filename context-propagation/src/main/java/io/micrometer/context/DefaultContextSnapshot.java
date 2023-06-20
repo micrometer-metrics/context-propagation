@@ -99,7 +99,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         ThreadLocalAccessor.Scope scope = ((ThreadLocalAccessor<V>) accessor).setValueScoped(value);
         if (scope == null) {
             previousValues.put(key, previousValue);
-        } else {
+        }
+        else {
             previousValues.put(key, scope);
         }
         return previousValues;
@@ -112,7 +113,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
         ThreadLocalAccessor.Scope scope = accessor.setValueScoped();
         if (scope == null) {
             previousValues.put(key, previousValue);
-        } else {
+        }
+        else {
             previousValues.put(key, scope);
         }
         return previousValues;

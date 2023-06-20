@@ -51,5 +51,4 @@ public class ScopedObservationThreadLocalAccessor implements ThreadLocalAccessor
         return scope::close;
     }
 
-
 }

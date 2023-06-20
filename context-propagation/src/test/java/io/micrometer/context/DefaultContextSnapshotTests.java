@@ -492,7 +492,8 @@ public class DefaultContextSnapshotTests {
                         .isNull();
                     then(ScopedObservationScopeThreadLocalHolder.getValue()).as("This is the 'null' scope").isNotNull();
                 }
-                then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're back to previous observation")
+                then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation())
+                    .as("We're back to previous observation")
                     .isSameAs(observation);
             }
             then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation())
