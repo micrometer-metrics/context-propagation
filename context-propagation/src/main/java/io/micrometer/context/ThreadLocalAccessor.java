@@ -69,7 +69,8 @@ public interface ThreadLocalAccessor<V> {
     void setValue(V value);
 
     /**
-     * A variation of {@link #setValue(Object)} that returns {@link Scope} which will be closed {@link Scope#close()} to restore the previous value.
+     * A variation of {@link #setValue(Object)} that returns {@link Scope} which will be
+     * closed {@link Scope#close()} to restore the previous value.
      * @return A scope of null to behave like {@link #setValue(Object)}
      *
      * @since 1.0.4
@@ -92,7 +93,8 @@ public interface ThreadLocalAccessor<V> {
     }
 
     /**
-     * A variation of {@link #setValue()} that returns {@link Scope} which will be closed {@link Scope#close()} to restore the previous value.
+     * A variation of {@link #setValue()} that returns {@link Scope} which will be closed
+     * {@link Scope#close()} to restore the previous value.
      * @return A scope of null to behave like {@link #setValue()}
      *
      * @since 1.0.4
@@ -151,5 +153,7 @@ public interface ThreadLocalAccessor<V> {
 
         @Override
         void close();
+
     }
+
 }
