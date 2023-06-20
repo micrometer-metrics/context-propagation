@@ -142,7 +142,7 @@ public interface ThreadLocalAccessor<V> {
     }
 
     /**
-     * The scope that should be closed after the value is restored.
+     * The scope that should be closed to restore the previous value.
      *
      * @author Denis Stepanov
      * @since 1.0.4
