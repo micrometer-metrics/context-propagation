@@ -95,17 +95,26 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
             @Nullable Map<Object, Object> previousValues) {
 
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
-        previousValues.put(key, accessor.getValue());
-        ((ThreadLocalAccessor<V>) accessor).setValue(value);
+        Object previousValue = accessor.getValue();
+        ThreadLocalAccessor.Scope scope = ((ThreadLocalAccessor<V>) accessor).setValueScoped(value);
+        if (scope == null) {
+            previousValues.put(key, previousValue);
+        } else {
+            previousValues.put(key, scope);
+        }
         return previousValues;
     }
 
-    @SuppressWarnings("unchecked")
     static Map<Object, Object> clearThreadLocal(Object key, ThreadLocalAccessor<?> accessor,
             @Nullable Map<Object, Object> previousValues) {
         previousValues = (previousValues != null ? previousValues : new HashMap<>());
-        previousValues.put(key, accessor.getValue());
-        accessor.setValue();
+        Object previousValue = accessor.getValue();
+        ThreadLocalAccessor.Scope scope = accessor.setValueScoped();
+        if (scope == null) {
+            previousValues.put(key, previousValue);
+        } else {
+            previousValues.put(key, scope);
+        }
         return previousValues;
     }
 
@@ -140,6 +149,10 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
         @SuppressWarnings("unchecked")
         private <V> void resetThreadLocalValue(ThreadLocalAccessor<?> accessor, @Nullable V previousValue) {
+            if (previousValue instanceof ThreadLocalAccessor.Scope) {
+                ((ThreadLocalAccessor.Scope) previousValue).close();
+                return;
+            }
             if (previousValue != null) {
                 ((ThreadLocalAccessor<V>) accessor).restore(previousValue);
             }

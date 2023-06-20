@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -67,6 +69,18 @@ public interface ThreadLocalAccessor<V> {
     void setValue(V value);
 
     /**
+     * A variation of {@link #setValue(Object)} that returns {@link Scope} which will be closed {@link Scope#close()} to restore the previous value.
+     * @return A scope of null to behave like {@link #setValue(Object)}
+     *
+     * @since 1.0.4
+     */
+    @Nullable
+    default Scope setValueScoped(V value) {
+        setValue(value);
+        return null;
+    }
+
+    /**
      * Called instead of {@link #setValue(Object)} in order to remove the current
      * {@link ThreadLocal} value at the start of a
      * {@link io.micrometer.context.ContextSnapshot.Scope}.
@@ -75,6 +89,18 @@ public interface ThreadLocalAccessor<V> {
      */
     default void setValue() {
         reset();
+    }
+
+    /**
+     * A variation of {@link #setValue()} that returns {@link Scope} which will be closed {@link Scope#close()} to restore the previous value.
+     * @return A scope of null to behave like {@link #setValue()}
+     *
+     * @since 1.0.4
+     */
+    @Nullable
+    default Scope setValueScoped() {
+        setValue();
+        return null;
     }
 
     /**
@@ -115,4 +141,15 @@ public interface ThreadLocalAccessor<V> {
         setValue();
     }
 
+    /**
+     * The scope that should be closed after the value is restored.
+     *
+     * @author Denis Stepanov
+     * @since 1.0.4
+     */
+    interface Scope extends Closeable {
+
+        @Override
+        void close();
+    }
 }

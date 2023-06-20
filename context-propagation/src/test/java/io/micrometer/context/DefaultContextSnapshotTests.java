@@ -23,6 +23,9 @@ import io.micrometer.context.ContextSnapshot.Scope;
 import io.micrometer.context.observation.Observation;
 import io.micrometer.context.observation.ObservationScopeThreadLocalHolder;
 import io.micrometer.context.observation.ObservationThreadLocalAccessor;
+import io.micrometer.context.observation_scoped.ScopedObservation;
+import io.micrometer.context.observation_scoped.ScopedObservationScopeThreadLocalHolder;
+import io.micrometer.context.observation_scoped.ScopedObservationThreadLocalAccessor;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -73,6 +76,31 @@ public class DefaultContextSnapshotTests {
 
     @ParameterizedTest(name = "clearMissing={0}")
     @ValueSource(booleans = { true, false })
+    void should_propagate_thread_local_scoped(boolean clearMissing) {
+        ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .clearMissing(clearMissing)
+            .build();
+
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessorScoped());
+
+        StringThreadLocalHolder.setValue("hello");
+        ContextSnapshot snapshot = snapshotFactory.captureAll();
+
+        StringThreadLocalHolder.setValue("hola");
+        try {
+            try (Scope scope = snapshot.setThreadLocals()) {
+                then(StringThreadLocalHolder.getValue()).isEqualTo("hello");
+            }
+            then(StringThreadLocalHolder.getValue()).isEqualTo("hola");
+        }
+        finally {
+            StringThreadLocalHolder.reset();
+        }
+    }
+
+    @ParameterizedTest(name = "clearMissing={0}")
+    @ValueSource(booleans = { true, false })
     void should_propagate_single_thread_local_value(boolean clearMissing) {
         ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
             .contextRegistry(registry)
@@ -99,6 +127,32 @@ public class DefaultContextSnapshotTests {
 
     @ParameterizedTest(name = "clearMissing={0}")
     @ValueSource(booleans = { true, false })
+    void should_propagate_single_thread_local_value_scoped(boolean clearMissing) {
+        ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .clearMissing(clearMissing)
+            .build();
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessorScoped());
+
+        String key = StringThreadLocalAccessorScoped.KEY;
+        Map<String, String> sourceContext = Collections.singletonMap(key, "hello");
+
+        StringThreadLocalHolder.setValue("hola");
+        try {
+            try (Scope scope = snapshotFactory.setThreadLocalsFrom(sourceContext, key)) {
+                then(StringThreadLocalHolder.getValue()).isEqualTo("hello");
+            }
+            then(StringThreadLocalHolder.getValue()).isEqualTo("hola");
+        }
+        finally {
+            StringThreadLocalHolder.reset();
+        }
+    }
+
+    @ParameterizedTest(name = "clearMissing={0}")
+    @ValueSource(booleans = { true, false })
     void should_override_context_values_when_many_contexts(boolean clearMissing) {
         ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
             .contextRegistry(registry)
@@ -108,6 +162,30 @@ public class DefaultContextSnapshotTests {
         this.registry.registerContextAccessor(new TestContextAccessor());
 
         String key = StringThreadLocalAccessor.KEY;
+        Map<String, String> firstContext = Collections.singletonMap(key, "hello");
+        Map<String, String> secondContext = Collections.singletonMap(key, "override");
+        try {
+            ContextSnapshot contextSnapshot = snapshotFactory.captureFrom(firstContext, secondContext);
+            contextSnapshot.wrap(() -> {
+                then(StringThreadLocalHolder.getValue()).isEqualTo("override");
+            });
+        }
+        finally {
+            StringThreadLocalHolder.reset();
+        }
+    }
+
+    @ParameterizedTest(name = "clearMissing={0}")
+    @ValueSource(booleans = { true, false })
+    void should_override_context_values_when_many_contexts_scoped(boolean clearMissing) {
+        ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .clearMissing(clearMissing)
+            .build();
+
+        this.registry.registerContextAccessor(new TestContextAccessor());
+
+        String key = StringThreadLocalAccessorScoped.KEY;
         Map<String, String> firstContext = Collections.singletonMap(key, "hello");
         Map<String, String> secondContext = Collections.singletonMap(key, "override");
         try {
@@ -196,6 +274,29 @@ public class DefaultContextSnapshotTests {
             .clearMissing(clearMissing)
             .build();
         this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessor());
+
+        then(StringThreadLocalHolder.getValue()).isNull();
+
+        ContextSnapshot snapshot = snapshotFactory.captureAll();
+
+        StringThreadLocalHolder.reset();
+        then(StringThreadLocalHolder.getValue()).isNull();
+
+        try (Scope scope = snapshot.setThreadLocals()) {
+            then(StringThreadLocalHolder.getValue()).isNull();
+        }
+
+        then(StringThreadLocalHolder.getValue()).isNull();
+    }
+
+    @ParameterizedTest(name = "clearMissing={0}")
+    @ValueSource(booleans = { true, false })
+    void should_not_fail_on_empty_thread_local_scoped(boolean clearMissing) {
+        ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .clearMissing(clearMissing)
+            .build();
+        this.registry.registerThreadLocalAccessor(new StringThreadLocalAccessorScoped());
 
         then(StringThreadLocalHolder.getValue()).isNull();
 
@@ -369,6 +470,32 @@ public class DefaultContextSnapshotTests {
                     .isSameAs(observation);
             }
             then(ObservationScopeThreadLocalHolder.getCurrentObservation())
+                .as("There was no observation at the beginning")
+                .isNull();
+        }
+
+        @Test
+        void should_work_with_scope_based_thread_local_accessor_scoped() {
+            registry.registerContextAccessor(new TestContextAccessor());
+            registry.registerThreadLocalAccessor(new ScopedObservationThreadLocalAccessor());
+
+            String key = ScopedObservationThreadLocalAccessor.KEY;
+            ScopedObservation observation = new ScopedObservation();
+            Map<String, ScopedObservation> sourceContext = Collections.singletonMap(key, observation);
+
+            then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation()).isNull();
+            try (Scope scope1 = snapshotFactory.setThreadLocalsFrom(sourceContext)) {
+                then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
+                try (Scope scope2 = snapshotFactory.setThreadLocalsFrom(Collections.emptyMap())) {
+                    then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation())
+                        .as("We're resetting the observation")
+                        .isNull();
+                    then(ScopedObservationScopeThreadLocalHolder.getValue()).as("This is the 'null' scope").isNotNull();
+                }
+                then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're back to previous observation")
+                    .isSameAs(observation);
+            }
+            then(ScopedObservationScopeThreadLocalHolder.getCurrentObservation())
                 .as("There was no observation at the beginning")
                 .isNull();
         }

@@ -51,13 +51,13 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Obser
 
     @Override
     public void restore(Observation value) {
-        Scope scope = ObservationScopeThreadLocalHolder.getValue();
+        io.micrometer.context.observation.Scope scope = ObservationScopeThreadLocalHolder.getValue();
         if (scope == null) {
             String msg = "There is no current scope in thread local. This situation should not happen";
             log.log(Level.WARNING, msg);
             assert false : msg;
         }
-        Scope previousObservationScope = scope.getPreviousObservationScope();
+        io.micrometer.context.observation.Scope previousObservationScope = scope.getPreviousObservationScope();
         if (previousObservationScope == null || value != previousObservationScope.getCurrentObservation()) {
             Observation previousObservation = previousObservationScope != null
                     ? previousObservationScope.getCurrentObservation() : null;
@@ -77,7 +77,7 @@ public class ObservationThreadLocalAccessor implements ThreadLocalAccessor<Obser
     }
 
     private void close() {
-        Scope scope = ObservationScopeThreadLocalHolder.getValue();
+        io.micrometer.context.observation.Scope scope = ObservationScopeThreadLocalHolder.getValue();
         if (scope != null) {
             scope.close();
         }
