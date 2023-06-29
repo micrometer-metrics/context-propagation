@@ -25,8 +25,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.meta.TypeQualifierDefault;
 
 /**
- * Declares all method parameters and return values within a package as non-nullable via
- * JSR-305 meta-annotations to indicate nullability in Java.
+ * Declares all fields within a package as non-nullable via JSR-305 meta-annotations to
+ * indicate nullability in Java.
  *
  * @author Rossen Stoyanchev
  * @since 1.0.0
@@ -35,7 +35,7 @@ import javax.annotation.meta.TypeQualifierDefault;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Nonnull
-@TypeQualifierDefault({ ElementType.METHOD, ElementType.PARAMETER })
-@interface NonNullApi {
+@TypeQualifierDefault(ElementType.FIELD)
+public @interface NonNullFields {
 
 }

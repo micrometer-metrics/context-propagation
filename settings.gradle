@@ -22,3 +22,4 @@ gradleEnterprise {
 }
 
 include 'context-propagation'
+include 'context-propagation-test'

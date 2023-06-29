@@ -3,6 +3,9 @@ plugins {
 }
 
 dependencies {
+	testImplementation(project(":context-propagation-test")) {
+	  	exclude module: 'context-propagation'
+	}
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.assertj:assertj-core'
 	testImplementation 'org.mockito:mockito-core'

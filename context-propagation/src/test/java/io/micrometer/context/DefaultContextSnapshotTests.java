@@ -36,15 +36,11 @@ import static org.assertj.core.api.BDDAssertions.then;
  * Unit tests for {@link DefaultContextSnapshot}.
  *
  * @author Rossen Stoyanchev
+ * @author Dariusz Jędrzejczyk
  */
 public class DefaultContextSnapshotTests {
 
     private final ContextRegistry registry = new ContextRegistry();
-
-    private final ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
-        .contextRegistry(registry)
-        .clearMissing(false)
-        .build();
 
     @ParameterizedTest(name = "clearMissing={0}")
     @ValueSource(booleans = { true, false })
