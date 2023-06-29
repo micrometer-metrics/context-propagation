@@ -17,6 +17,8 @@ package io.micrometer.context;
 
 import java.util.Objects;
 
+import io.micrometer.context.util.annotation.Nullable;
+
 /**
  * ThreadLocalAccessor for testing purposes with a given key and {@link ThreadLocal}
  * instance.

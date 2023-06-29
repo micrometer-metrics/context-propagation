@@ -30,3 +30,6 @@
 @NonNullApi
 @NonNullFields
 package io.micrometer.context;
+
+import io.micrometer.context.util.annotation.NonNullApi;
+import io.micrometer.context.util.annotation.NonNullFields;

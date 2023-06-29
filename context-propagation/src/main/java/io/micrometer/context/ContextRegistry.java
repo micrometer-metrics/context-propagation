@@ -22,6 +22,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import io.micrometer.context.util.annotation.Nullable;
+
 /**
  * Registry that provides access to, instances of {@link ContextAccessor} and
  * {@link ThreadLocalAccessor}.

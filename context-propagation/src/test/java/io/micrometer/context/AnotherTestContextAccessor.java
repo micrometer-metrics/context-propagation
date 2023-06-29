@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import io.micrometer.context.util.annotation.Nullable;
+
 class AnotherTestContextAccessor implements ContextAccessor<Set, Set> {
 
     @Override

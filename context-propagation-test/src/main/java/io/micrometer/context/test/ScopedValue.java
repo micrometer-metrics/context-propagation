@@ -17,7 +17,7 @@ package io.micrometer.context.test;
 
 import java.util.logging.Logger;
 
-import io.micrometer.context.Nullable;
+import io.micrometer.context.util.annotation.Nullable;
 
 import static java.util.logging.Level.INFO;
 
@@ -61,7 +61,7 @@ public interface ScopedValue {
     }
 
     /**
-     * {@link String} value associated with this instance.
+     * {@code String} value associated with this instance.
      * @return associated value
      */
     @Nullable

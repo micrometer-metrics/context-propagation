@@ -27,4 +27,4 @@
 @NonNullApi
 package io.micrometer.context.test;
 
-import io.micrometer.context.NonNullApi;
+import io.micrometer.context.util.annotation.NonNullApi;
