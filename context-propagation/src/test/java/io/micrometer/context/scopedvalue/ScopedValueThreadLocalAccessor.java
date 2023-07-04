@@ -36,7 +36,7 @@ public class ScopedValueThreadLocalAccessor implements ThreadLocalAccessor<Scope
 
     @Override
     public ScopedValue getValue() {
-        return ScopedValue.VALUE_IN_SCOPE.get();
+        return ScopedValueHolder.get();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ScopedValueThreadLocalAccessor implements ThreadLocalAccessor<Scope
 
     @Override
     public void restore(ScopedValue previousValue) {
-        ScopedValue current = ScopedValue.VALUE_IN_SCOPE.get();
+        ScopedValue current = ScopedValueHolder.get();
         if (current != null) {
             ScopedValue.Scope currentScope = current.currentScope();
             if (currentScope == null || currentScope.parentScope == null
@@ -67,7 +67,7 @@ public class ScopedValueThreadLocalAccessor implements ThreadLocalAccessor<Scope
 
     @Override
     public void restore() {
-        ScopedValue current = ScopedValue.VALUE_IN_SCOPE.get();
+        ScopedValue current = ScopedValueHolder.get();
         if (current != null) {
             ScopedValue.Scope currentScope = current.currentScope();
             if (currentScope == null) {

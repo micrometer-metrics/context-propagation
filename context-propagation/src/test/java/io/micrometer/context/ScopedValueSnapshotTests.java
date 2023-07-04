@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.micrometer.context.scopedvalue.ScopedValue;
+import io.micrometer.context.scopedvalue.ScopedValueHolder;
 import io.micrometer.context.scopedvalue.ScopedValueThreadLocalAccessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ public class ScopedValueSnapshotTests {
 
     @AfterEach
     void cleanupThreadLocals() {
-        ScopedValue.VALUE_IN_SCOPE.remove();
+        ScopedValueHolder.remove();
         registry.removeThreadLocalAccessor(ScopedValueThreadLocalAccessor.KEY);
     }
 
@@ -56,18 +57,18 @@ public class ScopedValueSnapshotTests {
         AtomicReference<ScopedValue> valueInNewThread = new AtomicReference<>();
         ScopedValue scopedValue = ScopedValue.create("hello");
 
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
 
         try (ScopedValue.Scope scope = scopedValue.open()) {
-            assertThat(ScopedValue.getCurrent()).isEqualTo(scopedValue);
-            Runnable wrapped = snapshotFactory.captureAll().wrap(() -> valueInNewThread.set(ScopedValue.getCurrent()));
+            assertThat(ScopedValueHolder.get()).isEqualTo(scopedValue);
+            Runnable wrapped = snapshotFactory.captureAll().wrap(() -> valueInNewThread.set(ScopedValueHolder.get()));
             Thread t = new Thread(wrapped);
             t.start();
             t.join();
         }
 
         assertThat(valueInNewThread.get()).isEqualTo(scopedValue);
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
     }
 
     @Test
@@ -79,50 +80,50 @@ public class ScopedValueSnapshotTests {
         ScopedValue v1 = ScopedValue.create("val1");
         ScopedValue v2 = ScopedValue.create("val2");
 
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
 
         Thread t;
 
         try (ScopedValue.Scope v1Scope = v1.open()) {
-            assertThat(ScopedValue.getCurrent()).isEqualTo(v1);
+            assertThat(ScopedValueHolder.get()).isEqualTo(v1);
             try (ScopedValue.Scope v2scope1T1 = v2.open()) {
-                assertThat(ScopedValue.getCurrent()).isEqualTo(v2);
+                assertThat(ScopedValueHolder.get()).isEqualTo(v2);
                 try (ScopedValue.Scope v2scope2T1 = v2.open()) {
-                    assertThat(ScopedValue.getCurrent()).isEqualTo(v2);
+                    assertThat(ScopedValueHolder.get()).isEqualTo(v2);
                     Runnable runnable = () -> {
-                        value1InNewThreadBefore.set(ScopedValue.getCurrent());
+                        value1InNewThreadBefore.set(ScopedValueHolder.get());
                         try (ScopedValue.Scope v2scopeT2 = v2.open()) {
-                            value2InNewThread.set(ScopedValue.getCurrent());
+                            value2InNewThread.set(ScopedValueHolder.get());
                         }
-                        value1InNewThreadAfter.set(ScopedValue.getCurrent());
+                        value1InNewThreadAfter.set(ScopedValueHolder.get());
                     };
 
                     Runnable wrapped = snapshotFactory.captureAll().wrap(runnable);
                     t = new Thread(wrapped);
                     t.start();
 
-                    assertThat(ScopedValue.getCurrent()).isEqualTo(v2);
-                    assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(v2scope2T1);
+                    assertThat(ScopedValueHolder.get()).isEqualTo(v2);
+                    assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(v2scope2T1);
                 }
-                assertThat(ScopedValue.getCurrent()).isEqualTo(v2);
-                assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(v2scope1T1);
+                assertThat(ScopedValueHolder.get()).isEqualTo(v2);
+                assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(v2scope1T1);
             }
 
-            assertThat(ScopedValue.getCurrent()).isEqualTo(v1);
+            assertThat(ScopedValueHolder.get()).isEqualTo(v1);
 
             try (ScopedValue.Scope childScope3 = v2.open()) {
-                assertThat(ScopedValue.getCurrent()).isEqualTo(v2);
-                assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(childScope3);
+                assertThat(ScopedValueHolder.get()).isEqualTo(v2);
+                assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(childScope3);
             }
 
             t.join();
-            assertThat(ScopedValue.getCurrent()).isEqualTo(v1);
+            assertThat(ScopedValueHolder.get()).isEqualTo(v1);
         }
 
         assertThat(value1InNewThreadBefore.get()).isEqualTo(v2);
         assertThat(value1InNewThreadAfter.get()).isEqualTo(v2);
         assertThat(value2InNewThread.get()).isEqualTo(v2);
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
     }
 
     @Test
@@ -135,18 +136,18 @@ public class ScopedValueSnapshotTests {
         registry.registerContextAccessor(accessor);
         ScopedValue value = ScopedValue.create("value");
 
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
 
         Map<String, ScopedValue> sourceContext = Collections.singletonMap(ScopedValueThreadLocalAccessor.KEY, value);
 
         try (ContextSnapshot.Scope outer = snapshotFactory.setThreadLocalsFrom(sourceContext)) {
-            assertThat(ScopedValue.getCurrent()).isEqualTo(value);
+            assertThat(ScopedValueHolder.get()).isEqualTo(value);
             try (ContextSnapshot.Scope inner = snapshotFactory.setThreadLocalsFrom(Collections.emptyMap())) {
-                assertThat(ScopedValue.getCurrent().get()).isNull();
+                assertThat(ScopedValueHolder.get().get()).isNull();
             }
-            assertThat(ScopedValue.getCurrent()).isEqualTo(value);
+            assertThat(ScopedValueHolder.get()).isEqualTo(value);
         }
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
 
         registry.removeContextAccessor(accessor);
     }

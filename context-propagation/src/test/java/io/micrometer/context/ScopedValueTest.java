@@ -16,6 +16,7 @@
 package io.micrometer.context;
 
 import io.micrometer.context.scopedvalue.ScopedValue;
+import io.micrometer.context.scopedvalue.ScopedValueHolder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,30 +30,30 @@ class ScopedValueTest {
 
     @Test
     void basicScopeWorks() {
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
 
         ScopedValue scopedValue = ScopedValue.create("hello");
         try (ScopedValue.Scope scope = scopedValue.open()) {
-            assertThat(ScopedValue.getCurrent()).isEqualTo(scopedValue);
+            assertThat(ScopedValueHolder.get()).isEqualTo(scopedValue);
         }
 
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
     }
 
     @Test
     void emptyScopeWorks() {
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
 
         ScopedValue scopedValue = ScopedValue.create("hello");
         try (ScopedValue.Scope scope = scopedValue.open()) {
-            assertThat(ScopedValue.getCurrent()).isEqualTo(scopedValue);
+            assertThat(ScopedValueHolder.get()).isEqualTo(scopedValue);
             try (ScopedValue.Scope emptyScope = ScopedValue.nullValue().open()) {
-                assertThat(ScopedValue.getCurrent().get()).isNull();
+                assertThat(ScopedValueHolder.get().get()).isNull();
             }
-            assertThat(ScopedValue.getCurrent()).isEqualTo(scopedValue);
+            assertThat(ScopedValueHolder.get()).isEqualTo(scopedValue);
         }
 
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
     }
 
     @Test
@@ -66,25 +67,25 @@ class ScopedValueTest {
                     try (ScopedValue.Scope v2scope2 = v2.open()) {
                         try (ScopedValue.Scope v1scope3 = v1.open()) {
                             try (ScopedValue.Scope nullScope = ScopedValue.nullValue().open()) {
-                                assertThat(ScopedValue.getCurrent().get()).isNull();
+                                assertThat(ScopedValueHolder.get().get()).isNull();
                             }
-                            assertThat(ScopedValue.getCurrent()).isEqualTo(v1);
-                            assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(v1scope3);
+                            assertThat(ScopedValueHolder.get()).isEqualTo(v1);
+                            assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(v1scope3);
                         }
-                        assertThat(ScopedValue.getCurrent()).isEqualTo(v2);
-                        assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(v2scope2);
+                        assertThat(ScopedValueHolder.get()).isEqualTo(v2);
+                        assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(v2scope2);
                     }
-                    assertThat(ScopedValue.getCurrent()).isEqualTo(v2);
-                    assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(v2scope1);
+                    assertThat(ScopedValueHolder.get()).isEqualTo(v2);
+                    assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(v2scope1);
                 }
-                assertThat(ScopedValue.getCurrent()).isEqualTo(v1);
-                assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(v1scope2);
+                assertThat(ScopedValueHolder.get()).isEqualTo(v1);
+                assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(v1scope2);
             }
-            assertThat(ScopedValue.getCurrent()).isEqualTo(v1);
-            assertThat(ScopedValue.getCurrent().currentScope()).isEqualTo(v1scope1);
+            assertThat(ScopedValueHolder.get()).isEqualTo(v1);
+            assertThat(ScopedValueHolder.get().currentScope()).isEqualTo(v1scope1);
         }
 
-        assertThat(ScopedValue.getCurrent()).isNull();
+        assertThat(ScopedValueHolder.get()).isNull();
     }
 
 }

@@ -27,16 +27,11 @@ import static java.util.logging.Level.INFO;
 public interface ScopedValue {
 
     /**
-     * Thread-local storage for the current value in scope for the current Thread.
-     */
-    ThreadLocal<ScopedValue> VALUE_IN_SCOPE = new ThreadLocal<>();
-
-    /**
      * Shorthand for accessing the value in scope.
      * @return current {@link ScopedValue} set for this Thread.
      */
     static ScopedValue getCurrent() {
-        return VALUE_IN_SCOPE.get();
+        return ScopedValueHolder.get();
     }
 
     /**
@@ -98,23 +93,23 @@ public interface ScopedValue {
             log.log(INFO, () -> String.format("%s: open scope[%s]", scopedValue.get(), hashCode()));
             this.scopedValue = scopedValue;
 
-            ScopedValue currentValue = ScopedValue.VALUE_IN_SCOPE.get();
+            ScopedValue currentValue = ScopedValueHolder.get();
             this.parentScope = currentValue != null ? currentValue.currentScope() : null;
 
-            ScopedValue.VALUE_IN_SCOPE.set(scopedValue);
+            ScopedValueHolder.set(scopedValue);
         }
 
         @Override
         public void close() {
             if (parentScope == null) {
                 log.log(INFO, () -> String.format("%s: remove scope[%s]", scopedValue.get(), hashCode()));
-                ScopedValue.VALUE_IN_SCOPE.remove();
+                ScopedValueHolder.remove();
             }
             else {
                 log.log(INFO, () -> String.format("%s: close scope[%s] -> restore %s scope[%s]", scopedValue.get(),
                         hashCode(), parentScope.scopedValue.get(), parentScope.hashCode()));
                 parentScope.scopedValue.updateCurrentScope(parentScope);
-                ScopedValue.VALUE_IN_SCOPE.set(parentScope.scopedValue);
+                ScopedValueHolder.set(parentScope.scopedValue);
             }
         }
 
