@@ -36,7 +36,7 @@ public class ScopedValueThreadLocalAccessor implements ThreadLocalAccessor<Scope
 
     @Override
     public ScopedValue getValue() {
-        return ScopedValueHolder.get();
+        return ScopeHolder.currentValue();
     }
 
     @Override
@@ -51,11 +51,9 @@ public class ScopedValueThreadLocalAccessor implements ThreadLocalAccessor<Scope
 
     @Override
     public void restore(ScopedValue previousValue) {
-        ScopedValue current = ScopedValueHolder.get();
-        if (current != null) {
-            ScopedValue.Scope currentScope = current.currentScope();
-            if (currentScope == null || currentScope.parentScope == null
-                    || currentScope.parentScope.scopedValue != previousValue) {
+        ScopedValue.Scope currentScope = ScopeHolder.get();
+        if (currentScope != null) {
+            if (currentScope.parentScope == null || currentScope.parentScope.scopedValue != previousValue) {
                 throw new RuntimeException("Restoring to a different previous scope than expected!");
             }
             currentScope.close();
@@ -67,12 +65,8 @@ public class ScopedValueThreadLocalAccessor implements ThreadLocalAccessor<Scope
 
     @Override
     public void restore() {
-        ScopedValue current = ScopedValueHolder.get();
-        if (current != null) {
-            ScopedValue.Scope currentScope = current.currentScope();
-            if (currentScope == null) {
-                throw new RuntimeException("Can't close current scope, as it is missing");
-            }
+        ScopedValue.Scope currentScope = ScopeHolder.get();
+        if (currentScope != null) {
             currentScope.close();
         }
         else {

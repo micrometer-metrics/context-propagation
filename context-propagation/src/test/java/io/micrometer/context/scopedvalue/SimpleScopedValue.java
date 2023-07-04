@@ -15,21 +15,13 @@
  */
 package io.micrometer.context.scopedvalue;
 
-import java.util.logging.Logger;
-
-import static java.util.logging.Level.INFO;
-
 /**
  * Implementation of {@link ScopedValue} which maintains the hierarchy between parent
  * scope and an opened scope for this value.
  */
 class SimpleScopedValue implements ScopedValue {
 
-    private static final Logger log = Logger.getLogger(SimpleScopedValue.class.getName());
-
     private final String value;
-
-    ThreadLocal<Scope> currentScope = new ThreadLocal<>();
 
     SimpleScopedValue(String value) {
         this.value = value;
@@ -41,22 +33,8 @@ class SimpleScopedValue implements ScopedValue {
     }
 
     @Override
-    public Scope currentScope() {
-        return currentScope.get();
-    }
-
-    @Override
     public Scope open() {
-        Scope scope = new Scope(this);
-        this.currentScope.set(scope);
-        return scope;
-    }
-
-    @Override
-    public void updateCurrentScope(Scope scope) {
-        log.log(INFO, () -> String.format("%s update scope[%s] -> scope[%s]", value, currentScope.get().hashCode(),
-                scope.hashCode()));
-        this.currentScope.set(scope);
+        return new Scope(this);
     }
 
 }

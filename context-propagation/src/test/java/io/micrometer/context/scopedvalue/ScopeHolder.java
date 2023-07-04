@@ -20,21 +20,26 @@ import org.assertj.core.util.VisibleForTesting;
 /**
  * Thread-local storage for the current value in scope for the current Thread.
  */
-public class ScopedValueHolder {
+public class ScopeHolder {
 
-    private static final ThreadLocal<ScopedValue> VALUE_IN_SCOPE = new ThreadLocal<>();
+    private static final ThreadLocal<ScopedValue.Scope> SCOPE = new ThreadLocal<>();
 
-    public static ScopedValue get() {
-        return VALUE_IN_SCOPE.get();
+    public static ScopedValue currentValue() {
+        ScopedValue.Scope scope = SCOPE.get();
+        return scope == null ? null : scope.scopedValue;
     }
 
-    static void set(ScopedValue value) {
-        VALUE_IN_SCOPE.set(value);
+    public static ScopedValue.Scope get() {
+        return SCOPE.get();
+    }
+
+    static void set(ScopedValue.Scope scope) {
+        SCOPE.set(scope);
     }
 
     @VisibleForTesting
     public static void remove() {
-        VALUE_IN_SCOPE.remove();
+        SCOPE.remove();
     }
 
 }

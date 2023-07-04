@@ -27,14 +27,6 @@ import static java.util.logging.Level.INFO;
 public interface ScopedValue {
 
     /**
-     * Shorthand for accessing the value in scope.
-     * @return current {@link ScopedValue} set for this Thread.
-     */
-    static ScopedValue getCurrent() {
-        return ScopedValueHolder.get();
-    }
-
-    /**
      * Creates a new instance, which can be set in scope via {@link #open()}.
      * @param value {@code String} value associated with created {@link ScopedValue}
      * @return new instance
@@ -59,20 +51,6 @@ public interface ScopedValue {
     String get();
 
     /**
-     * If this value was set in scope, returns the current {@link Scope} for the accessing
-     * Thread. If not set, returns {@code null}.
-     * @return current {@link Scope}
-     */
-    Scope currentScope();
-
-    /**
-     * Associates the value with the current scope. It allows re-using the same value in
-     * multiple nested scopes.
-     * @param scope current scope in which this value is set
-     */
-    void updateCurrentScope(Scope scope);
-
-    /**
      * Create a new scope and set the value for this Thread.
      * @return newly created {@link Scope}
      */
@@ -93,23 +71,21 @@ public interface ScopedValue {
             log.log(INFO, () -> String.format("%s: open scope[%s]", scopedValue.get(), hashCode()));
             this.scopedValue = scopedValue;
 
-            ScopedValue currentValue = ScopedValueHolder.get();
-            this.parentScope = currentValue != null ? currentValue.currentScope() : null;
-
-            ScopedValueHolder.set(scopedValue);
+            ScopedValue.Scope currentScope = ScopeHolder.get();
+            this.parentScope = currentScope;
+            ScopeHolder.set(this);
         }
 
         @Override
         public void close() {
             if (parentScope == null) {
                 log.log(INFO, () -> String.format("%s: remove scope[%s]", scopedValue.get(), hashCode()));
-                ScopedValueHolder.remove();
+                ScopeHolder.remove();
             }
             else {
                 log.log(INFO, () -> String.format("%s: close scope[%s] -> restore %s scope[%s]", scopedValue.get(),
                         hashCode(), parentScope.scopedValue.get(), parentScope.hashCode()));
-                parentScope.scopedValue.updateCurrentScope(parentScope);
-                ScopedValueHolder.set(parentScope.scopedValue);
+                ScopeHolder.set(parentScope);
             }
         }
 
