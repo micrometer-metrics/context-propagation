@@ -17,8 +17,6 @@ package io.micrometer.context.scopedvalue;
 
 import java.util.logging.Logger;
 
-import io.micrometer.context.Nullable;
-
 import static java.util.logging.Level.INFO;
 
 /**
@@ -37,7 +35,6 @@ public interface ScopedValue {
      * Shorthand for accessing the value in scope.
      * @return current {@link ScopedValue} set for this Thread.
      */
-    @Nullable
     static ScopedValue getCurrent() {
         return VALUE_IN_SCOPE.get();
     }
@@ -64,7 +61,6 @@ public interface ScopedValue {
      * {@code String} value associated with this instance.
      * @return associated value
      */
-    @Nullable
     String get();
 
     /**
@@ -72,7 +68,6 @@ public interface ScopedValue {
      * Thread. If not set, returns {@code null}.
      * @return current {@link Scope}
      */
-    @Nullable
     Scope currentScope();
 
     /**
@@ -97,7 +92,6 @@ public interface ScopedValue {
 
         final ScopedValue scopedValue;
 
-        @Nullable
         final Scope parentScope;
 
         Scope(ScopedValue scopedValue) {
