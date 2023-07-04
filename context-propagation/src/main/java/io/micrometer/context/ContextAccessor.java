@@ -18,8 +18,6 @@ package io.micrometer.context;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import io.micrometer.context.util.annotation.Nullable;
-
 /**
  * Contract to assist with access to an external, map-like context, such as the Project
  * Reactor {@code Context}, including the ability to read values from it a {@link Map} and

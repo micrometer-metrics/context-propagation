@@ -19,8 +19,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.micrometer.context.test.ScopedValue;
-import io.micrometer.context.test.ScopedValueThreadLocalAccessor;
+import io.micrometer.context.scopedvalue.ScopedValue;
+import io.micrometer.context.scopedvalue.ScopedValueThreadLocalAccessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

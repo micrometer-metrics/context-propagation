@@ -16,15 +16,15 @@
  * {@link io.micrometer.context.ContextSnapshot} and
  * {@link io.micrometer.context.ContextSnapshotFactory}.
  * <ul>
- * <li>{@link io.micrometer.context.test.ScopedValue} allows accessing currently set
+ * <li>{@link io.micrometer.context.scopedvalue.ScopedValue} allows accessing currently set
  * {@link String} value in Thread-local
- * {@link io.micrometer.context.test.ScopedValue.Scope scope}.
- * <li>{@link io.micrometer.context.test.ScopedValueThreadLocalAccessor} can be registered
+ * {@link io.micrometer.context.scopedvalue.ScopedValue.Scope scope}.
+ * <li>{@link io.micrometer.context.scopedvalue.ScopedValueThreadLocalAccessor} can be registered
  * in {@link io.micrometer.context.ContextRegistry} to allow capturing and restoring the
  * values with regards to their scope hierarchy.
  * </ul>
  */
 @NonNullApi
-package io.micrometer.context.test;
+package io.micrometer.context.scopedvalue;
 
-import io.micrometer.context.util.annotation.NonNullApi;
+import io.micrometer.context.NonNullApi;

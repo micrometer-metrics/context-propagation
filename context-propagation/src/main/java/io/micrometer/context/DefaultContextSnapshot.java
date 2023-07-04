@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import io.micrometer.context.util.annotation.Nullable;
-
 /**
  * Default implementation of {@link ContextSnapshot}.
  *

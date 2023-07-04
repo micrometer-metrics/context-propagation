@@ -18,8 +18,6 @@ package io.micrometer.context;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import io.micrometer.context.util.annotation.Nullable;
-
 /**
  * Contract to assist with setting and clearing a {@link ThreadLocal}.
  *

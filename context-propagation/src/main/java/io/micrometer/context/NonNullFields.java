@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context.util.annotation;
+package io.micrometer.context;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -36,6 +36,6 @@ import javax.annotation.meta.TypeQualifierDefault;
 @Documented
 @Nonnull
 @TypeQualifierDefault(ElementType.FIELD)
-public @interface NonNullFields {
+@interface NonNullFields {
 
 }

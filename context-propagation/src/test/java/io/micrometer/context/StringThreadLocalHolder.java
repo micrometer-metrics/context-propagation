@@ -15,8 +15,6 @@
  */
 package io.micrometer.context;
 
-import io.micrometer.context.util.annotation.Nullable;
-
 public class StringThreadLocalHolder {
 
     private static final ThreadLocal<String> holder = new ThreadLocal<>();

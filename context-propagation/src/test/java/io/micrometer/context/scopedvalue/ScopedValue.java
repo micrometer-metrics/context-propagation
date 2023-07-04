@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context.test;
+package io.micrometer.context.scopedvalue;
 
 import java.util.logging.Logger;
 
-import io.micrometer.context.util.annotation.Nullable;
+import io.micrometer.context.Nullable;
 
 import static java.util.logging.Level.INFO;
 
