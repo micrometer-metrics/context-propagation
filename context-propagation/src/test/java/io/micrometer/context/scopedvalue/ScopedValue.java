@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 import static java.util.logging.Level.INFO;
 
 /**
- * Serves as an abstraction of a value currently in scope.
+ * Serves as an abstraction of a value which can be in the current Thread-local scope.
  *
  * @author Dariusz Jędrzejczyk
  */
@@ -57,7 +57,8 @@ public interface ScopedValue {
     Scope open();
 
     /**
-     * Represents a scope in which a {@link ScopedValue} is set for a particular Thread.
+     * Represents a scope in which a {@link ScopedValue} is set for a particular Thread
+     * and maintains a hierarchy between this instance and the parent.
      */
     class Scope implements AutoCloseable {
 

@@ -16,8 +16,8 @@
 package io.micrometer.context.scopedvalue;
 
 /**
- * Implementation of {@link ScopedValue} which maintains the hierarchy between parent
- * scope and an opened scope for this value.
+ * Implementation of {@link ScopedValue} for which {@link ScopedValue.Scope} maintains the
+ * hierarchy between parent scope and an opened scope for this value.
  */
 class SimpleScopedValue implements ScopedValue {
 
