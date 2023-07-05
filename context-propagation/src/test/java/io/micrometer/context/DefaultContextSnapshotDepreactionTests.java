@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.micrometer.context.ContextSnapshot.Scope;
-import io.micrometer.context.observation.Observation;
-import io.micrometer.context.observation.ObservationScopeThreadLocalHolder;
-import io.micrometer.context.observation.ObservationThreadLocalAccessor;
+import io.micrometer.context.scopedvalue.ScopeHolder;
+import io.micrometer.context.scopedvalue.ScopedValue;
+import io.micrometer.context.scopedvalue.ScopedValueThreadLocalAccessor;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 
@@ -287,29 +287,31 @@ public class DefaultContextSnapshotDepreactionTests {
 
     @Test
     void should_work_with_scope_based_thread_local_accessor() {
-        this.registry.registerContextAccessor(new TestContextAccessor());
-        this.registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
+        TestContextAccessor accessor = new TestContextAccessor();
+        this.registry.registerContextAccessor(accessor);
+        this.registry.registerThreadLocalAccessor(new ScopedValueThreadLocalAccessor());
 
-        String key = ObservationThreadLocalAccessor.KEY;
-        Observation observation = new Observation();
-        Map<String, Observation> sourceContext = Collections.singletonMap(key, observation);
+        ScopedValue value = ScopedValue.create("value");
 
-        then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isNull();
-        try (Scope scope1 = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
-            then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
-            try (Scope scope2 = ContextSnapshot.setAllThreadLocalsFrom(Collections.emptyMap(), this.registry)) {
-                then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
-                // TODO: This should work like this in the future
-                // then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're
-                // resetting the observation").isNull();
-                // then(ObservationScopeThreadLocalHolder.getValue()).as("This is the
-                // 'null' scope").isNotNull();
+        assertThat(ScopeHolder.currentValue()).isNull();
+
+        Map<String, ScopedValue> sourceContext = Collections.singletonMap(ScopedValueThreadLocalAccessor.KEY, value);
+
+        try (ContextSnapshot.Scope outer = ContextSnapshot.setAllThreadLocalsFrom(sourceContext, this.registry)) {
+            assertThat(ScopeHolder.currentValue()).isEqualTo(value);
+            try (ContextSnapshot.Scope inner = ContextSnapshot.setAllThreadLocalsFrom(Collections.emptyMap(),
+                    this.registry)) {
+                assertThat(ScopeHolder.currentValue()).isEqualTo(value);
+                // The new API allows the following to happen when clearing behavior is
+                // specified on ContextSnapshotFactory
+                // assertThat(ScopeHolder.currentValue().get()).isNull();
             }
-            then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're back to previous observation")
-                .isSameAs(observation);
+            assertThat(ScopeHolder.currentValue()).isEqualTo(value);
         }
-        then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("There was no observation at the beginning")
-            .isNull();
+        assertThat(ScopeHolder.currentValue()).isNull();
+
+        this.registry.removeContextAccessor(accessor);
+        this.registry.removeThreadLocalAccessor(ScopedValueThreadLocalAccessor.KEY);
     }
 
 }
