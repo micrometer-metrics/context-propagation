@@ -186,8 +186,10 @@ class ContextWrappingTests {
         StringThreadLocalHolder.setValue("hello"); // IMPORTANT: We are setting the
                                                    // thread local value as late as
                                                    // possible
-        executor.execute(runnable(valueInNewThread));
-        Thread.sleep(5);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        executor.execute(countDownWhenDone(runnable(valueInNewThread), latch));
+        throwIfTimesOut(latch);
         assertion.accept(valueInNewThread);
 
         executor.submit(runnable(valueInNewThread)).get(5, TimeUnit.MILLISECONDS);
