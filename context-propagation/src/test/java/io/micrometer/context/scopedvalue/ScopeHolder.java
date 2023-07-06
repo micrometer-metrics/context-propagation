@@ -22,18 +22,18 @@ import org.assertj.core.util.VisibleForTesting;
  */
 public class ScopeHolder {
 
-    private static final ThreadLocal<ScopedValue.Scope> SCOPE = new ThreadLocal<>();
+    private static final ThreadLocal<Scope> SCOPE = new ThreadLocal<>();
 
     public static ScopedValue currentValue() {
-        ScopedValue.Scope scope = SCOPE.get();
+        Scope scope = SCOPE.get();
         return scope == null ? null : scope.scopedValue;
     }
 
-    public static ScopedValue.Scope get() {
+    public static Scope get() {
         return SCOPE.get();
     }
 
-    static void set(ScopedValue.Scope scope) {
+    static void set(Scope scope) {
         SCOPE.set(scope);
     }
 

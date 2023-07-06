@@ -16,8 +16,8 @@
 package io.micrometer.context.scopedvalue;
 
 /**
- * Implementation of {@link ScopedValue} for which {@link ScopedValue.Scope} maintains the
- * hierarchy between parent scope and an opened scope for this value.
+ * Implementation of {@link ScopedValue} for which {@link Scope} maintains the hierarchy
+ * between parent scope and an opened scope for this value.
  */
 class SimpleScopedValue implements ScopedValue {
 
@@ -30,11 +30,6 @@ class SimpleScopedValue implements ScopedValue {
     @Override
     public String get() {
         return value;
-    }
-
-    @Override
-    public Scope open() {
-        return new Scope(this);
     }
 
 }

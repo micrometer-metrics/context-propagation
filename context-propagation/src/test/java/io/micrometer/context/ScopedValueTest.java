@@ -15,6 +15,7 @@
  */
 package io.micrometer.context;
 
+import io.micrometer.context.scopedvalue.Scope;
 import io.micrometer.context.scopedvalue.ScopedValue;
 import io.micrometer.context.scopedvalue.ScopeHolder;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ class ScopedValueTest {
         assertThat(ScopeHolder.currentValue()).isNull();
 
         ScopedValue scopedValue = ScopedValue.create("hello");
-        try (ScopedValue.Scope scope = scopedValue.open()) {
+        try (Scope scope = Scope.open(scopedValue)) {
             assertThat(ScopeHolder.currentValue()).isEqualTo(scopedValue);
         }
 
@@ -45,9 +46,9 @@ class ScopedValueTest {
         assertThat(ScopeHolder.currentValue()).isNull();
 
         ScopedValue scopedValue = ScopedValue.create("hello");
-        try (ScopedValue.Scope scope = scopedValue.open()) {
+        try (Scope scope = Scope.open(scopedValue)) {
             assertThat(ScopeHolder.currentValue()).isEqualTo(scopedValue);
-            try (ScopedValue.Scope emptyScope = ScopedValue.nullValue().open()) {
+            try (Scope emptyScope = Scope.open(ScopedValue.nullValue())) {
                 assertThat(ScopeHolder.currentValue().get()).isNull();
             }
             assertThat(ScopeHolder.currentValue()).isEqualTo(scopedValue);
@@ -61,12 +62,12 @@ class ScopedValueTest {
         ScopedValue v1 = ScopedValue.create("val1");
         ScopedValue v2 = ScopedValue.create("val2");
 
-        try (ScopedValue.Scope v1scope1 = v1.open()) {
-            try (ScopedValue.Scope v1scope2 = v1.open()) {
-                try (ScopedValue.Scope v2scope1 = v2.open()) {
-                    try (ScopedValue.Scope v2scope2 = v2.open()) {
-                        try (ScopedValue.Scope v1scope3 = v1.open()) {
-                            try (ScopedValue.Scope nullScope = ScopedValue.nullValue().open()) {
+        try (Scope v1scope1 = Scope.open(v1)) {
+            try (Scope v1scope2 = Scope.open(v1)) {
+                try (Scope v2scope1 = Scope.open(v2)) {
+                    try (Scope v2scope2 = Scope.open(v2)) {
+                        try (Scope v1scope3 = Scope.open(v1)) {
+                            try (Scope nullScope = Scope.open(ScopedValue.nullValue())) {
                                 assertThat(ScopeHolder.currentValue().get()).isNull();
                             }
                             assertThat(ScopeHolder.currentValue()).isEqualTo(v1);

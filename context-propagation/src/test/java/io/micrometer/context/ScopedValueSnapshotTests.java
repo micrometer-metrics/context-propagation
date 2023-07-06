@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import io.micrometer.context.scopedvalue.Scope;
 import io.micrometer.context.scopedvalue.ScopedValue;
 import io.micrometer.context.scopedvalue.ScopeHolder;
 import io.micrometer.context.scopedvalue.ScopedValueThreadLocalAccessor;
@@ -59,7 +60,7 @@ public class ScopedValueSnapshotTests {
 
         assertThat(ScopeHolder.currentValue()).isNull();
 
-        try (ScopedValue.Scope scope = scopedValue.open()) {
+        try (Scope scope = Scope.open(scopedValue)) {
             assertThat(ScopeHolder.currentValue()).isEqualTo(scopedValue);
             Runnable wrapped = snapshotFactory.captureAll()
                 .wrap(() -> valueInNewThread.set(ScopeHolder.currentValue()));
@@ -85,15 +86,15 @@ public class ScopedValueSnapshotTests {
 
         Thread t;
 
-        try (ScopedValue.Scope v1Scope = v1.open()) {
+        try (Scope v1Scope = Scope.open(v1)) {
             assertThat(ScopeHolder.currentValue()).isEqualTo(v1);
-            try (ScopedValue.Scope v2scope1T1 = v2.open()) {
+            try (Scope v2scope1T1 = Scope.open(v2)) {
                 assertThat(ScopeHolder.currentValue()).isEqualTo(v2);
-                try (ScopedValue.Scope v2scope2T1 = v2.open()) {
+                try (Scope v2scope2T1 = Scope.open(v2)) {
                     assertThat(ScopeHolder.currentValue()).isEqualTo(v2);
                     Runnable runnable = () -> {
                         value1InNewThreadBefore.set(ScopeHolder.currentValue());
-                        try (ScopedValue.Scope v2scopeT2 = v2.open()) {
+                        try (Scope v2scopeT2 = Scope.open(v2)) {
                             value2InNewThread.set(ScopeHolder.currentValue());
                         }
                         value1InNewThreadAfter.set(ScopeHolder.currentValue());
@@ -112,7 +113,7 @@ public class ScopedValueSnapshotTests {
 
             assertThat(ScopeHolder.currentValue()).isEqualTo(v1);
 
-            try (ScopedValue.Scope childScope3 = v2.open()) {
+            try (Scope childScope3 = Scope.open(v2)) {
                 assertThat(ScopeHolder.currentValue()).isEqualTo(v2);
                 assertThat(ScopeHolder.get()).isEqualTo(childScope3);
             }
