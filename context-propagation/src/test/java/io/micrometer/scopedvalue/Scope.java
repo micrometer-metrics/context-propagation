@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context.scopedvalue;
+package io.micrometer.scopedvalue;
 
 import java.util.logging.Logger;
 

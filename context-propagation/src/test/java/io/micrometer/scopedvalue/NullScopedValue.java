@@ -13,23 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context.scopedvalue;
+package io.micrometer.scopedvalue;
 
 /**
- * Implementation of {@link ScopedValue} for which {@link Scope} maintains the hierarchy
- * between parent scope and an opened scope for this value.
+ * Implementation of {@link ScopedValue} which is used when the actual value in scope
+ * should be missing, but the scope hierarchy needs to be maintained.
  */
-class SimpleScopedValue implements ScopedValue {
+class NullScopedValue extends SimpleScopedValue {
 
-    private final String value;
-
-    SimpleScopedValue(String value) {
-        this.value = value;
+    NullScopedValue() {
+        super("null");
     }
 
     @Override
     public String get() {
-        return value;
+        return null;
     }
 
 }

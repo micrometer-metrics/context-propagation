@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.micrometer.context.ContextSnapshot.Scope;
-import io.micrometer.context.scopedvalue.ScopeHolder;
-import io.micrometer.context.scopedvalue.ScopedValue;
-import io.micrometer.context.scopedvalue.ScopedValueThreadLocalAccessor;
+import io.micrometer.scopedvalue.ScopeHolder;
+import io.micrometer.scopedvalue.ScopedValue;
+import io.micrometer.scopedvalue.ScopedValueThreadLocalAccessor;
 import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.Test;
 

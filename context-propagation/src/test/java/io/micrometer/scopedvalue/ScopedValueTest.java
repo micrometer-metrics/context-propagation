@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context;
+package io.micrometer.scopedvalue;
 
-import io.micrometer.context.scopedvalue.Scope;
-import io.micrometer.context.scopedvalue.ScopedValue;
-import io.micrometer.context.scopedvalue.ScopeHolder;
+import io.micrometer.scopedvalue.Scope;
+import io.micrometer.scopedvalue.ScopedValue;
+import io.micrometer.scopedvalue.ScopeHolder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
