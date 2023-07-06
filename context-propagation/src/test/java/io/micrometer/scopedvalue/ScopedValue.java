@@ -47,7 +47,7 @@ public class ScopedValue {
      * virtually absent, but allows reverting to the previous value in scope.
      * @return new instance representing an empty scope
      */
-    static ScopedValue nullValue() {
+    public static ScopedValue nullValue() {
         return new ScopedValue(null);
     }
 
