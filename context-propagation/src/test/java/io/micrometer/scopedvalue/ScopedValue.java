@@ -15,20 +15,31 @@
  */
 package io.micrometer.scopedvalue;
 
+import java.util.Objects;
+
 /**
- * Serves as an abstraction of a value which can be in the current Thread-local scope.
+ * Serves as an abstraction of a value which can be in the current Thread-local
+ * {@link Scope scope} that maintains the hierarchy between the parent a new scope with
+ * potentially a different value.
  *
  * @author Dariusz Jędrzejczyk
  */
-public interface ScopedValue {
+public class ScopedValue {
+
+    private final String value;
+
+    private ScopedValue(String value) {
+        this.value = value;
+    }
 
     /**
      * Creates a new instance, which can be set in scope via {@link Scope#open()}.
      * @param value {@code String} value associated with created {@link ScopedValue}
      * @return new instance
      */
-    static ScopedValue create(String value) {
-        return new SimpleScopedValue(value);
+    public static ScopedValue create(String value) {
+        Objects.requireNonNull(value, "value can't be null");
+        return new ScopedValue(value);
     }
 
     /**
@@ -37,13 +48,15 @@ public interface ScopedValue {
      * @return new instance representing an empty scope
      */
     static ScopedValue nullValue() {
-        return new NullScopedValue();
+        return new ScopedValue(null);
     }
 
     /**
      * {@code String} value associated with this instance.
      * @return associated value
      */
-    String get();
+    public String get() {
+        return value;
+    }
 
 }
