@@ -13,26 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context.observation;
+package io.micrometer.scopedvalue;
 
-public class ObservationScopeThreadLocalHolder {
+import org.assertj.core.util.VisibleForTesting;
 
-    private static final ThreadLocal<Scope> holder = new ThreadLocal<>();
+/**
+ * Thread-local storage for the current value in scope for the current Thread.
+ */
+public class ScopeHolder {
 
-    public static void setValue(Scope value) {
-        holder.set(value);
+    private static final ThreadLocal<Scope> SCOPE = new ThreadLocal<>();
+
+    public static ScopedValue currentValue() {
+        Scope scope = SCOPE.get();
+        return scope == null ? null : scope.scopedValue;
     }
 
-    public static Scope getValue() {
-        return holder.get();
+    public static Scope get() {
+        return SCOPE.get();
     }
 
-    public static Observation getCurrentObservation() {
-        Scope scope = holder.get();
-        if (scope != null) {
-            return scope.getCurrentObservation();
-        }
-        return null;
+    static void set(Scope scope) {
+        SCOPE.set(scope);
+    }
+
+    @VisibleForTesting
+    public static void remove() {
+        SCOPE.remove();
     }
 
 }

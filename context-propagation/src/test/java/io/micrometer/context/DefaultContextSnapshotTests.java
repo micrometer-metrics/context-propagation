@@ -20,9 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.micrometer.context.ContextSnapshot.Scope;
-import io.micrometer.context.observation.Observation;
-import io.micrometer.context.observation.ObservationScopeThreadLocalHolder;
-import io.micrometer.context.observation.ObservationThreadLocalAccessor;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,15 +33,11 @@ import static org.assertj.core.api.BDDAssertions.then;
  * Unit tests for {@link DefaultContextSnapshot}.
  *
  * @author Rossen Stoyanchev
+ * @author Dariusz Jędrzejczyk
  */
 public class DefaultContextSnapshotTests {
 
     private final ContextRegistry registry = new ContextRegistry();
-
-    private final ContextSnapshotFactory snapshotFactory = ContextSnapshotFactory.builder()
-        .contextRegistry(registry)
-        .clearMissing(false)
-        .build();
 
     @ParameterizedTest(name = "clearMissing={0}")
     @ValueSource(booleans = { true, false })
@@ -345,32 +338,6 @@ public class DefaultContextSnapshotTests {
                 assertThat(fooThreadLocal.get()).isNull();
             }
             assertThat(fooThreadLocal.get()).isEqualTo("present");
-        }
-
-        @Test
-        void should_work_with_scope_based_thread_local_accessor() {
-            registry.registerContextAccessor(new TestContextAccessor());
-            registry.registerThreadLocalAccessor(new ObservationThreadLocalAccessor());
-
-            String key = ObservationThreadLocalAccessor.KEY;
-            Observation observation = new Observation();
-            Map<String, Observation> sourceContext = Collections.singletonMap(key, observation);
-
-            then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isNull();
-            try (Scope scope1 = snapshotFactory.setThreadLocalsFrom(sourceContext)) {
-                then(ObservationScopeThreadLocalHolder.getCurrentObservation()).isSameAs(observation);
-                try (Scope scope2 = snapshotFactory.setThreadLocalsFrom(Collections.emptyMap())) {
-                    then(ObservationScopeThreadLocalHolder.getCurrentObservation())
-                        .as("We're resetting the observation")
-                        .isNull();
-                    then(ObservationScopeThreadLocalHolder.getValue()).as("This is the 'null' scope").isNotNull();
-                }
-                then(ObservationScopeThreadLocalHolder.getCurrentObservation()).as("We're back to previous observation")
-                    .isSameAs(observation);
-            }
-            then(ObservationScopeThreadLocalHolder.getCurrentObservation())
-                .as("There was no observation at the beginning")
-                .isNull();
         }
 
         @Test
