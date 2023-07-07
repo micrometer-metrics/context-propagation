@@ -17,6 +17,7 @@ package io.micrometer.context;
 
 import java.util.Collections;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -51,7 +52,7 @@ class ContextWrappingTests {
     }
 
     @Test
-    void should_instrument_runnable() throws InterruptedException {
+    void should_instrument_runnable() throws InterruptedException, TimeoutException {
         StringThreadLocalHolder.setValue("hello");
         AtomicReference<String> valueInNewThread = new AtomicReference<>();
         Runnable runnable = runnable(valueInNewThread);
@@ -82,7 +83,7 @@ class ContextWrappingTests {
     }
 
     @Test
-    void should_instrument_executor() throws InterruptedException {
+    void should_instrument_executor() throws InterruptedException, TimeoutException {
         StringThreadLocalHolder.setValue("hello");
         AtomicReference<String> valueInNewThread = new AtomicReference<>();
         Executor executor = command -> new Thread(command).start();
@@ -139,10 +140,12 @@ class ContextWrappingTests {
         }
     }
 
-    private void runInNewThread(Runnable runnable) throws InterruptedException {
-        Thread thread = new Thread(runnable);
+    private void runInNewThread(Runnable runnable) throws InterruptedException, TimeoutException {
+        CountDownLatch latch = new CountDownLatch(1);
+        Thread thread = new Thread(countDownWhenDone(runnable, latch));
         thread.start();
-        Thread.sleep(5);
+
+        throwIfTimesOut(latch);
     }
 
     private void runInNewThread(Callable<?> callable)
@@ -157,9 +160,23 @@ class ContextWrappingTests {
     }
 
     private void runInNewThread(Executor executor, AtomicReference<String> valueInNewThread)
-            throws InterruptedException {
-        executor.execute(runnable(valueInNewThread));
-        Thread.sleep(5);
+            throws InterruptedException, TimeoutException {
+        CountDownLatch latch = new CountDownLatch(1);
+        executor.execute(countDownWhenDone(runnable(valueInNewThread), latch));
+        throwIfTimesOut(latch);
+    }
+
+    private Runnable countDownWhenDone(Runnable runnable, CountDownLatch latch) {
+        return () -> {
+            runnable.run();
+            latch.countDown();
+        };
+    }
+
+    private void throwIfTimesOut(CountDownLatch latch) throws InterruptedException, TimeoutException {
+        if (!latch.await(5, TimeUnit.MILLISECONDS)) {
+            throw new TimeoutException("Waiting for executed task timed out");
+        }
     }
 
     private void runInNewThread(ExecutorService executor, AtomicReference<String> valueInNewThread,
@@ -169,8 +186,10 @@ class ContextWrappingTests {
         StringThreadLocalHolder.setValue("hello"); // IMPORTANT: We are setting the
                                                    // thread local value as late as
                                                    // possible
-        executor.execute(runnable(valueInNewThread));
-        Thread.sleep(5);
+
+        CountDownLatch latch = new CountDownLatch(1);
+        executor.execute(countDownWhenDone(runnable(valueInNewThread), latch));
+        throwIfTimesOut(latch);
         assertion.accept(valueInNewThread);
 
         executor.submit(runnable(valueInNewThread)).get(5, TimeUnit.MILLISECONDS);
