@@ -16,6 +16,7 @@
 package io.micrometer.context;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -74,7 +75,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     @Override
     public Scope setThreadLocals(Predicate<Object> keyPredicate) {
         Map<Object, Object> previousValues = null;
-        for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
+        List<ThreadLocalAccessor<?>> accessors = this.contextRegistry.getThreadLocalAccessors();
+        for (int i = 0; i < accessors.size(); ++i) {
+            ThreadLocalAccessor<?> accessor = accessors.get(i);
             Object key = accessor.key();
             if (keyPredicate.test(key)) {
                 if (this.containsKey(key)) {
@@ -130,7 +133,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
         @Override
         public void close() {
-            for (ThreadLocalAccessor<?> accessor : this.contextRegistry.getThreadLocalAccessors()) {
+            List<ThreadLocalAccessor<?>> accessors = this.contextRegistry.getThreadLocalAccessors();
+            for (int i = accessors.size() - 1; i >= 0; --i) {
+                ThreadLocalAccessor<?> accessor = accessors.get(i);
                 if (this.previousValues.containsKey(accessor.key())) {
                     Object previousValue = this.previousValues.get(accessor.key());
                     resetThreadLocalValue(accessor, previousValue);

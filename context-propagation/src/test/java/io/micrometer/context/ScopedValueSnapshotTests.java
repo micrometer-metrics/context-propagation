@@ -154,4 +154,24 @@ public class ScopedValueSnapshotTests {
         registry.removeContextAccessor(accessor);
     }
 
+    @Test
+    void duplicateThreadLocalAccessorsForSameThreadLocalHaveReverseOrderUponClose() {
+        registry.registerThreadLocalAccessor(new ScopedValueThreadLocalAccessor("other"));
+
+        ScopedValue value = ScopedValue.create("value");
+
+        ContextSnapshot snapshot;
+        try (Scope scope = Scope.open(value)) {
+            snapshot = snapshotFactory.captureAll();
+        }
+
+        try (ContextSnapshot.Scope scope = snapshot.setThreadLocals()) {
+            assertThat(ScopeHolder.currentValue()).isEqualTo(value);
+        }
+
+        assertThat(ScopeHolder.currentValue()).isNull();
+
+        registry.removeThreadLocalAccessor("other");
+    }
+
 }

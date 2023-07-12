@@ -29,9 +29,19 @@ public class ScopedValueThreadLocalAccessor implements ThreadLocalAccessor<Scope
      */
     public static final String KEY = "svtla";
 
+    private final String key;
+
+    public ScopedValueThreadLocalAccessor() {
+        this.key = KEY;
+    }
+
+    public ScopedValueThreadLocalAccessor(String key) {
+        this.key = key;
+    }
+
     @Override
     public Object key() {
-        return KEY;
+        return this.key;
     }
 
     @Override
