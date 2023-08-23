@@ -9,9 +9,13 @@ antora:
     enabled: false
   - '@springio/antora-extensions/latest-version-extension'
   - require: '@springio/antora-extensions/root-component-extension'
-    root_component_name: 'micrometer context propagation'
+    root_component_name: 'context-propagation'
 site:
-  title: Micrometer Context Propagation Reference
+  title: Micrometer Context Propagation
+  url: https://micrometer.io/docs/context-propagation/reference/
+  robots: allow
+git:
+  ensure_git_suffix: false
 content:
   sources:
   - url: ./..
@@ -22,7 +26,6 @@ asciidoc:
   attributes:
     hide-uri-scheme: '@'
     page-pagination: ''
-    primary-site-url: https://micrometer.io/docs
     tabs-sync-option: '@'
   extensions:
   - '@asciidoctor/tabs'
@@ -35,9 +38,9 @@ urls:
   redirect_facility: httpd
 runtime:
   log:
-    failure_level: warn
+    failure_level: error
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.3.3/ui-bundle.zip
+    url: https://github.com/rwinch/antora-ui-micrometer/releases/download/latest/ui-bundle.zip
     snapshot: true
 

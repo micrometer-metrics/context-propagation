@@ -1,4 +1,4 @@
-name: micrometer-context-propagation
+name: context-propagation
 version: true
 title: Micrometer Context Propagation
 nav:
@@ -19,5 +19,3 @@ asciidoc:
     chomp: 'all'
     include-java: 'example$docs-src/test/java/io/micrometer/docs'
     include-resources: 'example$docs-src/test/resources'
-    docs-site: 'https://micrometer.io'
-    docs-micrometer: "{docs-site}/docs/{micrometer-context-propagation-version}"
