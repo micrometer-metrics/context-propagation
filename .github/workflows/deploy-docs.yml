@@ -11,6 +11,7 @@ on:
 env:
   GRADLE_ENTERPRISE_SECRET_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
 permissions:
+  contents: write
   actions: write
 jobs:
   build:
