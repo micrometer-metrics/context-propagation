@@ -4,8 +4,10 @@
 Snapshots are published to https://repo.spring.io/snapshot for every successful build on the `main` branch and maintenance branches.
 
 Milestone releases are published to https://repo.spring.io/milestone. Include that as a Maven repository in your build
-configuration to use milestone releases. Note that milestone releases are for testing purposes and are not intended for
-production use.
+configuration to use milestone releases. 
+
+NOTE: Milestone releases are for testing purposes and are not intended for
+production.
 
 The following example shows the required dependency in Gradle:
 
