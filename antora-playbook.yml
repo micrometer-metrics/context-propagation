@@ -6,37 +6,38 @@ antora:
     - '@antora/collector-extension'
     - '@antora/atlas-extension'
     - require: '@springio/antora-extensions/root-component-extension'
-      root_component_name: 'shell'
+      root_component_name: 'context-propagation'
 site:
-  title: Spring Shell
-  url: https://docs.spring.io/spring-shell/reference
+  title: Micrometer Context Propagation
+  url: https://docs.micrometer.io/context-propagation/reference/
   robots: allow
-git:
-  ensure_git_suffix: false
 content:
   sources:
-    - url: https://github.com/spring-projects/spring-shell
+    - url: https://github.com/micrometer-metrics/context-propagation
       # Refname matching:
       # https://docs.antora.org/antora/latest/playbook/content-refname-matching/
-      branches: [ main,'({3..9}).+({0..9}).x', '!(3.{0..1}.x)' ]
-      tags: [ 'v({3..9}).+({0..9}).+({0..9})?(-{RC,M}+({0..9}))', '!(v3.{0..1}.+({0..9})?(-{RC,M}+({0..9})))' ]
-      start_path: spring-shell-docs
+      branches: [ main ]
+      tags: [ '({1..9}).+({1..9}).+({0..9})?(-{RC,M}+({0..9}))', '!1.0.({0..9})?(-{RC,M}+({0..9}))', '!1.1.0-M({0..4}))' ]
+      start_path: docs
 asciidoc:
   attributes:
-    page-stackoverflow-url: https://stackoverflow.com/tags/spring-shell
+    page-stackoverflow-url: https://stackoverflow.com/tags/micrometer
     page-pagination: ''
     hide-uri-scheme: '@'
     tabs-sync-option: '@'
+    chomp: 'all'
   extensions:
     - '@asciidoctor/tabs'
     - '@springio/asciidoctor-extensions'
+  sourcemap: true
 urls:
   latest_version_segment_strategy: redirect:to
   latest_version_segment: ''
   redirect_facility: httpd
-ui:
-  bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.3.3/ui-bundle.zip
 runtime:
   log:
     failure_level: warn
+    format: pretty
+ui:
+  bundle:
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.3.5/ui-bundle.zip
