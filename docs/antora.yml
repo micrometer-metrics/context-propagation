@@ -14,8 +14,6 @@ ext:
 asciidoc:
   attributes:
     attribute-missing: 'warn'
-    # FIXME: the copyright is not removed
-    # FIXME: The package is not renamed
     chomp: 'all'
     include-java: 'example$docs-src/test/java/io/micrometer/docs'
     include-resources: 'example$docs-src/test/resources'

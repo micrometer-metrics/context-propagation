@@ -9,26 +9,20 @@ description = "Micrometer Context Propagation Docs"
 
 antora {
     version = '3.2.0-alpha.2'
-    playbook = 'cached-antora-playbook.yml'
-    playbookProvider {
-        repository = 'micrometer/micrometer-docs'
-        branch = 'docs-build'
-        path = 'lib/antora/templates/per-branch-antora-playbook.yml'
-        checkLocalBranch = true
-    }
+    playbook = 'antora-playbook.yml'
     options = ['--clean', '--stacktrace']
     environment = [
             'ALGOLIA_API_KEY': 'da671ceec1f84f80f280884a6a91bde5',
             'ALGOLIA_APP_ID': 'WB1FQYI187',
             'ALGOLIA_INDEX_NAME': 'micrometer'
     ]
+
     dependencies = [
             '@antora/atlas-extension': '1.0.0-alpha.1',
             '@antora/collector-extension': '1.0.0-alpha.3',
             '@asciidoctor/tabs': '1.0.0-beta.3',
-            '@opendevise/antora-release-line-extension': '1.0.0-alpha.2',
-            '@springio/antora-extensions': '1.3.0',
-            '@springio/asciidoctor-extensions': '1.0.0-alpha.9'
+            '@springio/antora-extensions': '1.4.2',
+            '@springio/asciidoctor-extensions': '1.0.0-alpha.8',
     ]
 }
 
