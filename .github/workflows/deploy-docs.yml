@@ -10,7 +10,8 @@ on:
     branches: docs-build
 env:
   GRADLE_ENTERPRISE_SECRET_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
-permissions: read-all
+permissions:
+  actions: write
 jobs:
   build:
     if: github.repository_owner == 'micrometer-metrics'
