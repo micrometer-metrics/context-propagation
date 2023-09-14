@@ -21,4 +21,4 @@ gradleEnterprise {
 	server = 'https://ge.micrometer.io'
 }
 
-include 'docs', 'context-propagation'
+include 'context-propagation', 'docs'
