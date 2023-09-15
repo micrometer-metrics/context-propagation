@@ -27,6 +27,14 @@ buildscript {
 	configurations.classpath.resolutionStrategy.cacheDynamicVersionsFor 0, 'minutes'
 }
 
+// Antora uses worktrees to check out branches/tags.
+// The nebula release, project, and info plugins use jgit to fetch git-related info.
+// Unfortunately jgit does not support worktrees: https://bugs.eclipse.org/bugs/show_bug.cgi?id=477475
+// TODO: remove this hack once jgit supports worktrees and nebula upgrades.
+if (project.hasProperty('antora')) {
+	ext['git.root'] = 'git rev-parse --path-format=absolute --git-common-dir'.execute().text.trim()
+}
+
 // TODO: remove this hack, see: https://github.com/nebula-plugins/nebula-release-plugin/issues/213
 def releaseStage = findProperty('release.stage')
 apply plugin: 'nebula.release'
@@ -258,8 +266,11 @@ subprojects {
 		apply plugin: 'com.netflix.nebula.maven-apache-license'
 		apply plugin: 'com.netflix.nebula.publish-verification'
 		apply plugin: 'com.netflix.nebula.contacts'
-		apply plugin: 'com.netflix.nebula.info'
-		apply plugin: 'com.netflix.nebula.project'
+		// TODO: remove this check, see the antora issue above
+		if (!project.hasProperty('antora')) {
+			apply plugin: 'com.netflix.nebula.info'
+			apply plugin: 'com.netflix.nebula.project'
+		}
 
 		jar {
 			manifest.attributes.put('Automatic-Module-Name', project.name.replace('-', '.'))
