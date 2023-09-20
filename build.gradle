@@ -267,11 +267,8 @@ subprojects {
 		apply plugin: 'com.netflix.nebula.maven-apache-license'
 		apply plugin: 'com.netflix.nebula.publish-verification'
 		apply plugin: 'com.netflix.nebula.contacts'
-		// TODO: remove this check, see the antora issue above
-		if (!project.hasProperty('antora')) {
-			apply plugin: 'com.netflix.nebula.info'
-			apply plugin: 'com.netflix.nebula.project'
-		}
+		apply plugin: 'com.netflix.nebula.info'
+		apply plugin: 'com.netflix.nebula.project'
 
 		jar {
 			manifest.attributes.put('Automatic-Module-Name', project.name.replace('-', '.'))
