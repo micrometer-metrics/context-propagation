@@ -1,7 +1,4 @@
 buildscript {
-	dependencyLocking {
-		lockAllConfigurations()
-	}
 
 	repositories {
 		mavenCentral()
@@ -9,8 +6,8 @@ buildscript {
 	}
 
 	dependencies {
-		classpath 'io.spring.gradle.antora:spring-antora-plugin:0.0.1'
-		classpath 'org.antora:gradle-antora-plugin:1.0.0'
+		classpath libs.plugin.spring.antora
+		classpath libs.plugin.antora
 	}
 }
 
@@ -28,8 +25,7 @@ dependencies {
 	implementation project(':context-propagation')
 
 	testImplementation 'org.junit.jupiter:junit-jupiter'
-	testImplementation 'org.mockito:mockito-inline'
-	testImplementation 'org.assertj:assertj-core'
+	testImplementation libs.assertj
 }
 
 antora {
