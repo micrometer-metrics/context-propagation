@@ -1,0 +1,22 @@
+[versions]
+assertj = "3.24.2"
+mockito = "5.5.0"
+javaFormatForPlugins = "0.0.39"
+jsr305 = "3.0.2"
+junit = "5.10.0"
+
+[libraries]
+assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+javaFormatForPlugins = { module = "io.spring.javaformat:spring-javaformat-checkstyle", version.ref = "javaFormatForPlugins" }
+jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
+junitBom = { module = "org.junit:junit-bom", version.ref = "junit" }
+mockitoCore = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+
+# plugin dependencies
+plugin-license = { module = "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin", version = "0.16.1" }
+plugin-nebulaRelease = { module = "com.netflix.nebula:nebula-release-plugin", version = "16.1.0" }
+plugin-nebulaPublishing = { module = "com.netflix.nebula:nebula-publishing-plugin", version = "20.3.0" }
+plugin-nebulaProject = { module = "com.netflix.nebula:nebula-project-plugin", version = "10.1.5" }
+plugin-noHttp = { module = "io.spring.nohttp:nohttp-gradle", version = "0.0.11" }
+plugin-nexusPublish = { module = "io.github.gradle-nexus:publish-plugin", version = "1.3.0" }
+plugin-javaformat = { module = "io.spring.javaformat:spring-javaformat-gradle-plugin", version = "0.0.39" }

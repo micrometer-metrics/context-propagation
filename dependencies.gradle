@@ -1,12 +1,10 @@
 def VERSIONS = [
-		'org.assertj:assertj-core:latest.release',
-		'org.awaitility:awaitility:latest.release',
-		'org.mockito:mockito-core:latest.release',
-		'org.mockito:mockito-inline:latest.release'
+		libs.assertj,
+		libs.mockitoCore,
 ]
 
 def PLATFORM_BOMS = [
-		'org.junit:junit-bom:5.10.+' // Not using latest.release to avoid using a milestone version.
+		libs.junitBom
 ]
 
 subprojects {
