@@ -4,7 +4,7 @@
 [![Apache 2.0](https://img.shields.io/github/license/micrometer-metrics/context-propagation.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Maven Central](https://img.shields.io/maven-central/v/io.micrometer/context-propagation.svg)](https://search.maven.org/artifact/io.micrometer/context-propagation)
 [![Javadocs](https://www.javadoc.io/badge/io.micrometer/context-propagation.svg)](https://www.javadoc.io/doc/io.micrometer/context-propagation)
-[![Revved up by Gradle Enterprise](https://img.shields.io/badge/Revved%20up%20by-Gradle%20Enterprise-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.micrometer.io/)
+[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.micrometer.io/)
 
 ## Overview
 
