@@ -28,4 +28,3 @@ The following example shows one way to store and restore thread local values by 
 -----
 include::{include-java}/context/DefaultContextSnapshotTests.java[tags=simple,indent=0]
 -----
-
