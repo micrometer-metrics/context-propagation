@@ -11,7 +11,6 @@ buildscript {
 		classpath libs.plugin.nebulaPublishing
 		classpath libs.plugin.nebulaProject
 		classpath libs.plugin.noHttp
-		classpath libs.plugin.nexusPublish
 		classpath libs.plugin.javaformat
 
 		constraints {
@@ -29,7 +28,6 @@ def releaseStage = findProperty('release.stage')
 apply plugin: 'nebula.release'
 release.defaultVersionStrategy = nebula.plugin.release.git.opinion.Strategies.SNAPSHOT
 
-apply plugin: 'io.github.gradle-nexus.publish-plugin'
 apply from: 'dependencies.gradle'
 
 allprojects {
@@ -194,19 +192,19 @@ subprojects {
 			}
 			repositories {
 				maven {
-					name = 'Snapshot'
-					url = 'https://repo.spring.io/snapshot'
+					name = 'CommercialSnapshot'
+					url = 'https://repo.spring.vmware.com/test-snapshot-local'
 					credentials {
-						username findProperty('SNAPSHOT_REPO_USER')
-						password findProperty('SNAPSHOT_REPO_PASSWORD')
+						username findProperty('TEST_REPO_USER')
+						password findProperty('TEST_REPO_PASSWORD')
 					}
 				}
 				maven {
-					name = 'Milestone'
-					url = 'https://repo.spring.io/milestone'
+					name = 'CommercialRelease'
+					url = 'https://repo.spring.vmware.com/test-release-local'
 					credentials {
-						username findProperty('MILESTONE_REPO_USER')
-						password findProperty('MILESTONE_REPO_PASSWORD')
+						username findProperty('TEST_REPO_USER')
+						password findProperty('TEST_REPO_PASSWORD')
 					}
 				}
 			}
@@ -275,17 +273,6 @@ subprojects {
 
 	def check = tasks.findByName('check')
 	if (check) project.rootProject.tasks.releaseCheck.dependsOn check
-}
-
-nexusPublishing {
-	repositories {
-		mavenCentral {
-			nexusUrl.set(uri('https://s01.oss.sonatype.org/service/local/'))
-			snapshotRepositoryUrl.set(uri('https://repo.spring.io/snapshot/')) // not used but necessary for the plugin
-			username = findProperty('MAVEN_CENTRAL_USER')
-			password = findProperty('MAVEN_CENTRAL_PASSWORD')
-		}
-	}
 }
 
 wrapper {
