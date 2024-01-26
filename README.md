@@ -19,7 +19,7 @@ Abstractions:
 * `ContextRegistry` - registry for instances of `ThreadLocalAccessor` and `ContextAccessor`. 
 * `ContextSnapshot` - holder of contextual values, that provides methods to capture and to propagate.
 
-You can read the full [reference documentation here](hhttps://docs.micrometer.io/context-propagation/reference/).
+You can read the full [reference documentation here](https://docs.micrometer.io/context-propagation/reference/).
 
 Example Scenarios:
 
