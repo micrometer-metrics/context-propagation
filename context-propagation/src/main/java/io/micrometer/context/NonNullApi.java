@@ -36,6 +36,6 @@ import javax.annotation.meta.TypeQualifierDefault;
 @Documented
 @Nonnull
 @TypeQualifierDefault({ ElementType.METHOD, ElementType.PARAMETER })
-@interface NonNullApi {
+public @interface NonNullApi {
 
 }

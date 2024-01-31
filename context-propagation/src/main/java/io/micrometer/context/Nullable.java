@@ -41,6 +41,6 @@ import javax.annotation.meta.When;
 @Documented
 @Nonnull(when = When.MAYBE)
 @TypeQualifierNickname
-@interface Nullable {
+public @interface Nullable {
 
 }
