@@ -26,6 +26,7 @@ import org.slf4j.MDC;
  * {@link ThreadLocalAccessor} interacts with the MDC</strong>, for instance tracing
  * libraries.
  *
+ * @author Dariusz Jędrzejczyk
  * @since 1.1.1
  */
 public class GlobalMdcThreadLocalAccessor implements ThreadLocalAccessor<Map<String, String>> {

@@ -27,6 +27,9 @@ import org.slf4j.MDC;
  * across {@link Thread} boundaries. <strong>For use only when no other
  * {@link ThreadLocalAccessor} interacts with the MDC</strong>, for instance tracing
  * libraries.
+ *
+ * @author Dariusz Jędrzejczyk
+ * @since 1.1.1
  */
 public class SelectiveMdcThreadLocalAccessor implements ThreadLocalAccessor<Map<String, String>> {
 
@@ -42,7 +45,6 @@ public class SelectiveMdcThreadLocalAccessor implements ThreadLocalAccessor<Map<
      * Create an instance of {@link SelectiveMdcThreadLocalAccessor}.
      * @param keys selected keys for which values from the {@link MDC} should be
      * propagated across {@link Thread} boundaries.
-     * @since 1.1.1
      */
     public SelectiveMdcThreadLocalAccessor(List<String> keys) {
         this.keys = keys;
