@@ -15,7 +15,6 @@
  */
 package io.micrometer.context.integration;
 
-import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,13 +29,48 @@ import org.slf4j.MDC;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SelectiveMdcThreadLocalAccessorTests {
-
-    private final ContextRegistry registry = new ContextRegistry()
-        .registerThreadLocalAccessor(new SelectiveMdcThreadLocalAccessor(Arrays.asList("key1", "key2")));
+public class Slf4JThreadLocalAccessorTests {
 
     @Test
-    void shouldCopyMdcContentsToNewThread() throws InterruptedException {
+    void shouldCopyEntireMdcContentsToNewThread() throws InterruptedException {
+        ContextRegistry registry = new ContextRegistry().registerThreadLocalAccessor(new Slf4JThreadLocalAccessor());
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<String> value1InOtherThread = new AtomicReference<>();
+        AtomicReference<String> value2InOtherThread = new AtomicReference<>();
+
+        MDC.put("key1", "value1");
+        MDC.put("key2", "value2");
+
+        ContextSnapshot snapshot = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .clearMissing(true)
+            .build()
+            .captureAll();
+
+        executorService.submit(() -> {
+            try (ContextSnapshot.Scope scope = snapshot.setThreadLocals()) {
+                value1InOtherThread.set(MDC.get("key1"));
+                value2InOtherThread.set(MDC.get("key2"));
+            }
+            latch.countDown();
+        });
+
+        latch.await(100, TimeUnit.MILLISECONDS);
+
+        assertThat(value1InOtherThread.get()).isEqualTo("value1");
+        assertThat(value2InOtherThread.get()).isEqualTo("value2");
+
+        executorService.shutdown();
+    }
+
+    @Test
+    void shouldCopySelectedMdcContentsToNewThread() throws InterruptedException {
+        ContextRegistry registry = new ContextRegistry()
+            .registerThreadLocalAccessor(new Slf4JThreadLocalAccessor("key1", "key2"));
+
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         CountDownLatch latch = new CountDownLatch(1);
