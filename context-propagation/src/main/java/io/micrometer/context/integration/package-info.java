@@ -29,7 +29,7 @@
  */
 @NonNullApi
 @NonNullFields
-package io.micrometer.context.logging.slf4j;
+package io.micrometer.context.integration;
 
 import io.micrometer.context.NonNullApi;
 import io.micrometer.context.NonNullFields;

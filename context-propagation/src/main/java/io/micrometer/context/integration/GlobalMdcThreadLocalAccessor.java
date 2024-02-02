@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.context.logging.slf4j;
+package io.micrometer.context.integration;
 
 import java.util.Map;
 
