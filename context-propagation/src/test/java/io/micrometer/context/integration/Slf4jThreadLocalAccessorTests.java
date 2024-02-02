@@ -29,11 +29,11 @@ import org.slf4j.MDC;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Slf4JThreadLocalAccessorTests {
+public class Slf4jThreadLocalAccessorTests {
 
     @Test
     void shouldCopyEntireMdcContentsToNewThread() throws InterruptedException {
-        ContextRegistry registry = new ContextRegistry().registerThreadLocalAccessor(new Slf4JThreadLocalAccessor());
+        ContextRegistry registry = new ContextRegistry().registerThreadLocalAccessor(new Slf4jThreadLocalAccessor());
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -69,7 +69,7 @@ public class Slf4JThreadLocalAccessorTests {
     @Test
     void shouldCopySelectedMdcContentsToNewThread() throws InterruptedException {
         ContextRegistry registry = new ContextRegistry()
-            .registerThreadLocalAccessor(new Slf4JThreadLocalAccessor("key1", "key2"));
+            .registerThreadLocalAccessor(new Slf4jThreadLocalAccessor("key1", "key2"));
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 

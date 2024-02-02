@@ -33,7 +33,7 @@ import org.slf4j.MDC;
  * @author Dariusz Jędrzejczyk
  * @since 1.1.1
  */
-public class Slf4JThreadLocalAccessor implements ThreadLocalAccessor<Map<String, String>> {
+public class Slf4jThreadLocalAccessor implements ThreadLocalAccessor<Map<String, String>> {
 
     /**
      * Key under which this accessor is registered in
@@ -45,12 +45,12 @@ public class Slf4JThreadLocalAccessor implements ThreadLocalAccessor<Map<String,
 
     /**
      * Create an instance of
-     * {@link io.micrometer.context.integration.Slf4JThreadLocalAccessor}.
+     * {@link Slf4jThreadLocalAccessor}.
      * @param keys selected keys for which values from the {@link MDC} should be
      * propagated across {@link Thread} boundaries. If none provided, the entire contents
      * of the {@link MDC} are propagated.
      */
-    public Slf4JThreadLocalAccessor(String... keys) {
+    public Slf4jThreadLocalAccessor(String... keys) {
         this.delegate = keys.length == 0 ? new GlobalMdcThreadLocalAccessor()
                 : new SelectiveMdcThreadLocalAccessor(Arrays.asList(keys));
     }
