@@ -44,8 +44,7 @@ public class Slf4jThreadLocalAccessor implements ThreadLocalAccessor<Map<String,
     private final ThreadLocalAccessor<Map<String, String>> delegate;
 
     /**
-     * Create an instance of
-     * {@link Slf4jThreadLocalAccessor}.
+     * Create an instance of {@link Slf4jThreadLocalAccessor}.
      * @param keys selected keys for which values from the {@link MDC} should be
      * propagated across {@link Thread} boundaries. If none provided, the entire contents
      * of the {@link MDC} are propagated.
