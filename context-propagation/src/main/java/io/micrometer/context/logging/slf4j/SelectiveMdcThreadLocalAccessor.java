@@ -24,9 +24,9 @@ import org.slf4j.MDC;
 
 /**
  * {@link ThreadLocalAccessor} for copying values for selected keys from the {@link MDC}
- * across {@link Thread} boundaries. <strong>For use only when no other
- * {@link ThreadLocalAccessor} interacts with the MDC</strong>, for instance tracing
- * libraries.
+ * across {@link Thread} boundaries. Ensure no other
+ * {@link ThreadLocalAccessor} interacts with any MDC key that is used, for
+ * instance by tracing libraries.
  *
  * @author Dariusz Jędrzejczyk
  * @since 1.1.1
