@@ -3,7 +3,7 @@ assertj = "3.24.2"
 mockito = "5.7.0"
 javaFormatForPlugins = "0.0.41"
 jsr305 = "3.0.2"
-junit = "5.10.1"
+junit = "5.10.2"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
