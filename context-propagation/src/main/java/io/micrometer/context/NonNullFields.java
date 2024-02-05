@@ -36,6 +36,6 @@ import javax.annotation.meta.TypeQualifierDefault;
 @Documented
 @Nonnull
 @TypeQualifierDefault(ElementType.FIELD)
-@interface NonNullFields {
+public @interface NonNullFields {
 
 }

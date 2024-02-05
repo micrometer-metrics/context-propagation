@@ -4,6 +4,8 @@ mockito = "5.7.0"
 javaFormatForPlugins = "0.0.41"
 jsr305 = "3.0.2"
 junit = "5.10.2"
+slf4j = "2.0.11"
+logback = "1.4.14"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
@@ -11,6 +13,8 @@ javaFormatForPlugins = { module = "io.spring.javaformat:spring-javaformat-checks
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
 junitBom = { module = "org.junit:junit-bom", version.ref = "junit" }
 mockitoCore = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 
 # plugin dependencies
 plugin-license = { module = "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin", version = "0.16.1" }
