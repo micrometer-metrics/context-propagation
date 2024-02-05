@@ -3,7 +3,10 @@ plugins {
 }
 
 dependencies {
+	compileOnly libs.slf4j
+
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation libs.assertj
-	testImplementation libs.mockitoCore
+	testImplementation libs.slf4j
+	testImplementation libs.logback
 }

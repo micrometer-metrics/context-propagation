@@ -1,6 +1,8 @@
 def VERSIONS = [
 		libs.assertj,
 		libs.mockitoCore,
+		libs.slf4j,
+		libs.logback
 ]
 
 def PLATFORM_BOMS = [
