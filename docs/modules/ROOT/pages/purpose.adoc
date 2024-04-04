@@ -8,7 +8,7 @@ The Context Propagation libarary contains the following abstractions:
 * `ContextRegistry` - registry for instances of `ThreadLocalAccessor` and `ContextAccessor`.
 * `ContextSnapshot` - holder of contextual values that provides methods to capture and to propagate.
 
-The Context Progation library enables several usage scenarios, including:
+The Context Propagation library enables several usage scenarios, including:
 
 * In imperative code, such as Spring MVC controller, you can capture `ThreadLocal` values into a
 `ContextSnapshot`. After that, use the snapshot to populate a Reactor `Context` with the
