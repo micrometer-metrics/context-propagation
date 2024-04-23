@@ -92,6 +92,7 @@ public class Slf4jThreadLocalAccessorTests {
             try (ContextSnapshot.Scope scope = snapshot.setThreadLocals()) {
                 value1InOtherThread.set(MDC.get("key1"));
                 value2InOtherThread.set(MDC.get("key2"));
+                value3InOtherThread.set(MDC.get("key3"));
             }
             latch.countDown();
         });
