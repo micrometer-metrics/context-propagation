@@ -4,7 +4,7 @@ mockito = "5.7.0"
 javaFormatForPlugins = "0.0.42"
 jsr305 = "3.0.2"
 junit = "5.10.3"
-slf4j = "2.0.13"
+slf4j = "2.0.15"
 logback = "1.4.14"
 
 [libraries]
