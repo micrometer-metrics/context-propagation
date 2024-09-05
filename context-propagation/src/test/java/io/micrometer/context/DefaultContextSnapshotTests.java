@@ -35,7 +35,7 @@ import static org.assertj.core.api.BDDAssertions.then;
  * @author Rossen Stoyanchev
  * @author Dariusz Jędrzejczyk
  */
-public class DefaultContextSnapshotTests {
+class DefaultContextSnapshotTests {
 
     private final ContextRegistry registry = new ContextRegistry();
 
