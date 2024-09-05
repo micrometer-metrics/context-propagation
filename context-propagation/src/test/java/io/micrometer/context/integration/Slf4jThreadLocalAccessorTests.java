@@ -29,7 +29,7 @@ import org.slf4j.MDC;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class Slf4jThreadLocalAccessorTests {
+class Slf4jThreadLocalAccessorTests {
 
     @Test
     void shouldCopyEntireMdcContentsToNewThread() throws InterruptedException {
