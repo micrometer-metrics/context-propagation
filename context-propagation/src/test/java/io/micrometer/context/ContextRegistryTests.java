@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Rossen Stoyanchev
  */
-public class ContextRegistryTests {
+class ContextRegistryTests {
 
     private final ContextRegistry registry = new ContextRegistry();
 

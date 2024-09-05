@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Dariusz Jędrzejczyk
  */
-public class ScopedValueSnapshotTests {
+class ScopedValueSnapshotTests {
 
     private final ContextRegistry registry = new ContextRegistry();
 
