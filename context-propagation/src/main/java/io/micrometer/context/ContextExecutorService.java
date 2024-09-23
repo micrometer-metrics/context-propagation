@@ -152,14 +152,12 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
 
     /**
      * Variant of {@link #wrap(ExecutorService, Supplier)} that uses
-     * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
+     * {@link ContextSnapshotFactory#builder()} to create the context snapshot.
      * @param service the executorService to wrap
-     * @deprecated use {@link #wrap(ExecutorService, Supplier)}
      */
-    @Deprecated
     public static ExecutorService wrap(ExecutorService service) {
         return wrap(service,
-                () -> DefaultContextSnapshotFactory.captureAll(ContextRegistry.getInstance(), key -> true, false));
+                () -> ContextSnapshotFactory.builder().build().captureAll());
     }
 
 }
