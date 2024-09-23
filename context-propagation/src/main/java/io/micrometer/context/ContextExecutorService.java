@@ -156,8 +156,7 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
      * @param service the executorService to wrap
      */
     public static ExecutorService wrap(ExecutorService service) {
-        return wrap(service,
-                () -> ContextSnapshotFactory.builder().build().captureAll());
+        return wrap(service, () -> ContextSnapshotFactory.builder().build().captureAll());
     }
 
 }
