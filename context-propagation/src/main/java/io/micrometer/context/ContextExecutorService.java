@@ -142,7 +142,6 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
     /**
      * Wrap the given {@code ExecutorService} in order to propagate context to any
      * executed task through the given {@link ContextSnapshot} supplier.
-     *
      * <p>
      * Typically, a {@link ContextSnapshotFactory} can be used to supply the snapshot. In
      * the case that only ThreadLocal values are to be captured, the
