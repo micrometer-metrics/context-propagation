@@ -141,6 +141,21 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
 
     /**
      * Wrap the given {@code ExecutorService} in order to propagate context to any
+     * executed task through the given {@link ContextSnapshotFactory}.
+     * <p>
+     * This method only captures ThreadLocal value. To work with other types of
+     * contexts, use {@link #wrap(ExecutorService, Supplier)}.
+     * </p>
+     * @param service the executorService to wrap
+     * @param contextSnapshotFactory {@link ContextSnapshotFactory} for capturing a
+     * {@link ContextSnapshot} at the point when tasks are scheduled
+     */
+    public static ExecutorService wrap(ExecutorService service, ContextSnapshotFactory contextSnapshotFactory) {
+        return new ContextExecutorService<>(service, contextSnapshotFactory::captureAll);
+    }
+
+    /**
+     * Wrap the given {@code ExecutorService} in order to propagate context to any
      * executed task through the given {@link ContextSnapshot} supplier.
      * <p>
      * Typically, a {@link ContextSnapshotFactory} can be used to supply the snapshot. In
@@ -153,22 +168,6 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
      */
     public static ExecutorService wrap(ExecutorService service, Supplier<ContextSnapshot> snapshotSupplier) {
         return new ContextExecutorService<>(service, snapshotSupplier);
-    }
-
-    /**
-     * Wrap the given {@code ExecutorService} in order to propagate context to any
-     * executed task through the given {@link ContextSnapshotFactory}.
-     * <p>
-     * This method only captures ThreadLocal value. Use
-     * {@link #wrap(ExecutorService, Supplier)} in order to be able to work with other
-     * contexts.
-     * </p>
-     * @param service the executorService to wrap
-     * @param contextSnapshotFactory {@link ContextSnapshotFactory} for capturing a
-     * {@link ContextSnapshot} at the point when tasks are scheduled
-     */
-    public static ExecutorService wrap(ExecutorService service, ContextSnapshotFactory contextSnapshotFactory) {
-        return new ContextExecutorService<>(service, contextSnapshotFactory::captureAll);
     }
 
     /**
