@@ -143,12 +143,13 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
      * Wrap the given {@code ExecutorService} in order to propagate context to any
      * executed task through the given {@link ContextSnapshotFactory}.
      * <p>
-     * This method only captures ThreadLocal value. To work with other types of
-     * contexts, use {@link #wrap(ExecutorService, Supplier)}.
+     * This method only captures ThreadLocal value. To work with other types of contexts,
+     * use {@link #wrap(ExecutorService, Supplier)}.
      * </p>
      * @param service the executorService to wrap
      * @param contextSnapshotFactory {@link ContextSnapshotFactory} for capturing a
      * {@link ContextSnapshot} at the point when tasks are scheduled
+     * @return {@code ExecutorService} wrapper
      */
     public static ExecutorService wrap(ExecutorService service, ContextSnapshotFactory contextSnapshotFactory) {
         return new ContextExecutorService<>(service, contextSnapshotFactory::captureAll);
@@ -165,6 +166,7 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
      * @param service the executorService to wrap
      * @param snapshotSupplier supplier for capturing a {@link ContextSnapshot} at the
      * point when tasks are scheduled
+     * @return {@code ExecutorService} wrapper
      */
     public static ExecutorService wrap(ExecutorService service, Supplier<ContextSnapshot> snapshotSupplier) {
         return new ContextExecutorService<>(service, snapshotSupplier);
@@ -174,6 +176,7 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
      * Variant of {@link #wrap(ExecutorService, Supplier)} that uses
      * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
      * @param service the executorService to wrap
+     * @return {@code ExecutorService} wrapper
      * @deprecated use {@link #wrap(ExecutorService, Supplier)}
      */
     @Deprecated

@@ -163,6 +163,15 @@ class ContextWrappingTests {
                     atomic -> then(atomic.get())
                         .as("With context container the thread local information should be propagated")
                         .isEqualTo("hello from map"));
+
+            StringThreadLocalHolder.setValue("hello at time of creation of the executor");
+            runInNewThread(
+                    ContextScheduledExecutorService
+                        .wrap(executorService, () -> defaultSnapshotFactory.captureAll(sourceContext)),
+                    valueInNewThread,
+                    atomic -> then(atomic.get())
+                        .as("With context container the thread local information should be propagated")
+                        .isEqualTo("hello from map"));
         }
         finally {
             executorService.shutdown();

@@ -66,10 +66,34 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
 
     /**
      * Wrap the given {@code ScheduledExecutorService} in order to propagate context to
+     * any executed task through the given {@link ContextSnapshotFactory}.
+     * <p>
+     * This method only captures ThreadLocal value. To work with other types of contexts,
+     * use {@link #wrap(ScheduledExecutorService, Supplier)}.
+     * </p>
+     * @param service the executorService to wrap
+     * @param contextSnapshotFactory {@link ContextSnapshotFactory} for capturing a
+     * {@link ContextSnapshot} at the point when tasks are scheduled
+     * @return {@code ScheduledExecutorService} wrapper
+     */
+    public static ScheduledExecutorService wrap(ScheduledExecutorService service,
+            ContextSnapshotFactory contextSnapshotFactory) {
+        return new ContextScheduledExecutorService(service, contextSnapshotFactory::captureAll);
+    }
+
+    /**
+     * Wrap the given {@code ScheduledExecutorService} in order to propagate context to
      * any executed task through the given {@link ContextSnapshot} supplier.
+     * <p>
+     * Typically, a {@link ContextSnapshotFactory} can be used to supply the snapshot. In
+     * the case that only ThreadLocal values are to be captured, the
+     * {@link #wrap(ScheduledExecutorService, ContextSnapshotFactory)} variant can be
+     * used.
+     * </p>
      * @param service the executorService to wrap
      * @param supplier supplier for capturing a {@link ContextSnapshot} at the point when
      * tasks are scheduled
+     * @return {@code ScheduledExecutorService} wrapper
      */
     public static ScheduledExecutorService wrap(ScheduledExecutorService service, Supplier<ContextSnapshot> supplier) {
         return new ContextScheduledExecutorService(service, supplier);
@@ -79,6 +103,7 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
      * Variant of {@link #wrap(ScheduledExecutorService, Supplier)} that uses
      * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
      * @param service the executorService to wrap
+     * @return {@code ScheduledExecutorService} wrapper
      * @deprecated use {@link #wrap(ScheduledExecutorService, Supplier)}
      */
     @Deprecated
