@@ -16,6 +16,7 @@
 package io.micrometer.context;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -39,7 +40,8 @@ import static org.assertj.core.api.BDDAssertions.then;
 class ContextWrappingTests {
 
     private final ContextRegistry registry = new ContextRegistry()
-        .registerThreadLocalAccessor(new StringThreadLocalAccessor());
+        .registerThreadLocalAccessor(new StringThreadLocalAccessor())
+        .registerContextAccessor(new TestContextAccessor());
 
     private final ContextSnapshotFactory defaultSnapshotFactory = ContextSnapshotFactory.builder()
         .contextRegistry(registry)
@@ -138,6 +140,34 @@ class ContextWrappingTests {
         finally {
             executorService.shutdown();
         }
+    }
+
+    @Test
+    void should_instrument_scheduled_executor_service_with_snapshot_supplier()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        Map<String, String> sourceContext = Collections.singletonMap(StringThreadLocalAccessor.KEY, "hello from map");
+
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        try {
+            StringThreadLocalHolder.setValue("hello at time of creation of the executor");
+            AtomicReference<String> valueInNewThread = new AtomicReference<>();
+            runInNewThread(executorService, valueInNewThread,
+                    atomic -> then(atomic.get()).as("By default thread local information should not be propagated")
+                        .isNull());
+
+            StringThreadLocalHolder.setValue("hello at time of creation of the executor");
+            runInNewThread(
+                    ContextExecutorService
+                        .wrap(executorService, () -> defaultSnapshotFactory.captureAll(sourceContext)),
+                    valueInNewThread,
+                    atomic -> then(atomic.get())
+                        .as("With context container the thread local information should be propagated")
+                        .isEqualTo("hello from map"));
+        }
+        finally {
+            executorService.shutdown();
+        }
+
     }
 
     private void runInNewThread(Runnable runnable) throws InterruptedException, TimeoutException {

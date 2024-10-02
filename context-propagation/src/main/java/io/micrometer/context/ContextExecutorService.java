@@ -151,6 +151,22 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
     }
 
     /**
+     * Wrap the given {@code ExecutorService} in order to propagate context to any
+     * executed task through the given {@link ContextSnapshotFactory}.
+     * <p>
+     * This method only captures ThreadLocal value. Use
+     * {@link #wrap(ExecutorService, Supplier)} in order to be able to work with other
+     * contexts.
+     * </p>
+     * @param service the executorService to wrap
+     * @param contextSnapshotFactory {@link ContextSnapshotFactory} for capturing a
+     * {@link ContextSnapshot} at the point when tasks are scheduled
+     */
+    public static ExecutorService wrap(ExecutorService service, ContextSnapshotFactory contextSnapshotFactory) {
+        return new ContextExecutorService<>(service, contextSnapshotFactory::captureAll);
+    }
+
+    /**
      * Variant of {@link #wrap(ExecutorService, Supplier)} that uses
      * {@link ContextSnapshot#captureAll(Object...)} to create the context snapshot.
      * @param service the executorService to wrap
