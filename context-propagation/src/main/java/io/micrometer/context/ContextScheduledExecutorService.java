@@ -75,6 +75,7 @@ public final class ContextScheduledExecutorService extends ContextExecutorServic
      * @param contextSnapshotFactory {@link ContextSnapshotFactory} for capturing a
      * {@link ContextSnapshot} at the point when tasks are scheduled
      * @return {@code ScheduledExecutorService} wrapper
+     * @since 1.1.2
      */
     public static ScheduledExecutorService wrap(ScheduledExecutorService service,
             ContextSnapshotFactory contextSnapshotFactory) {

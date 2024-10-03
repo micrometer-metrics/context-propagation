@@ -150,6 +150,7 @@ public class ContextExecutorService<EXECUTOR extends ExecutorService> implements
      * @param contextSnapshotFactory {@link ContextSnapshotFactory} for capturing a
      * {@link ContextSnapshot} at the point when tasks are scheduled
      * @return {@code ExecutorService} wrapper
+     * @since 1.1.2
      */
     public static ExecutorService wrap(ExecutorService service, ContextSnapshotFactory contextSnapshotFactory) {
         return new ContextExecutorService<>(service, contextSnapshotFactory::captureAll);
