@@ -1,7 +1,7 @@
 [[context-propagation-purpose]]
 = Purpose
 
-The Context Propagation libarary contains the following abstractions:
+The Context Propagation library contains the following abstractions:
 
 * `ThreadLocalAccessor` - contract to assist with access to a `ThreadLocal` value.
 * `ContextAccessor` - contract to assist with access to a `Map`-like context.
