@@ -90,6 +90,8 @@ workflows:
       - build-jdk11
       - build-jdk17
       - deploy:
+          context:
+            - deploy
           requires:
             - build
             - build-jdk11
@@ -120,6 +122,8 @@ workflows:
             tags:
               only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
       - deploy:
+          context:
+            - deploy
           requires:
             - build
             - build-jdk11
