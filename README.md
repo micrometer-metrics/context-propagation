@@ -49,6 +49,10 @@ registered `ContextAccesor` instance.
 
 ## Artifacts
 
+The published artifacts work with Java 8 or later.
+
+### Snapshot builds
+
 Snapshots are published to `repo.spring.io` for every successful build on the `main` branch and maintenance branches.
 
 ```groovy
@@ -61,11 +65,9 @@ dependencies {
 }
 ```
 
-Milestone releases are published to https://repo.spring.io/milestone. Include that as a maven repository in your build
-configuration to use milestone releases. Note that milestone releases are for testing purposes and are not intended for
-production use.
+### Milestone releases
 
-These artifacts work with Java 8 or later.
+Starting with the 1.2.0-M1 release, milestone releases and release candidates will be published to Maven Central. Note that milestone releases are for testing purposes and are not intended for production use. Earlier milestone releases were published to https://repo.spring.io/milestone.
 
 ## Contributing
 
