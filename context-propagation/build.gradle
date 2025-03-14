@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation libs.junitJupiter
+	testRuntimeOnly libs.junitPlatformLauncher
 	testImplementation libs.assertj
 	testImplementation libs.mockitoCore
 }
