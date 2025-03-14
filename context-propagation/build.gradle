@@ -5,7 +5,8 @@ plugins {
 dependencies {
 	compileOnly libs.slf4j
 
-	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation libs.junitJupiter
+	testRuntimeOnly libs.junitPlatformLauncher
 	testImplementation libs.assertj
 	testImplementation libs.slf4j
 	testImplementation libs.logback

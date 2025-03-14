@@ -24,7 +24,8 @@ repositories {
 dependencies {
 	implementation project(':context-propagation')
 
-	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation libs.junitJupiter
+	testRuntimeOnly libs.junitPlatformLauncher
 	testImplementation libs.assertj
 }
 
