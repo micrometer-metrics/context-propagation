@@ -1,28 +1,34 @@
 version: 2.1
 
 executors:
+  circle-jdk23-executor:
+    working_directory: ~/context-propagation
+    environment:
+      GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
+    docker:
+      - image: cimg/openjdk:23.0.2
   circle-jdk-executor:
     working_directory: ~/context-propagation
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     docker:
-      - image: cimg/openjdk:20.0.1
+      - image: cimg/openjdk:21.0.6
   circle-jdk11-executor:
     working_directory: ~/context-propagation
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     docker:
-      - image: cimg/openjdk:11.0.19
+      - image: cimg/openjdk:11.0.26
   circle-jdk17-executor:
     working_directory: ~/context-propagation
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     docker:
-      - image: cimg/openjdk:17.0.7
+      - image: cimg/openjdk:17.0.14
   machine-executor:
     working_directory: ~/context-propagation
     machine:
-      image: ubuntu-2204:2023.04.2
+      image: ubuntu-2404:2024.11.1
 
 commands:
   gradlew-build:
@@ -57,6 +63,11 @@ commands:
           path: ~/context-propagation/test-results/
 
 jobs:
+  build-jdk23:
+    executor: circle-jdk23-executor
+    steps:
+      - gradlew-build
+
   build:
     executor: circle-jdk-executor
     steps:
@@ -89,6 +100,7 @@ workflows:
       - build
       - build-jdk11
       - build-jdk17
+      - build-jdk23
       - deploy:
           context:
             - deploy
@@ -96,6 +108,7 @@ workflows:
             - build
             - build-jdk11
             - build-jdk17
+            - build-jdk23
           filters:
             branches:
               only:
@@ -121,6 +134,12 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
+      - build-jdk23:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
       - deploy:
           context:
             - deploy
@@ -128,6 +147,7 @@ workflows:
             - build
             - build-jdk11
             - build-jdk17
+            - build-jdk23
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
