@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 the original author or authors.
+ * Copyright 2024-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,6 +103,69 @@ class Slf4jThreadLocalAccessorTests {
         assertThat(value2InOtherThread.get()).isEqualTo("value2");
         assertThat(value3InOtherThread.get()).isNull();
 
+        executorService.shutdown();
+    }
+
+    @Test
+    void shouldDealWithEmptySelectedValues() throws InterruptedException {
+        ContextRegistry registry = new ContextRegistry()
+            .registerThreadLocalAccessor(new Slf4jThreadLocalAccessor("key1", "key2"));
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<String> value1InOtherThread = new AtomicReference<>();
+        AtomicReference<String> value2InOtherThread = new AtomicReference<>();
+        AtomicReference<String> value3InOtherThread = new AtomicReference<>();
+
+        MDC.put("key1", "value1_1");
+        MDC.put("key3", "value3_1");
+
+        ContextSnapshot snapshot = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .clearMissing(true)
+            .build()
+            .captureAll();
+
+        executorService.submit(() -> {
+            try (ContextSnapshot.Scope scope = snapshot.setThreadLocals()) {
+                value1InOtherThread.set(MDC.get("key1"));
+                value2InOtherThread.set(MDC.get("key2"));
+                value3InOtherThread.set(MDC.get("key3"));
+            }
+            latch.countDown();
+        });
+
+        latch.await(100, TimeUnit.MILLISECONDS);
+
+        assertThat(value1InOtherThread.get()).isEqualTo("value1_1");
+        assertThat(value2InOtherThread.get()).isNull();
+        assertThat(value3InOtherThread.get()).isNull();
+
+        CountDownLatch latch2 = new CountDownLatch(1);
+
+        MDC.remove("key1");
+        MDC.put("key2", "value2_2");
+
+        ContextSnapshot snapshot2 = ContextSnapshotFactory.builder()
+            .contextRegistry(registry)
+            .clearMissing(true)
+            .build()
+            .captureAll();
+        executorService.submit(() -> {
+            try (ContextSnapshot.Scope scope = snapshot2.setThreadLocals()) {
+                value1InOtherThread.set(MDC.get("key1"));
+                value2InOtherThread.set(MDC.get("key2"));
+                value3InOtherThread.set(MDC.get("key3"));
+            }
+            latch2.countDown();
+        });
+
+        latch2.await(100, TimeUnit.MILLISECONDS);
+
+        assertThat(value1InOtherThread.get()).isNull();
+        assertThat(value2InOtherThread.get()).isEqualTo("value2_2");
+        assertThat(value3InOtherThread.get()).isNull();
         executorService.shutdown();
     }
 
