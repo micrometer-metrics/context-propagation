@@ -1,5 +1,5 @@
 /**
- * Copyright 2024 the original author or authors.
+ * Copyright 2024-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,9 @@ public class Slf4jThreadLocalAccessor implements ThreadLocalAccessor<Map<String,
                 String mdcValue = value.get(key);
                 if (mdcValue != null) {
                     MDC.put(key, mdcValue);
+                }
+                else {
+                    MDC.remove(key);
                 }
             }
         }
