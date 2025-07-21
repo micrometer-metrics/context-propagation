@@ -5,6 +5,7 @@ plugins {
 dependencies {
 	compileOnly libs.slf4j
 
+	testImplementation platform(libs.junitBom)
 	testImplementation libs.junitJupiter
 	testRuntimeOnly libs.junitPlatformLauncher
 	testImplementation libs.assertj
