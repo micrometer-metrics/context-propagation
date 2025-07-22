@@ -15,16 +15,17 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
 public class StringThreadLocalHolder {
 
-    private static final ThreadLocal<String> holder = new ThreadLocal<>();
+    private static final ThreadLocal<@Nullable String> holder = new ThreadLocal<>();
 
     public static void setValue(String value) {
         holder.set(value);
     }
 
-    @Nullable
-    public static String getValue() {
+    public static @Nullable String getValue() {
         return holder.get();
     }
 

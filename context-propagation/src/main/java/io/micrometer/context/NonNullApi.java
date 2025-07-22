@@ -30,12 +30,14 @@ import javax.annotation.meta.TypeQualifierDefault;
  *
  * @author Rossen Stoyanchev
  * @since 1.0.0
+ * @deprecated Use {@link org.jspecify.annotations.NullMarked} instead.
  */
 @Target(ElementType.PACKAGE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Nonnull
 @TypeQualifierDefault({ ElementType.METHOD, ElementType.PARAMETER })
+@Deprecated
 public @interface NonNullApi {
 
 }

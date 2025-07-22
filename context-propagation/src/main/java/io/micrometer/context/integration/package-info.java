@@ -17,9 +17,7 @@
  * This package contains useful integrations with external libraries that can be used
  * provided those libraries are present at runtime.
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package io.micrometer.context.integration;
 
-import io.micrometer.context.NonNullApi;
-import io.micrometer.context.NonNullFields;
+import org.jspecify.annotations.NullMarked;

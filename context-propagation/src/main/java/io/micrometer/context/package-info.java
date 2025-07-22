@@ -27,6 +27,7 @@
  * another or from one thread to another.
  * </ul>
  */
-@NonNullApi
-@NonNullFields
+@NullMarked
 package io.micrometer.context;
+
+import org.jspecify.annotations.NullMarked;

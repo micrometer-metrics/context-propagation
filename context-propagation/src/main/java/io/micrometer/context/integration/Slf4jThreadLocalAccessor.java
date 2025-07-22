@@ -15,13 +15,14 @@
  */
 package io.micrometer.context.integration;
 
+import io.micrometer.context.ThreadLocalAccessor;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.MDC;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.micrometer.context.ThreadLocalAccessor;
-import org.slf4j.MDC;
 
 /**
  * {@link ThreadLocalAccessor} for copying contents of the {@link MDC} across
@@ -60,7 +61,7 @@ public class Slf4jThreadLocalAccessor implements ThreadLocalAccessor<Map<String,
     }
 
     @Override
-    public Map<String, String> getValue() {
+    public @Nullable Map<String, String> getValue() {
         return delegate.getValue();
     }
 
