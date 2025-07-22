@@ -1,4 +1,5 @@
 buildscript {
+	ext.javaLanguageVersion = JavaLanguageVersion.of(JavaVersion.current().isJava11Compatible() ? JavaVersion.current().getMajorVersion() : 17)
 
 	repositories {
 		mavenCentral()
@@ -6,6 +7,7 @@ buildscript {
 	}
 
 	dependencies {
+		classpath libs.plugin.errorprone
 		classpath libs.plugin.license
 		classpath libs.plugin.nebulaRelease
 		classpath libs.plugin.nebulaPublishing
@@ -53,6 +55,7 @@ allprojects {
 }
 
 subprojects {
+	apply plugin: 'net.ltgt.errorprone'
 	apply plugin: 'signing'
 	apply plugin: 'io.spring.javaformat'
 	apply plugin: 'java-library'
@@ -78,6 +81,17 @@ subprojects {
 		// JSR-305 only used for non-required meta-annotations
 		optionalApi libs.jsr305
 		checkstyle libs.javaFormatForPlugins
+		errorprone libs.errorprone
+	}
+
+	tasks.withType(JavaCompile).configureEach {
+		options.errorprone {
+			enabled = javaLanguageVersion.canCompileOrRun(17) // ErrorProne does not work with JDK <17
+			disableAllWarnings = System.env.CI != null // Disable warnings on CI
+
+			disableWarningsInGeneratedCode = true
+			excludedPaths = '.*/build/generated/.*'
+		}
 	}
 
 	tasks {
