@@ -33,7 +33,7 @@ import javax.annotation.meta.When;
  *
  * @author Rossen Stoyanchev
  * @since 1.0.0
- * @deprecated Use {@link org.jspecify.annotations.NonNull} instead.
+ * @deprecated Use {@link org.jspecify.annotations.Nullable} instead.
  */
 @Target({ ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
