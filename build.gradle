@@ -75,13 +75,11 @@ subprojects {
 		}
 	}
 
-	// All projects use optional annotations, but since we don't expose them downstream we would
-	// have to add the dependency in every project, which is tedious so just do it here.
 	dependencies {
-		// JSR-305 only used for non-required meta-annotations
-		optionalApi libs.jsr305
+		api libs.jspecify
 		checkstyle libs.javaFormatForPlugins
 		errorprone libs.errorprone
+		errorprone libs.nullAway
 	}
 
 	tasks.withType(JavaCompile).configureEach {
@@ -91,6 +89,18 @@ subprojects {
 
 			disableWarningsInGeneratedCode = true
 			excludedPaths = '.*/build/generated/.*'
+
+			error('NullAway')
+
+			option('NullAway:OnlyNullMarked', 'true')
+			// option('NullAway:CustomContractAnnotations', 'io.micrometer.context.lang.internal.Contract')
+			option('NullAway:CheckContracts', 'true')
+			option('NullAway:HandleTestAssertionLibraries', 'true')
+			if (javaLanguageVersion.canCompileOrRun(22)) {
+				// see https://bugs.openjdk.org/browse/JDK-8346471
+				// see https://github.com/uber/NullAway/wiki/JSpecify-Support
+				option('NullAway:JSpecifyMode', 'true')
+			}
 		}
 	}
 

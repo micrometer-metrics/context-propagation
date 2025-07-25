@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -100,8 +102,8 @@ public class ContextRegistry {
      * @return the same registry instance
      * @param <V> the type of value stored in the ThreadLocal
      */
-    public <V> ContextRegistry registerThreadLocalAccessor(String key, Supplier<V> getSupplier, Consumer<V> setConsumer,
-            Runnable resetTask) {
+    public <V extends @Nullable Object> ContextRegistry registerThreadLocalAccessor(String key, Supplier<V> getSupplier,
+            Consumer<V> setConsumer, Runnable resetTask) {
 
         return registerThreadLocalAccessor(new ThreadLocalAccessor<V>() {
 
@@ -110,7 +112,6 @@ public class ContextRegistry {
                 return key;
             }
 
-            @Nullable
             @Override
             public V getValue() {
                 return getSupplier.get();

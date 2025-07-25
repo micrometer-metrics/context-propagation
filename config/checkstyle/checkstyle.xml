@@ -23,6 +23,7 @@
 					  value="com.google.common.(?!cache).*,org.apache.commons.text.*,org.jetbrains.*,jdk.internal.jline.internal.*,reactor.util.annotation.*,org.checkerframework.checker.*,javax.ws.*"/>
 			<property name="illegalClasses"
 					  value="org\.assertj\.core\.api\.Java6Assertions\..*,javax.annotation.Nullable"/>
+			<property name="illegalClasses" value="io\.micrometer\.context\.NonNullApi,io\.micrometer\.context\.NonNullFields,io\.micrometer\.context\.Nullable"/>
 			<property name="regexp" value="true"/>
 		</module>
 <!--		<module name="IllegalImportCheck">

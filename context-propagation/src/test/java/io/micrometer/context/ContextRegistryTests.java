@@ -15,11 +15,12 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
-
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -172,7 +173,7 @@ class ContextRegistryTests {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <T> T readValue(HashMap sourceContext, Object key) {
+        public <T> @Nullable T readValue(HashMap sourceContext, Object key) {
             return (T) sourceContext.get(key);
         }
 
@@ -205,7 +206,7 @@ class ContextRegistryTests {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <T> T readValue(Map sourceContext, Object key) {
+        public <T> @Nullable T readValue(Map sourceContext, Object key) {
             return (T) sourceContext.get(key);
         }
 
@@ -237,7 +238,7 @@ class ContextRegistryTests {
         }
 
         @Override
-        public <T> T readValue(String sourceContext, Object key) {
+        public <T> @Nullable T readValue(String sourceContext, Object key) {
             return null;
         }
 
@@ -269,7 +270,7 @@ class ContextRegistryTests {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <T> T readValue(HashMap sourceContext, Object key) {
+        public <T> @Nullable T readValue(HashMap sourceContext, Object key) {
             return (T) sourceContext.get(key);
         }
 

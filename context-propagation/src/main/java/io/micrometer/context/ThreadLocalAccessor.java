@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -51,8 +53,7 @@ public interface ThreadLocalAccessor<V> {
      * is called.</li>
      * </ul>
      */
-    @Nullable
-    V getValue();
+    @Nullable V getValue();
 
     /**
      * Set the {@link ThreadLocal} at the start of a

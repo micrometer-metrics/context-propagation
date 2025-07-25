@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -37,9 +39,8 @@ class TestContextAccessor implements ContextAccessor<Map, Map> {
         readValues.putAll(sourceContext);
     }
 
-    @Nullable
     @Override
-    public <T> T readValue(Map sourceContext, Object key) {
+    public <T> @Nullable T readValue(Map sourceContext, Object key) {
         return (T) sourceContext.get(key);
     }
 

@@ -11,11 +11,13 @@ logback = "1.5.18"
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.41.0" }
 javaFormatForPlugins = { module = "io.spring.javaformat:spring-javaformat-checkstyle", version.ref = "javaFormatForPlugins" }
+jspecify = { module = "org.jspecify:jspecify", version = "1.0.0" }
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
 junitBom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 mockitoCore = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+nullAway = { module = "com.uber.nullaway:nullaway", version = "0.12.7" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 

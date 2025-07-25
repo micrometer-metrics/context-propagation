@@ -3,6 +3,8 @@ plugins {
 }
 
 dependencies {
+	optionalApi libs.jsr305 // JSR-305 only used for non-required meta-annotations
+
 	compileOnly libs.slf4j
 
 	testImplementation platform(libs.junitBom)

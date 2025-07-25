@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -59,8 +61,7 @@ public interface ContextAccessor<READ, WRITE> {
      * @param key the key to use to look up the context value
      * @return the value, if present
      */
-    @Nullable
-    <T> T readValue(READ sourceContext, Object key);
+    <T> @Nullable T readValue(READ sourceContext, Object key);
 
     /**
      * {@link Class} representing the type of context this accessor can restore values to.
