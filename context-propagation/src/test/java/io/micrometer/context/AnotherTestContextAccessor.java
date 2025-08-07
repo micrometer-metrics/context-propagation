@@ -15,6 +15,9 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -31,9 +34,8 @@ class AnotherTestContextAccessor implements ContextAccessor<Set, Set> {
 
     }
 
-    @Nullable
     @Override
-    public <T> T readValue(Set sourceContext, Object key) {
+    public <T> @Nullable T readValue(Set sourceContext, Object key) {
         return null;
     }
 
@@ -44,7 +46,7 @@ class AnotherTestContextAccessor implements ContextAccessor<Set, Set> {
 
     @Override
     public Set writeValues(Map<Object, Object> valuesToWrite, Set targetContext) {
-        return null;
+        return Collections.EMPTY_SET;
     }
 
 }

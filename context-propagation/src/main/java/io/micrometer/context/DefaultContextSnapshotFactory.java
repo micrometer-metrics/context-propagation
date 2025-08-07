@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,9 +66,8 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
                 : (clearMissing ? clearingEmptySnapshot(contextRegistry) : emptyContextSnapshot));
     }
 
-    @Nullable
-    private static DefaultContextSnapshot captureFromThreadLocals(Predicate<Object> keyPredicate, boolean clearMissing,
-            ContextRegistry contextRegistry) {
+    private static @Nullable DefaultContextSnapshot captureFromThreadLocals(Predicate<Object> keyPredicate,
+            boolean clearMissing, ContextRegistry contextRegistry) {
 
         DefaultContextSnapshot snapshot = null;
         for (ThreadLocalAccessor<?> accessor : contextRegistry.getThreadLocalAccessors()) {

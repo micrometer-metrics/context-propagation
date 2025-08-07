@@ -15,6 +15,8 @@
  */
 package io.micrometer.context;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 /**
@@ -30,13 +32,13 @@ public class StringThreadLocalAccessor implements ThreadLocalAccessor<String> {
     }
 
     @Override
-    public String getValue() {
+    public @Nullable String getValue() {
         return StringThreadLocalHolder.getValue();
     }
 
     @Override
     public void setValue(String value) {
-        // ThreadLocalAccessor API is @NonNullApi by default
+        // ThreadLocalAccessor API is @NullMarked by default
         // so we don't expect null here
         Objects.requireNonNull(value);
         StringThreadLocalHolder.setValue(value);
@@ -49,7 +51,7 @@ public class StringThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
     @Override
     public void restore(String previousValue) {
-        // ThreadLocalAccessor API is @NonNullApi by default
+        // ThreadLocalAccessor API is @NullMarked by default
         // so we don't expect null here
         Objects.requireNonNull(previousValue);
         setValue(previousValue);
