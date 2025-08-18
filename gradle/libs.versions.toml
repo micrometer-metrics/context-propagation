@@ -1,6 +1,6 @@
 [versions]
 assertj = "3.27.4"
-mockito = "5.18.0"
+mockito = "5.19.0"
 javaFormatForPlugins = "0.0.47"
 jsr305 = "3.0.2"
 junit = "5.13.4"
