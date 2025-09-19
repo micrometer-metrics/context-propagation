@@ -149,8 +149,18 @@ public class ContextRegistry {
      * Removes a {@link ThreadLocalAccessor}.
      * @param key under which the accessor got registered
      * @return {@code true} when accessor got successfully removed
+     * @deprecated use {@link ContextRegistry#removeThreadLocalAccessorForKey(Object)} instead
      */
     public boolean removeThreadLocalAccessor(String key) {
+        return removeThreadLocalAccessorForKey(key);
+    }
+
+    /**
+     * Removes a {@link ThreadLocalAccessor}.
+     * @param key under which the accessor got registered
+     * @return {@code true} when accessor got successfully removed
+     */
+    public boolean removeThreadLocalAccessorForKey(Object key) {
         for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
             if (existing.key().equals(key)) {
                 return this.threadLocalAccessors.remove(existing);
