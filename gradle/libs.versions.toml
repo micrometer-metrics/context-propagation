@@ -9,7 +9,7 @@ logback = "1.5.20"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
-errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.42.0" }
+errorprone = { module = "com.google.errorprone:error_prone_core", version = "2.43.0" }
 javaFormatForPlugins = { module = "io.spring.javaformat:spring-javaformat-checkstyle", version.ref = "javaFormatForPlugins" }
 jspecify = { module = "org.jspecify:jspecify", version = "1.0.0" }
 jsr305 = { module = "com.google.code.findbugs:jsr305", version.ref = "jsr305" }
