@@ -78,13 +78,16 @@ subprojects {
 	dependencies {
 		api libs.jspecify
 		checkstyle libs.javaFormatForPlugins
-		errorprone libs.errorprone
-		errorprone libs.nullAway
+		if (javaLanguageVersion.canCompileOrRun(21)) {
+			// Error Prone 2.43.0 requires JDK 21+
+			errorprone libs.errorprone
+			errorprone libs.nullAway
+		}
 	}
 
 	tasks.withType(JavaCompile).configureEach {
 		options.errorprone {
-			enabled = javaLanguageVersion.canCompileOrRun(17) // ErrorProne does not work with JDK <17
+			enabled = javaLanguageVersion.canCompileOrRun(21) // Error Prone 2.43.0 requires JDK 21+
 			disableAllWarnings = System.env.CI != null // Disable warnings on CI
 
 			disableWarningsInGeneratedCode = true
