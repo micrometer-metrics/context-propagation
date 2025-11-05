@@ -1,12 +1,12 @@
 version: 2.1
 
 executors:
-  circle-jdk23-executor:
+  circle-jdk24-executor:
     working_directory: ~/context-propagation
     environment:
       GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
     docker:
-      - image: cimg/openjdk:23.0.2
+      - image: cimg/openjdk:24.0.2
   circle-jdk-executor:
     working_directory: ~/context-propagation
     environment:
@@ -63,8 +63,8 @@ commands:
           path: ~/context-propagation/test-results/
 
 jobs:
-  build-jdk23:
-    executor: circle-jdk23-executor
+  build-jdk24:
+    executor: circle-jdk24-executor
     steps:
       - gradlew-build
 
@@ -100,7 +100,7 @@ workflows:
       - build
       - build-jdk11
       - build-jdk17
-      - build-jdk23
+      - build-jdk24
       - deploy:
           context:
             - deploy
@@ -108,7 +108,7 @@ workflows:
             - build
             - build-jdk11
             - build-jdk17
-            - build-jdk23
+            - build-jdk24
           filters:
             branches:
               only:
@@ -134,7 +134,7 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
-      - build-jdk23:
+      - build-jdk24:
           filters:
             branches:
               ignore: /.*/
@@ -147,7 +147,7 @@ workflows:
             - build
             - build-jdk11
             - build-jdk17
-            - build-jdk23
+            - build-jdk24
           filters:
             tags:
               only: /^v\d+\.\d+\.\d+(-(RC|M)\d+)?$/
