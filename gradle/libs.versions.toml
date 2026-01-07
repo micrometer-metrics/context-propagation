@@ -3,7 +3,7 @@ assertj = "3.27.6"
 mockito = "5.20.0"
 javaFormatForPlugins = "0.0.47"
 jsr305 = "3.0.2"
-junit = "5.14.1"
+junit = "5.14.2"
 slf4j = "2.0.17"
 logback = "1.5.23"
 
