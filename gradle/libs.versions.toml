@@ -5,7 +5,7 @@ javaFormatForPlugins = "0.0.47"
 jsr305 = "3.0.2"
 junit = "5.14.1"
 slf4j = "2.0.17"
-logback = "1.5.23"
+logback = "1.5.24"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
