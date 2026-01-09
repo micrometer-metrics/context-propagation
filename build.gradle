@@ -1,5 +1,7 @@
 buildscript {
-	ext.javaLanguageVersion = JavaLanguageVersion.of(JavaVersion.current().isJava11Compatible() ? JavaVersion.current().getMajorVersion() : 17)
+	ext.gradleJvmVersion = JavaLanguageVersion.of(JavaVersion.current().getMajorVersion())
+	ext.javaLanguageVersion = project.hasProperty('toolchainVersion') && project.property('toolchainVersion') != '' ? JavaLanguageVersion.of(project.property('toolchainVersion') as int) : gradleJvmVersion
+	ext.javaTargetVersion = JavaVersion.VERSION_1_8
 
 	repositories {
 		mavenCentral()
@@ -12,6 +14,7 @@ buildscript {
 		classpath libs.plugin.nebulaRelease
 		classpath libs.plugin.nebulaPublishing
 		classpath libs.plugin.nebulaProject
+		classpath libs.plugin.nebulaInfo
 		classpath libs.plugin.noHttp
 		classpath libs.plugin.nexusPublish
 		classpath libs.plugin.javaformat
@@ -42,10 +45,12 @@ if (project.hasProperty('antora')) {
 
 // TODO: remove this hack, see: https://github.com/nebula-plugins/nebula-release-plugin/issues/213
 def releaseStage = findProperty('release.stage')
-apply plugin: 'nebula.release'
+apply plugin: 'com.netflix.nebula.release'
 release.defaultVersionStrategy = nebula.plugin.release.git.opinion.Strategies.SNAPSHOT
 
 apply plugin: 'io.github.gradle-nexus.publish-plugin'
+apply plugin: 'com.netflix.nebula.info'
+apply plugin: 'com.netflix.nebula.project'
 
 allprojects {
 	group = 'io.micrometer'
@@ -73,11 +78,17 @@ subprojects {
 		registerFeature('optional') {
 			usingSourceSet(sourceSets.main)
 		}
+
+		toolchain {
+			languageVersion = javaLanguageVersion
+		}
+		sourceCompatibility = javaTargetVersion
+		targetCompatibility = javaTargetVersion
 	}
 
 	dependencies {
 		api libs.jspecify
-		checkstyle libs.javaFormatForPlugins
+		checkstyle libs.spring.javaformatCheckstyle
 		if (javaLanguageVersion.canCompileOrRun(21)) {
 			// Error Prone 2.43.0 requires JDK 21+
 			errorprone libs.errorprone
@@ -91,12 +102,12 @@ subprojects {
 			disableAllWarnings = System.env.CI != null // Disable warnings on CI
 
 			disableWarningsInGeneratedCode = true
-			excludedPaths = '.*/build/generated/.*'
+			excludedPaths = ".*/generated/.*"
 
 			error('NullAway')
 
 			option('NullAway:OnlyNullMarked', 'true')
-			// option('NullAway:CustomContractAnnotations', 'io.micrometer.context.lang.internal.Contract')
+			option('NullAway:CustomContractAnnotations', 'org.assertj.core.internal.annotation.Contract')
 			option('NullAway:CheckContracts', 'true')
 			option('NullAway:HandleTestAssertionLibraries', 'true')
 			if (javaLanguageVersion.canCompileOrRun(22)) {
@@ -112,17 +123,20 @@ subprojects {
 			options.encoding = 'UTF-8'
 			options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
 
-			sourceCompatibility = JavaVersion.VERSION_1_8
-			targetCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = javaTargetVersion
+			targetCompatibility = javaTargetVersion
 
 			// ensure Java 8 baseline is enforced for main source
-			if (JavaVersion.current().isJava9Compatible()) {
-				options.release = 8
+			options.release = 8
+
+			doLast {
+				task -> logger.info("Compiling with " + task.javaCompiler.get().executablePath)
 			}
 		}
 		compileTestJava {
 			options.encoding = 'UTF-8'
 			options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+
 			sourceCompatibility = JavaVersion.VERSION_1_8
 			targetCompatibility = JavaVersion.VERSION_1_8
 		}
@@ -134,6 +148,7 @@ subprojects {
 						'implSpec:a:Implementation Requirements:',
 						'implNote:a:Implementation Note:'
 				)
+				options.addBooleanOption('Xdoclint:all,-missing', true)
 			}
 		}
 	}
@@ -172,22 +187,21 @@ subprojects {
 		useJUnitPlatform {
 			excludeTags 'docker'
 		}
+	}
 
+	tasks.withType(Test).configureEach {
+		testLogging.exceptionFormat = 'full'
 		develocity.testRetry {
 			maxFailures = 5
 			maxRetries = 3
 		}
 	}
 
-	project.tasks.withType(Test) { Test testTask ->
-		testTask.testLogging.exceptionFormat = 'full'
-	}
-
 	license {
 		header rootProject.file('gradle/licenseHeader.txt')
 		strictCheck true
 		mapping {
-			kt = 'SLASHSTAR_STYLE'
+			java = 'SLASHSTAR_STYLE'
 		}
 		sourceSets = project.sourceSets
 
@@ -198,9 +212,6 @@ subprojects {
 
 	// Publish resolved versions.
 	plugins.withId('maven-publish') {
-		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
-
 		publishing {
 			publications {
 				nebula(MavenPublication) {
@@ -321,7 +332,7 @@ nexusPublishing {
 }
 
 wrapper {
-	gradleVersion = '8.14.3'
+	gradleVersion = '9.2.1'
 }
 
 defaultTasks 'build'

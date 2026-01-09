@@ -1,5 +1,4 @@
 buildscript {
-
 	repositories {
 		mavenCentral()
 		gradlePluginPortal()
@@ -55,12 +54,13 @@ tasks.named('generateAntoraYml') {
 	}
 }
 
-tasks.create('generateAntoraResources') {
+tasks.register('generateAntoraResources') {
 	dependsOn 'generateAntoraYml'
 }
 
 tasks.named('antora') {
 	dependsOn 'generateAntoraResources', 'test'
+	inputs.files('modules')
 }
 
 jar {
