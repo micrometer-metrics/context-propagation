@@ -16,7 +16,7 @@ junitBom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 mockitoCore = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-nullAway = { module = "com.uber.nullaway:nullaway", version = "0.13.0" }
+nullAway = { module = "com.uber.nullaway:nullaway", version = "0.13.1" }
 slf4j = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 spring-javaformatCheckstyle = { module = "io.spring.javaformat:spring-javaformat-checkstyle", version.ref = "spring-javaformat" }
