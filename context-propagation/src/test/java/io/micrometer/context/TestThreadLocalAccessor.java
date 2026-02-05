@@ -25,12 +25,12 @@ import java.util.Objects;
  */
 class TestThreadLocalAccessor implements ThreadLocalAccessor<String> {
 
-    private final String key;
+    private final Object key;
 
     // Normally this wouldn't be a field in the accessor but ok for testing purposes
     private final ThreadLocal<String> threadLocal;
 
-    TestThreadLocalAccessor(String key, ThreadLocal<String> threadLocal) {
+    TestThreadLocalAccessor(Object key, ThreadLocal<String> threadLocal) {
         this.key = key;
         this.threadLocal = threadLocal;
     }
