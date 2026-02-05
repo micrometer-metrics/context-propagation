@@ -133,13 +133,17 @@ class ContextRegistryTests {
 
     @Test
     void should_remove_a_thread_local_accessor_with_a_given_key() {
+        Object baz = new Object();
         TestThreadLocalAccessor accessor1 = new TestThreadLocalAccessor("foo", new ThreadLocal<>());
         TestThreadLocalAccessor accessor2 = new TestThreadLocalAccessor("bar", new ThreadLocal<>());
+        TestThreadLocalAccessor accessor3 = new TestThreadLocalAccessor(baz, new ThreadLocal<>());
         this.registry.registerThreadLocalAccessor(accessor1);
         this.registry.registerThreadLocalAccessor(accessor2);
-        assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor1, accessor2);
+        this.registry.registerThreadLocalAccessor(accessor3);
+        assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor1, accessor2, accessor3);
 
         assertThat(this.registry.removeThreadLocalAccessor("foo")).isTrue();
+        assertThat(this.registry.removeThreadLocalAccessor(baz)).isTrue();
 
         assertThat(this.registry.getThreadLocalAccessors()).containsExactly(accessor2);
     }
