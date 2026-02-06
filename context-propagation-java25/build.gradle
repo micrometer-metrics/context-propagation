@@ -27,3 +27,11 @@ tasks.withType(JavaCompile).configureEach {
 	targetCompatibility = 25
 	options.release = 25
 }
+
+compileTestJava {
+    options.compilerArgs += '--enable-preview'
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += '--enable-preview'
+}
