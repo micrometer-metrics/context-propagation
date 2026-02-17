@@ -4,7 +4,7 @@ mockito = "5.21.0"
 jsr305 = "3.0.2"
 junit = "5.14.3"
 slf4j = "2.0.17"
-logback = "1.5.31"
+logback = "1.5.32"
 spring-javaformat = "0.0.47"
 
 [libraries]
