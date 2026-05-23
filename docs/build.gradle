@@ -48,6 +48,10 @@ antora {
 	]
 }
 
+node {
+	version = '24.15.0' // Antora does not generate the site using node 24.16.0
+}
+
 tasks.named('generateAntoraYml') {
 	asciidocAttributes = project.provider {
 		return  ['micrometer-context-propagation-version': project.version.toString()]
