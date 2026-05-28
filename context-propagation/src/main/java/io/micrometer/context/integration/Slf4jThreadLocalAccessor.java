@@ -15,13 +15,13 @@
  */
 package io.micrometer.context.integration;
 
+import io.micrometer.context.ThreadLocalAccessor;
+import org.slf4j.MDC;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.micrometer.context.ThreadLocalAccessor;
-import org.slf4j.MDC;
 
 /**
  * {@link ThreadLocalAccessor} for copying contents of the {@link MDC} across
@@ -42,6 +42,15 @@ public class Slf4jThreadLocalAccessor implements ThreadLocalAccessor<Map<String,
     public static final String KEY = "cp.slf4j";
 
     private final ThreadLocalAccessor<Map<String, String>> delegate;
+
+    /**
+     * Create an instance of {@link Slf4jThreadLocalAccessor}. If used directly or through
+     * the {@code ServiceLoader}, the entire contents of the {@link MDC} are propagated.
+     * @since 1.1.5
+     */
+    public Slf4jThreadLocalAccessor() {
+        this(new String[0]);
+    }
 
     /**
      * Create an instance of {@link Slf4jThreadLocalAccessor}.

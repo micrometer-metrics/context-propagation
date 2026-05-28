@@ -1,0 +1,3 @@
+io.micrometer.context.integration.Slf4jThreadLocalAccessor
+io.micrometer.context.StringThreadLocalAccessor
+io.micrometer.context.AutoloadTests$AutoLoadableTestThreadLocalAccessor
