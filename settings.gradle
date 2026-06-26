@@ -22,4 +22,4 @@ buildCache {
 	}
 }
 
-include 'context-propagation', 'docs'
+include 'context-propagation', 'context-propagation-java25', 'docs'
