@@ -13,12 +13,12 @@ plugins {
 rootProject.name = 'context-propagation'
 
 develocity {
-	server = 'https://ge.micrometer.io'
+	server = 'https://ge.spring.io'
 }
 
 buildCache {
 	remote(develocity.buildCache) {
-		server = 'https://ge.micrometer.io'
+		server = 'https://ge.spring.io'
 	}
 }
 
