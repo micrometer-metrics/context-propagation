@@ -312,6 +312,22 @@ subprojects {
 				github 'marcingrzejszczak'
 			}
 		}
+
+		infoBroker.excludedManifestProperties.addAll('Module-Origin', 'Module-Source')
+
+		// modify publications if necessary after Nebula plugins applied
+		plugins.withId('maven-publish') {
+			publishing {
+				publications {
+					nebula(MavenPublication) {
+						if (pom.url.get().startsWith('https://github.com/micrometer-metrics/')) {
+							pom.url = 'https://github.com/micrometer-metrics/context-propagation'
+							pom.scm.url = 'git@github.com:micrometer-metrics/context-propagation.git'
+						}
+					}
+				}
+			}
+		}
 	}
 
 	description = 'A library that assists with context propagation across different types of context mechanisms such as ThreadLocal, Reactor Context etc.'
