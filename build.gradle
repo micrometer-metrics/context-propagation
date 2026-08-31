@@ -149,6 +149,7 @@ subprojects {
 						'implNote:a:Implementation Note:'
 				)
 				options.addBooleanOption('Xdoclint:all,-missing', true)
+				options.addBooleanOption('-no-fonts', true)
 			}
 		}
 	}
