@@ -4,7 +4,7 @@
 [![Apache 2.0](https://img.shields.io/github/license/micrometer-metrics/context-propagation.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Maven Central](https://img.shields.io/maven-central/v/io.micrometer/context-propagation.svg)](https://search.maven.org/artifact/io.micrometer/context-propagation)
 [![Javadocs](https://www.javadoc.io/badge/io.micrometer/context-propagation.svg)](https://www.javadoc.io/doc/io.micrometer/context-propagation)
-[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.micrometer.io/)
+[![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://ge.spring.io)
 
 ## Overview
 
@@ -49,6 +49,10 @@ registered `ContextAccesor` instance.
 
 ## Artifacts
 
+The published artifacts work with Java 8 or later.
+
+### Snapshot builds
+
 Snapshots are published to `repo.spring.io` for every successful build on the `main` branch and maintenance branches.
 
 ```groovy
@@ -61,11 +65,11 @@ dependencies {
 }
 ```
 
+### Milestone releases
+
 Milestone releases are published to https://repo.spring.io/milestone. Include that as a maven repository in your build
 configuration to use milestone releases. Note that milestone releases are for testing purposes and are not intended for
 production use.
-
-These artifacts work with Java 8 or later.
 
 ## Contributing
 

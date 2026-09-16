@@ -1,5 +1,7 @@
 buildscript {
-	ext.javaLanguageVersion = JavaLanguageVersion.of(JavaVersion.current().isJava11Compatible() ? JavaVersion.current().getMajorVersion() : 17)
+	ext.gradleJvmVersion = JavaLanguageVersion.of(JavaVersion.current().getMajorVersion())
+	ext.javaLanguageVersion = project.hasProperty('toolchainVersion') && project.property('toolchainVersion') != '' ? JavaLanguageVersion.of(project.property('toolchainVersion') as int) : gradleJvmVersion
+	ext.javaTargetVersion = JavaVersion.VERSION_1_8
 
 	repositories {
 		mavenCentral()
@@ -12,6 +14,7 @@ buildscript {
 		classpath libs.plugin.nebulaRelease
 		classpath libs.plugin.nebulaPublishing
 		classpath libs.plugin.nebulaProject
+		classpath libs.plugin.nebulaInfo
 		classpath libs.plugin.noHttp
 		classpath libs.plugin.nexusPublish
 		classpath libs.plugin.javaformat
@@ -42,7 +45,9 @@ if (project.hasProperty('antora')) {
 
 // TODO: remove this hack, see: https://github.com/nebula-plugins/nebula-release-plugin/issues/213
 def releaseStage = findProperty('release.stage')
-apply plugin: 'nebula.release'
+apply plugin: 'com.netflix.nebula.info'
+apply plugin: 'com.netflix.nebula.project'
+apply plugin: 'com.netflix.nebula.release'
 release.defaultVersionStrategy = nebula.plugin.release.git.opinion.Strategies.SNAPSHOT
 
 apply plugin: 'io.github.gradle-nexus.publish-plugin'
@@ -73,6 +78,12 @@ subprojects {
 		registerFeature('optional') {
 			usingSourceSet(sourceSets.main)
 		}
+
+		toolchain {
+			languageVersion = javaLanguageVersion
+		}
+		sourceCompatibility = javaTargetVersion
+		targetCompatibility = javaTargetVersion
 	}
 
 	// All projects use optional annotations, but since we don't expose them downstream we would
@@ -80,7 +91,7 @@ subprojects {
 	dependencies {
 		// JSR-305 only used for non-required meta-annotations
 		optionalApi libs.jsr305
-		checkstyle libs.javaFormatForPlugins
+		checkstyle libs.spring.javaformatCheckstyle
 		errorprone libs.errorprone
 	}
 
@@ -99,17 +110,20 @@ subprojects {
 			options.encoding = 'UTF-8'
 			options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
 
-			sourceCompatibility = JavaVersion.VERSION_1_8
-			targetCompatibility = JavaVersion.VERSION_1_8
+			sourceCompatibility = javaTargetVersion
+			targetCompatibility = javaTargetVersion
 
 			// ensure Java 8 baseline is enforced for main source
-			if (JavaVersion.current().isJava9Compatible()) {
-				options.release = 8
+			options.release = 8
+
+			doLast {
+				task -> logger.info("Compiling with " + task.javaCompiler.get().executablePath)
 			}
 		}
 		compileTestJava {
 			options.encoding = 'UTF-8'
 			options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation'
+
 			sourceCompatibility = JavaVersion.VERSION_1_8
 			targetCompatibility = JavaVersion.VERSION_1_8
 		}
@@ -121,6 +135,8 @@ subprojects {
 						'implSpec:a:Implementation Requirements:',
 						'implNote:a:Implementation Note:'
 				)
+				options.addBooleanOption('Xdoclint:all,-missing', true)
+				options.addBooleanOption('-no-fonts', true)
 			}
 		}
 	}
@@ -159,22 +175,25 @@ subprojects {
 		useJUnitPlatform {
 			excludeTags 'docker'
 		}
+	}
 
+	tasks.withType(Test).configureEach {
+		// https://docs.gradle.org/current/userguide/upgrading_major_version_9.html#test_tasks_may_no_longer_execute_expected_tests
+		testClassesDirs = testing.suites.test.sources.output.classesDirs
+		classpath = testing.suites.test.sources.runtimeClasspath
+
+		testLogging.exceptionFormat = 'full'
 		develocity.testRetry {
 			maxFailures = 5
 			maxRetries = 3
 		}
 	}
 
-	project.tasks.withType(Test) { Test testTask ->
-		testTask.testLogging.exceptionFormat = 'full'
-	}
-
 	license {
 		header rootProject.file('gradle/licenseHeader.txt')
 		strictCheck true
 		mapping {
-			kt = 'SLASHSTAR_STYLE'
+			java = 'SLASHSTAR_STYLE'
 		}
 		sourceSets = project.sourceSets
 
@@ -185,9 +204,6 @@ subprojects {
 
 	// Publish resolved versions.
 	plugins.withId('maven-publish') {
-		sourceCompatibility = JavaVersion.VERSION_1_8
-		targetCompatibility = JavaVersion.VERSION_1_8
-
 		publishing {
 			publications {
 				nebula(MavenPublication) {
@@ -271,7 +287,12 @@ subprojects {
 		apply plugin: 'com.netflix.nebula.project'
 
 		jar {
-			manifest.attributes.put('Automatic-Module-Name', project.name.replace('-', '.'))
+			manifest {
+				attributes(
+					'Automatic-Module-Name': project.name.replace('-', '.'),
+					'Build-Jdk-Spec': System.getProperty('java.specification.version')
+				)
+			}
 			metaInf {
 				from "$rootDir/LICENSE"
 				from "$rootDir/NOTICE"
@@ -290,6 +311,39 @@ subprojects {
 			'mgrzejszczak@vmware.com' {
 				moniker 'Marcin Grzejszczak'
 				github 'marcingrzejszczak'
+			}
+		}
+
+		infoBroker.excludedManifestProperties.addAll(
+			'Branch',
+			'Build-Date-UTC',
+			'Build-Date',
+			'Build-Host',
+			'Build-Id',
+			'Build-Java-Version',
+			'Build-Job',
+			'Build-Number',
+			'Build-Timezone',
+			'Build-Url',
+			'Built-By',
+			'Built-OS',
+			'Built-Status',
+			'Created-By',
+			'Module-Origin',
+			'Module-Source'
+		)
+
+		// modify publications if necessary after Nebula plugins applied
+		plugins.withId('maven-publish') {
+			publishing {
+				publications {
+					nebula(MavenPublication) {
+						if (pom.url.get().startsWith('https://github.com/micrometer-metrics/')) {
+							pom.url = 'https://github.com/micrometer-metrics/context-propagation'
+							pom.scm.url = 'git@github.com:micrometer-metrics/context-propagation.git'
+						}
+					}
+				}
 			}
 		}
 	}
@@ -313,10 +367,6 @@ nexusPublishing {
 			password = findProperty('MAVEN_CENTRAL_PASSWORD')
 		}
 	}
-}
-
-wrapper {
-	gradleVersion = '8.14.3'
 }
 
 defaultTasks 'build'
