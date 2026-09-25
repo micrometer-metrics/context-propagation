@@ -17,7 +17,6 @@ package io.micrometer.context;
 
 import org.jspecify.annotations.Nullable;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -119,7 +118,9 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
             boolean clearMissing) {
         ContextAccessor<?, ?> contextAccessor = contextRegistry.getContextAccessorForRead(sourceContext);
         Map<Object, Object> previousValues = null;
-        for (ThreadLocalAccessor<?> threadLocalAccessor : contextRegistry.getThreadLocalAccessors()) {
+        ThreadLocalAccessor<?>[] accessors = contextRegistry.getThreadLocalAccessors()
+            .toArray(new ThreadLocalAccessor<?>[0]);
+        for (ThreadLocalAccessor<?> threadLocalAccessor : accessors) {
             Object key = threadLocalAccessor.key();
             Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) sourceContext, key);
             if (value != null) {
@@ -129,7 +130,7 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
                 previousValues = DefaultContextSnapshot.clearThreadLocal(key, threadLocalAccessor, previousValues);
             }
         }
-        return DefaultContextSnapshot.DefaultScope.from(previousValues, contextRegistry);
+        return DefaultContextSnapshot.DefaultScope.from(previousValues, accessors);
     }
 
     @SuppressWarnings("unchecked")
@@ -140,7 +141,8 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
         }
         ContextAccessor<?, ?> contextAccessor = contextRegistry.getContextAccessorForRead(sourceContext);
         Map<Object, Object> previousValues = null;
-        List<ThreadLocalAccessor<?>> accessors = contextRegistry.getThreadLocalAccessors();
+        ThreadLocalAccessor<?>[] accessors = contextRegistry.getThreadLocalAccessors()
+            .toArray(new ThreadLocalAccessor<?>[0]);
         for (String key : keys) {
             Object value = ((ContextAccessor<C, ?>) contextAccessor).readValue((C) sourceContext, key);
             if (value != null) {
@@ -162,7 +164,7 @@ final class DefaultContextSnapshotFactory implements ContextSnapshotFactory {
                 }
             }
         }
-        return DefaultContextSnapshot.DefaultScope.from(previousValues, contextRegistry);
+        return DefaultContextSnapshot.DefaultScope.from(previousValues, accessors);
     }
 
     static final class Builder implements ContextSnapshotFactory.Builder {
