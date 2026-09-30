@@ -18,7 +18,6 @@ package io.micrometer.context;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -77,9 +76,9 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
     @Override
     public Scope setThreadLocals(Predicate<Object> keyPredicate) {
         Map<Object, Object> previousValues = null;
-        List<ThreadLocalAccessor<?>> accessors = this.contextRegistry.getThreadLocalAccessors();
-        for (int i = 0; i < accessors.size(); ++i) {
-            ThreadLocalAccessor<?> accessor = accessors.get(i);
+        ThreadLocalAccessor<?>[] accessors = this.contextRegistry.getThreadLocalAccessors()
+            .toArray(new ThreadLocalAccessor<?>[0]);
+        for (ThreadLocalAccessor<?> accessor : accessors) {
             Object key = accessor.key();
             if (keyPredicate.test(key)) {
                 if (this.containsKey(key)) {
@@ -92,7 +91,7 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
                 }
             }
         }
-        return DefaultScope.from(previousValues, this.contextRegistry);
+        return DefaultScope.from(previousValues, accessors);
     }
 
     @SuppressWarnings("unchecked")
@@ -126,18 +125,17 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
         private final Map<Object, Object> previousValues;
 
-        private final ContextRegistry contextRegistry;
+        private final ThreadLocalAccessor<?>[] accessors;
 
-        private DefaultScope(Map<Object, Object> previousValues, ContextRegistry contextRegistry) {
+        private DefaultScope(Map<Object, Object> previousValues, ThreadLocalAccessor<?>[] accessors) {
             this.previousValues = previousValues;
-            this.contextRegistry = contextRegistry;
+            this.accessors = accessors;
         }
 
         @Override
         public void close() {
-            List<ThreadLocalAccessor<?>> accessors = this.contextRegistry.getThreadLocalAccessors();
-            for (int i = accessors.size() - 1; i >= 0; --i) {
-                ThreadLocalAccessor<?> accessor = accessors.get(i);
+            for (int i = this.accessors.length - 1; i >= 0; --i) {
+                ThreadLocalAccessor<?> accessor = this.accessors[i];
                 if (this.previousValues.containsKey(accessor.key())) {
                     Object previousValue = this.previousValues.get(accessor.key());
                     resetThreadLocalValue(accessor, previousValue);
@@ -155,8 +153,8 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
             }
         }
 
-        public static Scope from(@Nullable Map<Object, Object> previousValues, ContextRegistry registry) {
-            return (previousValues != null ? new DefaultScope(previousValues, registry) : () -> {
+        public static Scope from(@Nullable Map<Object, Object> previousValues, ThreadLocalAccessor<?>[] accessors) {
+            return (previousValues != null ? new DefaultScope(previousValues, accessors) : () -> {
             });
         }
 

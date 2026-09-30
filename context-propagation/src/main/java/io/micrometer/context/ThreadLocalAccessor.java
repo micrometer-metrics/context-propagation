@@ -39,6 +39,26 @@ public interface ThreadLocalAccessor<V> {
     Object key();
 
     /**
+     * Return the order of this accessor in a {@link ContextRegistry}. Accessors with a
+     * lower order come first. Accessors with the same order retain their registration
+     * order. The default is {@code 0}.
+     * <p>
+     * Snapshots apply accessors in registry order and restore them in reverse order.
+     * Explicit keys passed to
+     * {@link ContextSnapshotFactory#setThreadLocalsFrom(Object, String...)} continue to
+     * determine the order in which values are set.
+     * <p>
+     * For example, an accessor that depends on another accessor with the default order
+     * can return {@code 1} to be applied after it. The order must remain unchanged while
+     * the accessor is registered.
+     * @return the order of this accessor
+     * @since 1.3.0
+     */
+    default int getOrder() {
+        return 0;
+    }
+
+    /**
      * Return the current {@link ThreadLocal} value.
      * <p>
      * This method is called in two scenarios:
