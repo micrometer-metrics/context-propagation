@@ -10,7 +10,6 @@ buildscript {
 
 	dependencies {
 		classpath libs.plugin.errorprone
-		classpath libs.plugin.license
 		classpath libs.plugin.nebulaRelease
 		classpath libs.plugin.nebulaPublishing
 		classpath libs.plugin.nebulaProject
@@ -18,6 +17,7 @@ buildscript {
 		classpath libs.plugin.noHttp
 		classpath libs.plugin.nexusPublish
 		classpath libs.plugin.javaformat
+		classpath libs.plugin.spotless
 
 		constraints {
 			classpath('org.ow2.asm:asm:7.3.1') {
@@ -64,9 +64,9 @@ subprojects {
 	apply plugin: 'signing'
 	apply plugin: 'io.spring.javaformat'
 	apply plugin: 'java-library'
-	apply plugin: 'com.github.hierynomus.license'
 	apply plugin: 'checkstyle'
 	apply plugin: 'io.spring.nohttp'
+	apply plugin: 'com.diffplug.spotless'
 
 	java {
 		// It is more idiomatic to define different features for different sets of optional
@@ -115,6 +115,17 @@ subprojects {
 				// see https://github.com/uber/NullAway/wiki/JSpecify-Support
 				option('NullAway:JSpecifyMode', 'true')
 			}
+		}
+	}
+
+	spotless {
+		java {
+			toggleOffOn()
+		}
+		format 'javaLicenseHeader', {
+			target 'src/**/*.java'
+			licenseHeaderFile(rootProject.file('gradle/licenseHeader.txt'),
+				'(package|import|public|class|module) |@|\\n/\\*\\*|// spotless-license-check:off')
 		}
 	}
 
@@ -200,19 +211,6 @@ subprojects {
 			maxFailures = 5
 			maxRetries = 3
 		}
-	}
-
-	license {
-		header rootProject.file('gradle/licenseHeader.txt')
-		strictCheck true
-		mapping {
-			java = 'SLASHSTAR_STYLE'
-		}
-		sourceSets = project.sourceSets
-
-		ext.year = Calendar.getInstance().get(Calendar.YEAR)
-		skipExistingHeaders = true
-		exclude '**/*.json' // comments not supported
 	}
 
 	// Publish resolved versions.
