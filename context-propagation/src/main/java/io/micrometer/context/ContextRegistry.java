@@ -131,18 +131,30 @@ public class ContextRegistry {
 
     /**
      * Register a {@link ThreadLocalAccessor}. If there is an existing registration with
-     * the same {@link ThreadLocalAccessor#key() key}, it is removed first.
+     * the same {@link ThreadLocalAccessor#key() key}, it is removed first. Accessors are
+     * registered in ascending {@link ThreadLocalAccessor#getOrder() order}, preserving
+     * registration order for accessors with the same order.
      * @param accessor the accessor to register
      * @return the same registry instance
      */
     public ContextRegistry registerThreadLocalAccessor(ThreadLocalAccessor<?> accessor) {
-        for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
-            if (existing.key().equals(accessor.key())) {
-                this.threadLocalAccessors.remove(existing);
-                break;
+        synchronized (this.threadLocalAccessors) {
+            for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
+                if (existing.key().equals(accessor.key())) {
+                    this.threadLocalAccessors.remove(existing);
+                    break;
+                }
             }
+            int index = 0;
+            int order = accessor.getOrder();
+            for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
+                if (existing.getOrder() > order) {
+                    break;
+                }
+                index++;
+            }
+            this.threadLocalAccessors.add(index, accessor);
         }
-        this.threadLocalAccessors.add(accessor);
         return this;
     }
 
@@ -162,12 +174,14 @@ public class ContextRegistry {
      * @since 1.1.4
      */
     public boolean removeThreadLocalAccessor(Object key) {
-        for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
-            if (existing.key().equals(key)) {
-                return this.threadLocalAccessors.remove(existing);
+        synchronized (this.threadLocalAccessors) {
+            for (ThreadLocalAccessor<?> existing : this.threadLocalAccessors) {
+                if (existing.key().equals(key)) {
+                    return this.threadLocalAccessors.remove(existing);
+                }
             }
+            return false;
         }
-        return false;
     }
 
     /**
