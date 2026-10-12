@@ -135,13 +135,27 @@ final class DefaultContextSnapshot extends HashMap<Object, Object> implements Co
 
         @Override
         public void close() {
+            RuntimeException restoreFailure = null;
             List<ThreadLocalAccessor<?>> accessors = this.contextRegistry.getThreadLocalAccessors();
             for (int i = accessors.size() - 1; i >= 0; --i) {
                 ThreadLocalAccessor<?> accessor = accessors.get(i);
                 if (this.previousValues.containsKey(accessor.key())) {
                     Object previousValue = this.previousValues.get(accessor.key());
-                    resetThreadLocalValue(accessor, previousValue);
+                    try {
+                        resetThreadLocalValue(accessor, previousValue);
+                    }
+                    catch (RuntimeException ex) {
+                        if (restoreFailure == null) {
+                            restoreFailure = ex;
+                        }
+                        else if (restoreFailure != ex) {
+                            restoreFailure.addSuppressed(ex);
+                        }
+                    }
                 }
+            }
+            if (restoreFailure != null) {
+                throw restoreFailure;
             }
         }
 
