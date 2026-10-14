@@ -28,3 +28,14 @@ The following example shows one way to store and restore thread local values by 
 -----
 include::{include-java}/context/DefaultContextSnapshotTests.java[tags=simple,indent=0]
 -----
+
+== Ordering `ThreadLocalAccessor` Implementations
+
+When an accessor depends on another accessor's thread local value, override `ThreadLocalAccessor.getOrder()` to control their order in `ContextRegistry`.
+Snapshots apply accessors with lower order values first and restore them last when a scope closes.
+The default order is `0`; accessors with equal order values retain their registration order.
+For example, an accessor that depends on another accessor with the default order can return `1`.
+This also applies to accessors discovered through `ServiceLoader`.
+When explicit keys are passed to `ContextSnapshotFactory.setThreadLocalsFrom(context, keys...)`, their order continues to determine the order in which values are set.
+The order must remain unchanged while an accessor is registered.
+A scope retains the accessor instances and ordering used when it was opened, so later registry changes do not affect its restoration.
