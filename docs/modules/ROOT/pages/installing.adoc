@@ -12,7 +12,7 @@ The following example shows the required dependency in Gradle:
 
 [source,groovy,subs=+attributes]
 ----
-implementation 'io.micrometer:context-propagation:latest.integration'
+implementation 'io.micrometer:context-propagation:{micrometer-context-propagation-version}'
 ----
 
 The following example shows the required dependency in Maven:
@@ -23,7 +23,7 @@ The following example shows the required dependency in Maven:
     <dependency>
         <groupId>io.micrometer</groupId>
         <artifactId>context-propagation</artifactId>
-        <version>${micrometer-context-propagation.version}</version>
+        <version>{micrometer-context-propagation-version}</version>
     </dependency>
 </dependencies>
 ----
