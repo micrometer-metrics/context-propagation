@@ -1,0 +1,37 @@
+plugins {
+	id 'idea'
+}
+
+description = 'Context Propagation core classes that require Java 25'
+
+// skip this module when building with jdk <25
+if (!javaLanguageVersion.canCompileOrRun(25)) {
+	project.tasks.configureEach { task -> task.enabled = false }
+}
+
+dependencies {
+	api project(':context-propagation')
+
+	testImplementation platform(libs.junitBom)
+	testImplementation libs.junitJupiter
+	testRuntimeOnly libs.junitPlatformLauncher
+	testImplementation libs.assertj
+}
+
+java {
+	targetCompatibility = 25
+}
+
+tasks.withType(JavaCompile).configureEach {
+	sourceCompatibility = 25
+	targetCompatibility = 25
+	options.release = 25
+}
+
+compileTestJava {
+    options.compilerArgs += '--enable-preview'
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += '--enable-preview'
+}

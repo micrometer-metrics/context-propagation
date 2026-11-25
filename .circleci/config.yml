@@ -97,7 +97,7 @@ jobs:
           toolchainVersion: '11'
 
   deploy:
-    executor: jdk21-executor
+    executor: jdk25-executor
     steps:
       - checkout
       - restore_cache:
